@@ -1,0 +1,154 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum ShiftStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TimeOffType {
+  VACATION
+  SICK
+  OTHER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  role         Role     @default(EMPLOYEE)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  shifts            Shift[]
+  timeOffRequests   TimeOffRequest[]
+  shiftSwapRequests ShiftSwapRequest[] @relation("RequestedBy")
+  shiftSwapsWith    ShiftSwapRequest[] @relation("SwapWith")
+  workLogs          WorkLog[]
+  notifications     Notification[]
+  chatMemberships   ChatMember[]
+  messages          Message[]          @relation("SentMessages")
+}
+
+model Shift {
+  id        String      @id @default(uuid())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  startTime DateTime
+  endTime   DateTime
+  location  String?
+  notes     String?
+  status    ShiftStatus @default(PENDING)
+  createdBy String // admin user id if you wish to track
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  swapRequestsFrom ShiftSwapRequest[] @relation("SwapFrom")
+  swapRequestsTo   ShiftSwapRequest[] @relation("SwapTo")
+  workLogs         WorkLog[]
+}
+
+model TimeOffRequest {
+  id        String        @id @default(uuid())
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String
+  fromDate  DateTime
+  toDate    DateTime
+  type      TimeOffType
+  reason    String?
+  status    RequestStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ShiftSwapRequest {
+  id            String        @id @default(uuid())
+  requestedBy   User          @relation("RequestedBy", fields: [requestedById], references: [id])
+  requestedById String
+  fromShift     Shift         @relation("SwapFrom", fields: [fromShiftId], references: [id])
+  fromShiftId   String
+  swapWith      User          @relation("SwapWith", fields: [swapWithId], references: [id])
+  swapWithId    String
+  toShift       Shift         @relation("SwapTo", fields: [toShiftId], references: [id])
+  toShiftId     String
+  status        RequestStatus @default(PENDING)
+  requestedAt   DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model WorkLog {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  shift     Shift    @relation(fields: [shiftId], references: [id])
+  shiftId   String
+  hours     Float
+  notes     String?
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model ChatRoom {
+  id        String   @id @default(uuid())
+  name      String?
+  createdAt DateTime @default(now())
+
+  members  ChatMember[]
+  messages Message[]
+}
+
+model ChatMember {
+  id       String   @id @default(uuid())
+  room     ChatRoom @relation(fields: [roomId], references: [id])
+  roomId   String
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String
+  joinedAt DateTime @default(now())
+}
+
+model Message {
+  id       String   @id @default(uuid())
+  room     ChatRoom @relation(fields: [roomId], references: [id])
+  roomId   String
+  sender   User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId String
+  content  String
+  sentAt   DateTime @default(now())
+}
