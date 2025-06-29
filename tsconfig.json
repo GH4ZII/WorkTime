@@ -1,0 +1,15 @@
+﻿{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "preserve",
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "ui": ["packages/ui/src"],
+      "types": ["packages/types/src"]
+    }
+  },
+  "include": ["apps/**/*", "packages/**/*"]
+}

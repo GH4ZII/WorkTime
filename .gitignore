@@ -1,0 +1,21 @@
+﻿# Node-moduler og lockfiles
+node_modules/
+package-lock.json
+
+# Turborepo cache
+.turbo/
+
+# IDE-innstillinger
+.idea/
+
+# Next.js build
+apps/web/.next/
+
+# Mobile node_modules
+apps/mobile/node_modules/
+
+# API node_modules
+apps/api/node_modules/
+
+# Lokale TS-config genererte filer
+apps/web/next-env.d.ts

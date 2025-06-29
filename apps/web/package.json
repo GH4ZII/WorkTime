@@ -1,0 +1,29 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^24.0.7",
+    "@types/react": "^19.1.8",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "next": "^15.3.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "styled-jsx": "^5.1.6",
+    "types": "^1.0.0",
+    "ui": "^1.0.0"
+  }
+}
