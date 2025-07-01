@@ -6,21 +6,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppModule = void 0;
+exports.TimeOffReqModule = void 0;
 const common_1 = require("@nestjs/common");
-const app_controller_1 = require("./app.controller");
-const app_service_1 = require("./app.service");
-const shifts_module_1 = require("./shifts/shifts.module");
-const users_module_1 = require("./users/users.module");
-const timeOffReq_module_1 = require("./timeOffReq/timeOffReq.module");
-let AppModule = class AppModule {
+const timeOffReq_controller_1 = require("./timeOffReq.controller");
+const timeOffReq_service_1 = require("./timeOffReq.service");
+const prisma_service_1 = require("../prisma.service");
+let TimeOffReqModule = class TimeOffReqModule {
 };
-exports.AppModule = AppModule;
-exports.AppModule = AppModule = __decorate([
+exports.TimeOffReqModule = TimeOffReqModule;
+exports.TimeOffReqModule = TimeOffReqModule = __decorate([
     (0, common_1.Module)({
-        imports: [shifts_module_1.ShiftsModule, users_module_1.UsersModule, timeOffReq_module_1.TimeOffReqModule],
-        controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        controllers: [timeOffReq_controller_1.TimeOffReqController],
+        providers: [timeOffReq_service_1.TimeOffReqService, prisma_service_1.PrismaService],
     })
-], AppModule);
-//# sourceMappingURL=app.module.js.map
+], TimeOffReqModule);
+//# sourceMappingURL=timeOffReq.module.js.map
