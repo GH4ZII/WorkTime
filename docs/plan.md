@@ -1,106 +1,118 @@
-﻿🧱 1. Datamodell og Backend (API først!)
-🟢 Hvorfor først? Alt frontend og design trenger dataene herfra.
+﻿# 🚧 Utviklingsplan for WorkTime
 
-✅ Gjør dette:
+---
 
-Lag en plan for hvilke data du trenger:
+## 📅 Milepæler
 
-User, Shift, RequestForLeave, WorkLog, Admin
+1. **M1 – Database & API** (FERDIG)
+2. **M2 – Design & prototyping** (FERDIG)
+3. **M3 – Mobil-app CRUD + Auth**
+4. **M4 – Web-admin CRUD + Auth**
+5. **M5 – Sanntid (live-update & chat)**
+6. **M6 – Testing, dokumentasjon & deployment**
 
-Lag modellen i apps/api
+---
 
-Bruk Prisma eller Drizzle med SQLite/Postgres
+## 🧱 Fase 1: Database & API (M1)
 
-Lag API-ruter:
+- [x] Definere datamodeller (`User`, `Shift`, `TimeOffRequest`, `ShiftSwapRequest`, `WorkLog`, `Notification`, `Chat*`)
+- [x] Implementere Prisma-schema & migrasjoner
+- [x] Koble mot PostgreSQL og verifisere tabeller i pgAdmin
+- [ ] Skriv grunnleggende CRUD-endepunkter for alle modeller
 
-GET /shifts, POST /shift, PUT /shift/:id, osv.
+---
 
-Sett opp auth (for admin/ansatt)
+## 🎨 Fase 2: Design & prototyping (M2)
 
-Kjør backend lokalt og test med Postman
+- [ ] Lage wireframes i Figma:
+    - Innlogging
+    - Ansatt-dashboard
+    - Admin-dashboard
+    - Kalender-visning
+    - Chat-UI
+- [ ] Bryte opp i gjenbrukbare komponenter: Header, Button, Card, Calendar, ChatMessage
 
-🎨 2. Design og UI-prototyping
-🟢 Hvorfor nå? Det hjelper deg tenke brukerflyt og hvilke skjermer som trengs.
+---
 
-✅ Gjør dette:
+## 📱 Fase 3: Mobil-app (M3)
 
-Bruk Figma (eller papir!) til å tegne:
+### 3.1 Autentisering
 
-Logg inn-skjerm
+- [ ] `POST /auth/login` → lagre JWT i SecureStore / AsyncStorage
+- [ ] `GET /users/me` → vis profil
 
-Dashboard (for admin og ansatt)
+### 3.2 Skift-flyt
 
-Kalender-visning
+- [ ] `/shifts` (GET) → Mine skift
+- [ ] `/shifts` (POST/PUT/DELETE) → ADMIN-only (venter til M4)
+- [ ] Skjerm: Liste, detaljer, notater
 
-Skift-detaljer og godkjenning
+### 3.3 Forespørsler
 
-Del opp skjermene i komponenter:
+- [ ] `/time-off-requests` (POST, GET egen historikk)
+- [ ] `/shift-swap-requests` (POST, GET egen historikk)
 
-Header, knapper, kort, kalender osv.
+---
 
-📱 3. Frontend: Mobilapp (Expo)
-✅ Start med apps/mobile:
+## 🖥️ Fase 4: Web-admin (M4)
 
-Koble til API-et (axios/fetch)
+### 4.1 Autentisering & roller
 
-Bygg innloggingsskjerm
+- [ ] Login-side for admin
+- [ ] Middleware: `@Roles(ADMIN)`
 
-Lag dashboard-skjerm for ansatte
+### 4.2 CRUD for skift & brukere
 
-Vis dagens skift og arbeidstimer
+- [ ] `/users` (GET, POST, PUT, DELETE)
+- [ ] `/shifts` (GET alle, POST, PUT, DELETE)
+- [ ] Visning: Tabell + kalender
 
-Lag skjerm for å søke om fri
+### 4.3 Håndtering av forespørsler
 
-Gjenbruk packages/ui for knapper osv.
+- [ ] Liste og godkjenn/avvis for `/time-off-requests`
+- [ ] Liste og godkjenn/avvis for `/shift-swap-requests`
 
-🖥️ 4. Adminpanel (Web/Next.js)
-✅ Start med apps/web:
+---
 
-Innlogging (admin)
+## ⚡ Fase 5: Sanntid & chat (M5)
 
-Admin-dashboard
+- [ ] Sett opp WebSocket-gateway i NestJS (socket.io)
+- [ ] Emit events:
+    - `shift.created` / `shift.updated` / `shift.deleted`
+    - `timeOffRequest.*` / `swapRequest.*`
+- [ ] Frontend/web: lytte på events og oppdatere UI «live»
+- [ ] Mobilapp: lytte på events, push-varsler (Expo Notifications)
+- [ ] Chat-modul:
+    - `chat.room.join` / `chat.message`
 
-Liste over ansatte og skift
+---
 
-Rediger skift, flytt skift, legg til nye
+## 🔧 Fase 6: Testing, dokumentasjon & deployment (M6)
 
-Statistikk over timer og fravær
+### 6.1 Testing
 
-📦 5. Shared UI-komponenter (packages/ui)
-✅ Eksempler:
+- [ ] API-e2e-tester (Jest + Supertest)
+- [ ] Enhetstester for services
+- [ ] Manuelle tester i Expo og nettleser
 
-Button, Card, Calendar, Modal, TextInput
+### 6.2 Dokumentasjon
 
-Bruk samme komponenter i web og mobil
+- [ ] Swagger i NestJS (`@nestjs/swagger` på `/docs`)
+- [ ] Oppdater `docs/architecture.md` med endelig ER-diagram
+- [ ] Oppdater `docs/functionality.md` med sanntid & chat
 
-📚 6. Dokumentasjon (docs/)
-✅ Når du jobber med det tekniske:
+### 6.3 Deployment & CI
 
-Skriv docs/architecture.md med diagrammer
+- [ ] Legg til GitHub Actions:
+    - `npm test` + `prisma migrate deploy` ved push til main
+- [ ] Docker-Compose for lokal kjøring (api + db)
+- [ ] Deploy backend til Vercel/Azure
+- [ ] Deploy mobilapp til App Store / Play Store
 
-Forklar API-ruter i docs/api.md
+---
 
-Lag docs/usage.md for hvordan man bruker prosjektet
+## ✨ Ekstra tips & testdata
 
-🛡️ 7. Auth og Rollehåndtering
-Admin og ansatte har forskjellig tilgang
-
-JWT eller session tokens
-
-Middleware som beskytter ruter
-
-🚀 8. Testing og Deployment
-Test API med Postman
-
-Test appen på Expo Go
-
-Deploy backend til Vercel/Azure
-
-Deploy mobilapp til Android/iOS
-
-✨ Ekstra tips:
-Lag testdata (f.eks. 3 ansatte, 5 skift)
-
-Jobb først med én flyt: f.eks. ansatte som ser neste skift
-
-Når du får én flyt til å funke, legg på mer
+- Lag seed-skript i Prisma for å fylle på:
+    - 3 ansatte, 5 skift, 2 ferieforespørsler
+- Jobb iterativt: Få én full flyt (login → list shifts) helt ferdig før neste  

@@ -61,6 +61,10 @@ Denne filen beskriver **hvilke funksjoner** som skal implementeres i WorkTime-ap
     * Søk etter ansatte
     * Vis profil (navn, e-post, telefon)
     * Mulighet for å sende direktemelding
+10. **Sanntidsoppdateringer**
+
+    * Når admin legger til, endrer eller sletter skift, oppdateres appen automatisk
+    * Chat-meldinger oppdateres i sanntid
 
 ## 🖥️ Adminportal (Web)
 
@@ -89,5 +93,8 @@ Denne filen beskriver **hvilke funksjoner** som skal implementeres i WorkTime-ap
 
     * Timer per ansatt, per avdeling, per periode
     * Eksporter data til CSV
+7. **Sanntids-push
+    * Alle brukere ser umiddelbare endringer i skift, forespørsler og meldinger
+    * Live chat-interface for direktemeldinger
 
 
