@@ -6,52 +6,52 @@ export declare class UsersService {
     constructor(prisma: PrismaService);
     create(data: CreateUserDto): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
-        createdAt: Date;
-        updatedAt: Date;
+        passwordHash: string;
     }>;
     findAll(): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
-        createdAt: Date;
-        updatedAt: Date;
+        passwordHash: string;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
-        createdAt: Date;
-        updatedAt: Date;
+        passwordHash: string;
     } | null>;
     update(id: string, data: UpdateUserDto): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
-        createdAt: Date;
-        updatedAt: Date;
+        passwordHash: string;
     }>;
     remove(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
-        createdAt: Date;
-        updatedAt: Date;
+        passwordHash: string;
     }>;
 }

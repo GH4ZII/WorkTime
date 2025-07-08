@@ -14,6 +14,11 @@ datasource db {
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
+enum SwapRequestType {
+    GIVE_AWAY
+    SWAP
+}
+
 enum Role {
   ADMIN
   EMPLOYEE
@@ -94,10 +99,12 @@ model ShiftSwapRequest {
   requestedById String
   fromShift     Shift         @relation("SwapFrom", fields: [fromShiftId], references: [id])
   fromShiftId   String
-  swapWith      User          @relation("SwapWith", fields: [swapWithId], references: [id])
-  swapWithId    String
-  toShift       Shift         @relation("SwapTo", fields: [toShiftId], references: [id])
-  toShiftId     String
+  swapType      SwapRequestType @default(SWAP)
+  swapWith      User?          @relation("SwapWith", fields: [swapWithId], references: [id])
+  swapWithId    String?
+  toShift       Shift?         @relation("SwapTo", fields: [toShiftId], references: [id])
+  toShiftId     String?
+  reason        String?
   status        RequestStatus @default(PENDING)
   requestedAt   DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
