@@ -2,28 +2,6 @@
 
 ```python
 
-3. TimeOffRequest (ferie, sykdom osv)
-GET /timeoff-requests – Hent alle søknader
-
-GET /timeoff-requests/:id – Hent én søknad
-
-POST /timeoff-requests – Send inn søknad
-
-PUT /timeoff-requests/:id – Oppdater søknad/status
-
-DELETE /timeoff-requests/:id – Slett søknad
-
-4. ShiftSwapRequest (bytte skift)
-GET /shift-swap-requests
-
-GET /shift-swap-requests/:id
-
-POST /shift-swap-requests – Opprett forespørsel om bytte
-
-PUT /shift-swap-requests/:id – Oppdater status, eller godkjenn/avslå
-
-DELETE /shift-swap-requests/:id
-
 5. WorkLog (timelister/loggføring av arbeid)
 GET /worklogs
 
