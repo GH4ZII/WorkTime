@@ -112,13 +112,18 @@ model ShiftSwapRequest {
 
 model WorkLog {
   id        String   @id @default(uuid())
+
   user      User     @relation(fields: [userId], references: [id])
   userId    String
   shift     Shift    @relation(fields: [shiftId], references: [id])
   shiftId   String
-  hours     Float
+
+  startTime DateTime
+  endTime   DateTime
+
   notes     String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Notification {

@@ -5,9 +5,10 @@ import { ShiftsModule} from "./shifts/shifts.module";
 import { UsersModule} from "./users/users.module";
 import { TimeOffReqModule } from "./timeOffReq/timeOffReq.module";
 import { ShiftSwapReqModule } from "./shiftSwapReq/shiftSwapReq.module";
+import { WorklogModule} from "./worklog/worklog.module";
 
 @Module({
-  imports: [ShiftsModule, UsersModule, TimeOffReqModule, ShiftSwapReqModule],
+  imports: [ShiftsModule, UsersModule, TimeOffReqModule, ShiftSwapReqModule, WorklogModule],
   controllers: [AppController],
   providers: [AppService],
 })

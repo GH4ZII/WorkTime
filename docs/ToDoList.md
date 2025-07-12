@@ -2,17 +2,6 @@
 
 ```python
 
-5. WorkLog (timelister/loggføring av arbeid)
-GET /worklogs
-
-GET /worklogs/:id
-
-POST /worklogs – Legg til arbeidstimelog
-
-PUT /worklogs/:id
-
-DELETE /worklogs/:id
-
 6. Notification (varslinger til brukere)
 GET /notifications
 
