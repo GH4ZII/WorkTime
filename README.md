@@ -24,31 +24,6 @@ WorkTime/
 ```
 
 ---
-
-## 🧭 Roadmap
-
-1. **M1 – Database & API** (✅ ferdig)
-
-    * Prisma-schema, migrasjoner, grunnleggende CRUD
-2. **M2 – Design & prototyping** (✅ ferdig)
-
-    * Figma-wireframes, komponentbibliotek i `packages/ui`
-3. **M3 – Mobilapp (Expo)**
-
-    * Autentisering, skiftvisning, forespørsler om fri/skiftbytte
-4. **M4 – Adminpanel (Web)**
-
-    * Brukeradmin, shift management, håndtere forespørsler
-5. **M5 – Sanntid & chat**
-
-    * WebSocket-gateway (NestJS) → live oppdateringer for skift og forespørsler
-    * Live chat (socket.io) i web og mobil
-6. **M6 – Testing, dokumentasjon & deployment**
-
-    * Enhetstester, e2e-tester, Swagger, GitHub Actions, Docker-compose, deploy
-
----
-
 ## 🚀 Kom i gang
 
 ```bash
