@@ -1,27 +1,14 @@
-﻿Implementere alle disse API-kallene.
+﻿# To-Do List
 
-```python
+## UI Framework
+- [ ] Implement [shadcn/ui](https://ui.shadcn.com/) in the project
+- [ ] Alternatively, use [MUI (Material-UI)](https://mui.com/)
 
-7. Chat (enkel Slack/Teams-løsning)
-ChatRoom
-GET /chatrooms
+## Design
+- [ ] Use [v0.dev](https://v0.dev) to auto-generate design
 
-GET /chatrooms/:id
+---
 
-POST /chatrooms
-
-PUT /chatrooms/:id
-
-DELETE /chatrooms/:id
-
-ChatMember
-GET /chatmembers
-
-POST /chatmembers – Legg til bruker i rom
-
-DELETE /chatmembers/:id – Fjern fra rom
-
-Message
-GET /messages?roomId=...
-
-POST /messages – Send melding
+**Tips:**
+- Explore both UI libraries and choose the one that best fits your needs.
+- Use v0.dev for quick prototyping and inspiration.

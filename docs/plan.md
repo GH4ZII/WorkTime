@@ -5,7 +5,7 @@
 ## 📅 Milepæler
 
 1. **M1 – Database & API** (FERDIG)
-2. **M2 – Design & prototyping** (FERDIG)
+2. **M2 – Design & prototyping** (Pågående)
 3. **M3 – Mobil-app CRUD + Auth**
 4. **M4 – Web-admin CRUD + Auth**
 5. **M5 – Sanntid (live-update & chat)**
@@ -18,7 +18,7 @@
 - [x] Definere datamodeller (`User`, `Shift`, `TimeOffRequest`, `ShiftSwapRequest`, `WorkLog`, `Notification`, `Chat*`)
 - [x] Implementere Prisma-schema & migrasjoner
 - [x] Koble mot PostgreSQL og verifisere tabeller i pgAdmin
-- [ ] Skriv grunnleggende CRUD-endepunkter for alle modeller
+- [x] Skriv grunnleggende CRUD-endepunkter for alle modeller
 
 ---
 
