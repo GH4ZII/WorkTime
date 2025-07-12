@@ -15,12 +15,14 @@ const users_module_1 = require("./users/users.module");
 const timeOffReq_module_1 = require("./timeOffReq/timeOffReq.module");
 const shiftSwapReq_module_1 = require("./shiftSwapReq/shiftSwapReq.module");
 const worklog_module_1 = require("./worklog/worklog.module");
+const notification_module_1 = require("./notifications/notification.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [shifts_module_1.ShiftsModule, users_module_1.UsersModule, timeOffReq_module_1.TimeOffReqModule, shiftSwapReq_module_1.ShiftSwapReqModule, worklog_module_1.WorklogModule],
+        imports: [shifts_module_1.ShiftsModule, users_module_1.UsersModule, timeOffReq_module_1.TimeOffReqModule, shiftSwapReq_module_1.ShiftSwapReqModule, worklog_module_1.WorklogModule,
+            notification_module_1.NotificationModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })
