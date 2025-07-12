@@ -5,35 +5,35 @@ export declare class NotificationController {
     private readonly service;
     constructor(service: NotificationService);
     create(dto: CreateNotificationDto): Promise<{
+        message: string;
         id: string;
         userId: string;
-        title: string;
-        message: string;
-        read: boolean;
         createdAt: Date;
+        title: string;
+        read: boolean;
     }>;
     findAllForUser(userId: string): Promise<{
+        message: string;
         id: string;
         userId: string;
-        title: string;
-        message: string;
-        read: boolean;
         createdAt: Date;
+        title: string;
+        read: boolean;
     }[]>;
     updateReadStatus(id: string, updateDto: UpdateNotificationDto): Promise<{
+        message: string;
         id: string;
         userId: string;
-        title: string;
-        message: string;
-        read: boolean;
         createdAt: Date;
+        title: string;
+        read: boolean;
     }>;
     remove(id: string): Promise<{
+        message: string;
         id: string;
         userId: string;
-        title: string;
-        message: string;
-        read: boolean;
         createdAt: Date;
+        title: string;
+        read: boolean;
     }>;
 }

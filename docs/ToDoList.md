@@ -2,17 +2,6 @@
 
 ```python
 
-6. Notification (varslinger til brukere)
-GET /notifications
-
-GET /notifications/:id
-
-POST /notifications – Send en varsling
-
-PUT /notifications/:id – Merk som lest/ulest, endre innhold
-
-DELETE /notifications/:id
-
 7. Chat (enkel Slack/Teams-løsning)
 ChatRoom
 GET /chatrooms
