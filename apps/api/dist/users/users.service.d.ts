@@ -12,8 +12,8 @@ export declare class UsersService {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     }>;
     findAll(): Promise<{
         id: string;
@@ -22,8 +22,8 @@ export declare class UsersService {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
@@ -32,8 +32,8 @@ export declare class UsersService {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     } | null>;
     update(id: string, data: UpdateUserDto): Promise<{
         id: string;
@@ -42,8 +42,8 @@ export declare class UsersService {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     }>;
     remove(id: string): Promise<{
         id: string;
@@ -52,8 +52,8 @@ export declare class UsersService {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     }>;
     findOneByEmail(email: string): Promise<User | null>;
 }

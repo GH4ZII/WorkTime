@@ -1,112 +1,124 @@
-﻿# 🚧 Utviklingsplan for WorkTime
+﻿# 🚀 Utviklingsplan – WorkTime
+
+## 📌 Hovedmilepæler
+
+1. ✅ M1 – Database & API (FERDIG)
+2. ✅ M2 – Design & Prototyping (FERDIG)
+3. 🚧 M3 – Mobilapp for Ansatte
+4. ⏳ M4 – Webportal for Admin
+5. ⏳ M5 – Sanntid & Chat
+6. ⏳ M6 – Testing, Dokumentasjon og Deployment
 
 ---
 
-## 📅 Milepæler
+## 📱 M3 – Mobilapp for Ansatte
 
-1. **M1 – Database & API** (FERDIG)
-2. **M2 – Design & prototyping** (Pågående)
-3. **M3 – Mobil-app CRUD + Auth**
-4. **M4 – Web-admin CRUD + Auth**
-5. **M5 – Sanntid (live-update & chat)**
-6. **M6 – Testing, dokumentasjon & deployment**
+### 3.1 Autentisering & Profil
 
----
+- [x] Login med e-post og passord
+- [x] JWT lagring med SecureStore / AsyncStorage
+- [ ] Visning av brukerprofil (navn, e-post, rolle)
+- [ ] Endre passord / Logg ut
 
-## 🧱 Fase 1: Database & API (M1)
+### 3.2 Mine Skift
 
-- [x] Definere datamodeller (`User`, `Shift`, `TimeOffRequest`, `ShiftSwapRequest`, `WorkLog`, `Notification`, `Chat*`)
-- [x] Implementere Prisma-schema & migrasjoner
-- [x] Koble mot PostgreSQL og verifisere tabeller i pgAdmin
-- [x] Skriv grunnleggende CRUD-endepunkter for alle modeller
-
----
-
-## 🎨 Fase 2: Design & prototyping (M2)
-
-- [x] Lage wireframes i Figma:
-    - Innlogging
-    - Ansatt-dashboard
-    - Admin-dashboard
-    - Kalender-visning
-    - Chat-UI
-- [x] Bryte opp i gjenbrukbare komponenter: Header, Button, Card, Calendar, ChatMessage
-
----
-
-## 📱 Fase 3: Mobil-app (M3)
-
-### 3.1 Autentisering
-
-- [ ] `POST /auth/login` → lagre JWT i SecureStore / AsyncStorage
-- [ ] `GET /users/me` → vis profil
-
-### 3.2 Skift-flyt
-
-- [ ] `/shifts` (GET) → Mine skift
-- [ ] `/shifts` (POST/PUT/DELETE) → ADMIN-only (venter til M4)
-- [ ] Skjerm: Liste, detaljer, notater
+- [ ] Liste over kommende og tidligere skift
+- [ ] Skiftdetaljer: dato, tid, varighet, sted, status
+- [ ] Notater på skift
+- [ ] Se kollegaer på samme skift
 
 ### 3.3 Forespørsler
 
-- [ ] `/time-off-requests` (POST, GET egen historikk)
-- [ ] `/shift-swap-requests` (POST, GET egen historikk)
+- [ ] Fraværsforespørsel: datointervall, type, beskrivelse
+- [ ] Bytteforespørsel: velg eget skift → velg kollega/skift
+- [ ] Se historikk og status for begge forespørselstyper
+
+### 3.4 Arbeidstimer
+
+- [ ] Beregn og vis timer jobbet (uke/måned)
+- [ ] Mulighet for manuell logging (valgfritt)
+
+### 3.5 Notifikasjoner
+
+- [ ] Push-varsler for godkjenning/avvisning
+- [ ] Varsler for kommende skift
+
+### 3.6 Chat & Kollegaliste
+
+- [ ] Liste over kollegaer (søkbar)
+- [ ] Se kollegaprofil (navn, e-post, telefon)
+- [ ] Direktemelding og gruppechat
+- [ ] Chat i sanntid
 
 ---
 
-## 🖥️ Fase 4: Web-admin (M4)
+## 🖥️ M4 – Adminportal (Web)
 
-### 4.1 Autentisering & roller
+### 4.1 Admin Dashboard
 
-- [ ] Login-side for admin
-- [ ] Middleware: `@Roles(ADMIN)`
+- [ ] Nøkkeltall (ansatte, skift i dag, forespørsler)
+- [ ] Oversikt over kommende skift
 
-### 4.2 CRUD for skift & brukere
+### 4.2 Brukeradministrasjon
 
-- [ ] `/users` (GET, POST, PUT, DELETE)
-- [ ] `/shifts` (GET alle, POST, PUT, DELETE)
-- [ ] Visning: Tabell + kalender
+- [ ] CRUD for ansatte
+- [ ] Søk og filtrer ansatte
 
-### 4.3 Håndtering av forespørsler
+### 4.3 Skiftadministrasjon
 
-- [ ] Liste og godkjenn/avvis for `/time-off-requests`
-- [ ] Liste og godkjenn/avvis for `/shift-swap-requests`
+- [ ] Opprett, rediger, slett skift
+- [ ] Koble skift til ansatte
+- [ ] Skiftkalender (visuelt)
 
----
+### 4.4 Håndtering av forespørsler
 
-## ⚡ Fase 5: Sanntid & chat (M5)
+- [ ] Liste og godkjenning/avvisning av fraværsforespørsler
+- [ ] Liste og godkjenning/avvisning av bytteforespørsler
 
-- [ ] Sett opp WebSocket-gateway i NestJS (socket.io)
-- [ ] Emit events:
-    - `shift.created` / `shift.updated` / `shift.deleted`
-    - `timeOffRequest.*` / `swapRequest.*`
-- [ ] Frontend/web: lytte på events og oppdatere UI «live»
-- [ ] Mobilapp: lytte på events, push-varsler (Expo Notifications)
-- [ ] Chat-modul:
-    - `chat.room.join` / `chat.message`
+### 4.5 Rapporter & Statistikk
+
+- [ ] Timer per ansatt/avdeling/periode
+- [ ] Eksport til CSV
 
 ---
 
-## 🔧 Fase 6: Testing, dokumentasjon & deployment (M6)
+## ⚡ M5 – Sanntid & Chat
+
+### 5.1 Sanntid (WebSocket)
+
+- [ ] Socket.io i NestJS backend
+- [ ] Emit & lytte til events (skift, forespørsler)
+
+### 5.2 Mobilapp
+
+- [ ] Oppdater UI live ved skift- og forespørselsendringer
+- [ ] Push-varsler med Expo
+
+### 5.3 Chat
+
+- [ ] Opprett og bli med i chat-rom
+- [ ] Send og motta meldinger live
+- [ ] Direktemeldinger & grupper
+
+---
+
+## 🧪 M6 – Testing, Dokumentasjon & Deployment
 
 ### 6.1 Testing
 
-- [ ] API-e2e-tester (Jest + Supertest)
 - [ ] Enhetstester for services
-- [ ] Manuelle tester i Expo og nettleser
+- [ ] E2E-tester for API med Supertest
+- [ ] Manuelle tester på mobil og web
 
 ### 6.2 Dokumentasjon
 
-- [ ] Swagger i NestJS (`@nestjs/swagger` på `/docs`)
-- [ ] Oppdater `docs/architecture.md` med endelig ER-diagram
-- [ ] Oppdater `docs/functionality.md` med sanntid & chat
+- [ ] Swagger `/docs` med `@nestjs/swagger`
+- [ ] Arkitektur.md: ER-diagram + flyt
+- [ ] Functionality.md: dekker sanntid & chat
 
-### 6.3 Deployment & CI
+### 6.3 Deployment
 
-- [ ] Legg til GitHub Actions:
-    - `npm test` + `prisma migrate deploy` ved push til main
-- [ ] Docker-Compose for lokal kjøring (api + db)
-- [ ] Deploy backend til Vercel/Azure
-- [ ] Deploy mobilapp til App Store / Play Store
-
----
+- [ ] CI/CD med GitHub Actions (test + deploy)
+- [ ] Docker Compose for lokal testing
+- [ ] Backend: Azure App Service
+- [ ] Mobilapp: Deploy til App Store og Play Store

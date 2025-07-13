@@ -11,8 +11,8 @@ export declare class UsersController {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
@@ -21,8 +21,8 @@ export declare class UsersController {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     } | null>;
     create(dto: CreateUserDto): Promise<{
         id: string;
@@ -31,8 +31,8 @@ export declare class UsersController {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     }>;
     update(id: string, dto: UpdateUserDto): Promise<{
         id: string;
@@ -41,8 +41,8 @@ export declare class UsersController {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     }>;
     remove(id: string): Promise<{
         id: string;
@@ -51,7 +51,7 @@ export declare class UsersController {
         name: string;
         email: string;
         phone: string | null;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordHash: string;
     }>;
 }

@@ -2,8 +2,6 @@
 Arkitektur i WorkTime-prosjektet
 ---------------------------------------
 
-Denne delen gir en enkel, men detaljert oversikt over hvordan **WorkTime**-prosjektet er satt opp, hvilke deler som finnes, og hvordan de samarbeider.
-
 ## 1. Monorepo-struktur
 
 Prosjektet bruker én Git-repositorie (monorepo) med følgende hovedmapper:
