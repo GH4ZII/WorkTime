@@ -7,10 +7,11 @@ import { TimeOffReqModule } from "./timeOffReq/timeOffReq.module";
 import { ShiftSwapReqModule } from "./shiftSwapReq/shiftSwapReq.module";
 import { WorklogModule} from "./worklog/worklog.module";
 import { NotificationModule} from "./notifications/notification.module";
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
   imports: [ShiftsModule, UsersModule, TimeOffReqModule, ShiftSwapReqModule, WorklogModule,
-  NotificationModule],
+  NotificationModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

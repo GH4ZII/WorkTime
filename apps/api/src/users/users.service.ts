@@ -2,9 +2,8 @@
 import { PrismaService } from "../prisma.service"; // din Prisma-klient
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { Role } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import * as bcrypt from 'bcrypt';
-
 @Injectable()
 export class UsersService {
     constructor(private prisma: PrismaService) {}
@@ -51,5 +50,11 @@ export class UsersService {
     // 5) Slette en bruker
     async remove(id: string) {
         return this.prisma.user.delete({ where: { id } });
+    }
+
+    async findOneByEmail(email: string): Promise<User | null> {
+        return this.prisma.user.findUnique({
+            where: { email },
+        });
     }
 }

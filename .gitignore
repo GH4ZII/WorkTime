@@ -19,3 +19,5 @@ apps/api/node_modules/
 
 # Lokale TS-config genererte filer
 apps/web/next-env.d.ts
+
+apps/api/.env

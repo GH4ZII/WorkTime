@@ -49,6 +49,11 @@ let UsersService = class UsersService {
     async remove(id) {
         return this.prisma.user.delete({ where: { id } });
     }
+    async findOneByEmail(email) {
+        return this.prisma.user.findUnique({
+            where: { email },
+        });
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
