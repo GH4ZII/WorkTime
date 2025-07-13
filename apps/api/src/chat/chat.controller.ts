@@ -1,4 +1,4 @@
-﻿import { Controller, Get, Post, Body, Param, Patch, Delete, ParseUUIDPipe } from '@nestjs/common';
+﻿import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
@@ -6,7 +6,7 @@ import { UpdateMembersDto } from './dto/update-members.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { ChatRoom, Message } from '@prisma/client';
 
-// Bruk flertall for ressursen, som er en REST-konvensjon.
+
 @Controller('chatrooms')
 export class ChatController {
     constructor(private readonly chatService: ChatService) {}
@@ -22,14 +22,14 @@ export class ChatController {
     }
 
     @Get(':id')
-    findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ChatRoom> {
+    findOne(@Param('id') id: string): Promise<ChatRoom> {
         return this.chatService.findOne(id);
     }
 
     // PATCH brukes for delvise oppdateringer, som å kun endre navnet.
     @Patch(':id')
     update(
-        @Param('id', ParseUUIDPipe) id: string,
+        @Param('id') id: string,
         @Body() updateChatRoomDto: UpdateChatDto,
     ): Promise<ChatRoom> {
         return this.chatService.update(id, updateChatRoomDto);
@@ -39,7 +39,7 @@ export class ChatController {
 
     @Post(':id/members')
     addMembers(
-        @Param('id', ParseUUIDPipe) id: string,
+        @Param('id') id: string,
         @Body() updateMembersDto: UpdateMembersDto,
     ): Promise<ChatRoom> {
         return this.chatService.addMembers(id, updateMembersDto.userIds);
@@ -48,7 +48,7 @@ export class ChatController {
     // DELETE er det korrekte verbet for å fjerne en sub-ressurs.
     @Delete(':id/members')
     removeMembers(
-        @Param('id', ParseUUIDPipe) id: string,
+        @Param('id') id: string,
         @Body() updateMembersDto: UpdateMembersDto,
     ): Promise<ChatRoom> {
         return this.chatService.removeMembers(id, updateMembersDto.userIds);
@@ -57,13 +57,13 @@ export class ChatController {
     // --- Meldingshåndtering ---
 
     @Get(':id/messages')
-    getMessages(@Param('id', ParseUUIDPipe) id: string): Promise<Message[]> {
+    getMessages(@Param('id') id: string): Promise<Message[]> {
         return this.chatService.getMessages(id);
     }
 
     @Post(':id/messages')
     addMessage(
-        @Param('id', ParseUUIDPipe) id: string,
+        @Param('id') id: string,
         @Body() createMessageDto: CreateMessageDto,
     ): Promise<Message> {
         return this.chatService.addMessage(id, createMessageDto);

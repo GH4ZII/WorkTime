@@ -24,13 +24,13 @@
 
 ## 🎨 Fase 2: Design & prototyping (M2)
 
-- [ ] Lage wireframes i Figma:
+- [x] Lage wireframes i Figma:
     - Innlogging
     - Ansatt-dashboard
     - Admin-dashboard
     - Kalender-visning
     - Chat-UI
-- [ ] Bryte opp i gjenbrukbare komponenter: Header, Button, Card, Calendar, ChatMessage
+- [x] Bryte opp i gjenbrukbare komponenter: Header, Button, Card, Calendar, ChatMessage
 
 ---
 
@@ -110,9 +110,3 @@
 - [ ] Deploy mobilapp til App Store / Play Store
 
 ---
-
-## ✨ Ekstra tips & testdata
-
-- Lag seed-skript i Prisma for å fylle på:
-    - 3 ansatte, 5 skift, 2 ferieforespørsler
-- Jobb iterativt: Få én full flyt (login → list shifts) helt ferdig før neste  

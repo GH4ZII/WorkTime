@@ -1,9 +1,8 @@
 ﻿import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma.service'; // Sørg for at stien er korrekt
+import { PrismaService } from '../prisma.service';
 import { CreateChatDto} from "./dto/create-chat.dto";
 import { UpdateChatDto } from './dto/update-chat.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ChatService {
