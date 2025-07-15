@@ -25,8 +25,8 @@ export declare class ChatService {
     findAll(): import(".prisma/client").Prisma.PrismaPromise<({
         messages: {
             id: string;
-            sentAt: Date;
             roomId: string;
+            sentAt: Date;
             senderId: string;
             content: string;
         }[];
@@ -104,15 +104,15 @@ export declare class ChatService {
         };
     } & {
         id: string;
-        sentAt: Date;
         roomId: string;
+        sentAt: Date;
         senderId: string;
         content: string;
     })[]>;
     addMessage(roomId: string, dto: CreateMessageDto): Promise<{
         id: string;
-        sentAt: Date;
         roomId: string;
+        sentAt: Date;
         senderId: string;
         content: string;
     }>;

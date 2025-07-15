@@ -7,8 +7,14 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "jsEngine": "jsc",
     "splash": {
       "image": "./assets/splash-icon.png",
+      "doctor": {
+        "reactNativeDirectoryCheck": {
+          "listUnknownPackages": false
+        }
+      },
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

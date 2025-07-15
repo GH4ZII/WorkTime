@@ -1,29 +1,46 @@
-﻿import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useAuth } from '../context/AuthContext';
+﻿// apps/mobile/src/navigation/AppNavigator.tsx
 
-import LoginScreen from '../screens/LoginScreen';
+import React from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator } from '@react-navigation/drawer'; // Importer drawer
 import ProfileScreen from '../screens/ProfileScreen';
 
-const Stack = createNativeStackNavigator();
+// 1. Lag en instans av Drawer Navigator
+const Drawer = createDrawerNavigator();
+const Tab = createBottomTabNavigator();
 
-const AppNavigator: React.FC = () => {
-    const { isAuthenticated } = useAuth(); // Hent innloggingsstatus
-
+// 2. Definer din eksisterende Tab-navigator som en egen komponent
+function HomeTabs() {
     return (
-        <NavigationContainer>
-            <Stack.Navigator>
-                {isAuthenticated ? (
-                    // Vis disse skjermene hvis brukeren er logget inn
-                    <Stack.Screen name="Profile" component={ProfileScreen} />
-                ) : (
-                    // Ellers, vis kun LoginScreen
-                    <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-                )}
-            </Stack.Navigator>
-        </NavigationContainer>
+        <Tab.Navigator>
+            {/* Her kan du ha flere faner, f.eks. Hjem, Vaktliste etc.
+        Jeg legger bare inn ProfileScreen som et eksempel.
+      */}
+            <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profil' }} />
+        </Tab.Navigator>
     );
-};
+}
 
-export default AppNavigator;
+// 3. Sett opp AppNavigator til å bruke Drawer
+export default function AppNavigator() {
+    return (
+        // Bruk Drawer.Navigator som den ytre navigatoren
+        <Drawer.Navigator>
+            <Drawer.Screen
+                name="Home"
+                component={HomeTabs} // Hele Tab-navigatoren er nå én skjerm i draweren
+                options={{
+                    title: 'Hjem', // Tittel i header og drawer
+                }}
+            />
+            <Drawer.Screen
+                name="Profile"
+                component={ProfileScreen} // Du kan også ha direktelenker til skjermer
+                options={{
+                    title: 'Min Profil',
+                }}
+            />
+            {/* Legg til flere skjermer her som skal vises i hamburgermenyen */}
+        </Drawer.Navigator>
+    );
+}
