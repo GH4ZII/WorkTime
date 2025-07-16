@@ -17,8 +17,8 @@
 
 - [x] Login med e-post og passord
 - [x] JWT lagring med SecureStore / AsyncStorage
-- [ ] Visning av brukerprofil (navn, e-post, rolle)
-- [ ] Endre passord / Logg ut
+- [x] Visning av brukerprofil (navn, e-post, rolle)
+- [x] Endre passord / Logg ut
 
 ### 3.2 Mine Skift
 

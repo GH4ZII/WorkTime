@@ -11,6 +11,10 @@ const ProfileScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <Text>Du er logget inn!</Text>
+            <Text>Name:</Text>
+            <Text>e-mail</Text>
+            <Text>Role:</Text>
+            <Text>Change Password</Text>
             <Button mode={"contained-tonal"}
                     onPress={signOut}>
                     Logg ut
