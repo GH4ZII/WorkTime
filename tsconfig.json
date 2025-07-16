@@ -1,4 +1,4 @@
-﻿{
+{
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
@@ -7,9 +7,17 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "ui": ["packages/ui/src"],
-      "types": ["packages/types/src"]
+      "ui": [
+        "packages/ui/src"
+      ],
+      "types": [
+        "packages/types/src"
+      ]
     }
   },
-  "include": ["apps/**/*", "packages/**/*"]
+  "include": [
+    "apps/**/*",
+    "packages/**/*"
+  ],
+  "extends": "expo/tsconfig.base"
 }

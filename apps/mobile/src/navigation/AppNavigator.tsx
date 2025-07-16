@@ -1,46 +1,53 @@
-﻿// apps/mobile/src/navigation/AppNavigator.tsx
-
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator } from '@react-navigation/drawer'; // Importer drawer
+﻿import React from 'react';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfileScreen from '../screens/ProfileScreen';
+import HomeScreen from "../screens/HomeScreen";
+import LoginScreen from "../screens/LoginScreen";
+import { useAuth } from '../context/AuthContext';
 
-// 1. Lag en instans av Drawer Navigator
 const Drawer = createDrawerNavigator();
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-// 2. Definer din eksisterende Tab-navigator som en egen komponent
-function HomeTabs() {
+function AppDrawer() {
     return (
-        <Tab.Navigator>
-            {/* Her kan du ha flere faner, f.eks. Hjem, Vaktliste etc.
-        Jeg legger bare inn ProfileScreen som et eksempel.
-      */}
-            <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profil' }} />
-        </Tab.Navigator>
-    );
-}
-
-// 3. Sett opp AppNavigator til å bruke Drawer
-export default function AppNavigator() {
-    return (
-        // Bruk Drawer.Navigator som den ytre navigatoren
-        <Drawer.Navigator>
+        <Drawer.Navigator initialRouteName="Home">
             <Drawer.Screen
                 name="Home"
-                component={HomeTabs} // Hele Tab-navigatoren er nå én skjerm i draweren
+                component={HomeScreen}
                 options={{
-                    title: 'Hjem', // Tittel i header og drawer
+                    title: 'Hjem',
                 }}
             />
             <Drawer.Screen
                 name="Profile"
-                component={ProfileScreen} // Du kan også ha direktelenker til skjermer
+                component={ProfileScreen}
                 options={{
                     title: 'Min Profil',
                 }}
             />
-            {/* Legg til flere skjermer her som skal vises i hamburgermenyen */}
         </Drawer.Navigator>
+    );
+}
+
+export default function AppNavigator() {
+    const { isAuthenticated } = useAuth();
+
+    return (
+        <Stack.Navigator>
+            {isAuthenticated ? (
+                <Stack.Screen
+                    name="App"
+                    component={AppDrawer}
+                    options={{ headerShown: false }}
+                />
+            ) : (
+                <Stack.Screen
+                    name="LoginScreen"
+                    component={LoginScreen}
+                    options={{ title: 'Logg inn', headerShown: false }}
+                />
+            )}
+        </Stack.Navigator>
     );
 }
