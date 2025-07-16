@@ -1,17 +1,39 @@
 ﻿// src/screens/ProfileScreen.tsx
 import React from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { Button } from 'react-native-paper';
 
 const ProfileScreen: React.FC = () => {
     const { signOut } = useAuth();
     const navigation = useNavigation();
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={styles.container}>
             <Text>Du er logget inn!</Text>
-            <Button title="Logg ut" onPress={signOut} />
+            <Button mode={"contained-tonal"}
+                    onPress={signOut}>
+                    Logg ut
+        </Button>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 16,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    subtitle: {
+        fontSize: 18,
+        color: '#666',
+    },
+});
 export default ProfileScreen;
