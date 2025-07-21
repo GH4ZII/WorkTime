@@ -22,7 +22,7 @@
 
 ### 3.2 Mine Skift
 
-- [ ] Liste over kommende og tidligere skift
+- [x?] Liste over kommende og tidligere skift
 - [ ] Skiftdetaljer: dato, tid, varighet, sted, status
 - [ ] Notater på skift
 - [ ] Se kollegaer på samme skift

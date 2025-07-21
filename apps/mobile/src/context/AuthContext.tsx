@@ -2,7 +2,6 @@
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 
-// Definer hva slags data contexten skal holde
 interface AuthContextData {
     token: string | null;
     isAuthenticated: boolean;
@@ -13,7 +12,6 @@ interface AuthContextData {
 // Opprett Contexten
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-// Dette er komponenten som vil "pakke inn" appen vår
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [token, setToken] = useState<string | null>(null);
 
@@ -33,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signIn = async (email, password) => {
         try {
-            const response = await axios.post('http://10.130.50.26:3001/auth/login', {
+            const response = await axios.post('http://10.129.48.163:3001/auth/login', {
                 email,
                 password,
             });

@@ -54,7 +54,7 @@ const HomeScreen: React.FC = () => {
                 setIsLoading(true);
                 setError(null);
 
-                const respone = await axios.get<RawShiftFromAPI[]>('http://10.130.50.26:3001/shifts');
+                const respone = await axios.get<RawShiftFromAPI[]>('http://10.129.48.163:3001/shifts');
 
                 const processedData: ProcessedShift[] = respone.data.map(rawShift => {
                     const startDate = new Date(rawShift.startTime);
