@@ -1,22 +1,35 @@
-﻿import React, {useEffect, useMemo} from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import { Calendar, LocaleConfig, DateData } from "react-native-calendars";
-import axios from "axios"; // Importer axios for API-kall
+import axios from "axios";
 
-// Konfigurerer kalenderen til å bruke norske navn for måneder og dager
-LocaleConfig.locales['no'] = {
-    monthNames: ['Januar','Februar','Mars','April','Mai','Juni','Juli','August','September','Oktober','November','Desember'],
-    monthNamesShort: ['Jan.','Feb.','Mars','April','Mai','Juni','Juli','Aug.','Sep.','Okt.','Nov.','Des.'],
-    dayNames: ['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'],
-    dayNamesShort: ['Søn','Man','Tir','Ons','Tor','Fre','Lør'],
-    today: 'I dag'
+// Norsk språk i kalender
+LocaleConfig.locales["no"] = {
+    monthNames: [
+        "Januar",
+        "Februar",
+        "Mars",
+        "April",
+        "Mai",
+        "Juni",
+        "Juli",
+        "August",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+    ],
+    monthNamesShort: ["Jan.", "Feb.", "Mars", "April", "Mai", "Juni", "Juli", "Aug.", "Sep.", "Okt.", "Nov.", "Des."],
+    dayNames: ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"],
+    dayNamesShort: ["Søn", "Man", "Tir", "Ons", "Tor", "Fre", "Lør"],
+    today: "I dag",
 };
-LocaleConfig.defaultLocale = 'no';
+LocaleConfig.defaultLocale = "no";
 
 enum ShiftStatus {
-    PENDING = 'pending',
-    APPROVED = 'approved',
-    REJECTED = 'rejected',
+    PENDING = "pending",
+    APPROVED = "approved",
+    REJECTED = "rejected",
 }
 
 interface RawShiftFromAPI {
@@ -30,23 +43,26 @@ interface RawShiftFromAPI {
     createdBy: string;
     createdAt: string;
     updatedAt: string;
+    user?: { id: string; name: string; email?: string };
 }
 
 interface ProcessedShift {
     id: string;
-    date: string;
-    startTime: string;
-    endTime: string;
+    userId: string;
+    userName?: string;
+    date: string;        // YYYY-MM-DD
+    startTime: string;   // HH:MM
+    endTime: string;     // HH:MM
     description?: string;
     location?: string;
     status: ShiftStatus;
 }
 
 const HomeScreen: React.FC = () => {
-    const [selectedDate, setSelectedDate] = React.useState('');
-    const [allShifts, setAllShifts] = React.useState<ProcessedShift[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [error, setError] = React.useState<string | null>(null);
+    const [selectedDate, setSelectedDate] = useState("");
+    const [allShifts, setAllShifts] = useState<ProcessedShift[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchAndProcessShifts = async () => {
@@ -54,23 +70,26 @@ const HomeScreen: React.FC = () => {
                 setIsLoading(true);
                 setError(null);
 
-                const respone = await axios.get<RawShiftFromAPI[]>('http://10.129.48.163:3001/shifts');
+                const response = await axios.get<RawShiftFromAPI[]>("http://10.129.48.163:3001/shifts");
 
-                const processedData: ProcessedShift[] = respone.data.map(rawShift => {
-                    const startDate = new Date(rawShift.startTime);
-                    const endDate = new Date(rawShift.endTime);
+                const processed: ProcessedShift[] = response.data.map((raw) => {
+                    const start = new Date(raw.startTime);
+                    const end = new Date(raw.endTime);
 
                     return {
-                        id: rawShift.id,
-                        date: startDate.toISOString().split('T')[0], // Format YYYY-MM-DD
-                        startTime: startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), // Format HH:MM
-                        endTime: endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), // Format HH:MM
-                        description: rawShift.notes || '',
-                        location: rawShift.location || '',
-                        status: rawShift.status,
+                        id: raw.id,
+                        userId: raw.userId,
+                        userName: raw.user?.name,
+                        date: start.toISOString().split("T")[0],
+                        startTime: start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                        endTime: end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                        description: raw.notes || "",
+                        location: raw.location || "",
+                        status: raw.status,
                     };
                 });
-                setAllShifts(processedData);
+
+                setAllShifts(processed);
             } catch (err) {
                 console.error("Error fetching shifts:", err);
                 setError("Kunne ikke hente skift. Vennligst prøv igjen senere.");
@@ -78,55 +97,71 @@ const HomeScreen: React.FC = () => {
                 setIsLoading(false);
             }
         };
+
         fetchAndProcessShifts();
     }, []);
 
-    const markedDates = useMemo(() => {
-        const markings = {}; // Oppretter et tomt objekt som skal holde markeringene for datoene
+    // Alle skift for valgt dato
+    const shiftsForSelectedDate = useMemo(
+        () => allShifts.filter((s) => s.date === selectedDate),
+        [allShifts, selectedDate]
+    );
 
-        allShifts.forEach(shift => { // Går gjennom alle skiftene
-            markings[shift.date] = { marked: true, dotColor: '#1E90FF' }; // Markerer datoen med en blå prikk (dot)
+    // Kollegaliste
+    const coworkers = useMemo(() => {
+        const names = shiftsForSelectedDate.map((s) => s.userName).filter(Boolean) as string[];
+        return Array.from(new Set(names));
+    }, [shiftsForSelectedDate]);
+
+    // Markeringer i kalender (multi-dot for flere skift på samme dato)
+    const markedDates = useMemo(() => {
+        const m: Record<string, any> = {};
+
+        allShifts.forEach((shift) => {
+            if (!m[shift.date]) m[shift.date] = { dots: [] };
+            m[shift.date].dots.push({
+                key: shift.id,
+                color: shift.status === ShiftStatus.APPROVED ? "#1E90FF" : "#FFA500",
+            });
         });
 
-        if (selectedDate) { // Hvis en dato er valgt
-            markings[selectedDate] = { ...markings[selectedDate], selected: true, selectedColor: '#1E90FF' };
-            // Legger til ekstra markering på valgt dato: beholder eventuell eksisterende dot og markerer datoen som valgt med blå farge
+        if (selectedDate) {
+            m[selectedDate] = {
+                ...(m[selectedDate] || { dots: [] }),
+                selected: true,
+                selectedColor: "#1E90FF",
+            };
         }
 
-        return markings; // Returnerer det ferdige objektet med dato-markeringer
-    }, [allShifts, selectedDate]); // Beregningen kjører kun på nytt når allShifts eller selectedDate endres
-
-const shiftForSelectedDate = allShifts.find(shift => shift.date === selectedDate);
+        return m;
+    }, [allShifts, selectedDate]);
 
     const renderShiftDetails = () => {
         if (isLoading) return <ActivityIndicator size="large" color="#5E84E2" style={styles.infoContainer} />;
         if (error) return <Text style={[styles.infoText, styles.errorText]}>{error}</Text>;
         if (!selectedDate) return <Text style={styles.infoText}>Trykk på en dato for å se detaljer.</Text>;
 
-        if (shiftForSelectedDate) {
-            return (
-                <View style={styles.shiftCard}>
-                    <Text style={styles.shiftDate}>Vakt for {selectedDate}</Text>
-                    <Text style={styles.shiftTime}>
-                        Klokken: {shiftForSelectedDate.startTime} - {shiftForSelectedDate.endTime}
-                    </Text>
-                    {shiftForSelectedDate.location && (
-                        <Text style={styles.shiftDescription}>
-                            Sted: {shiftForSelectedDate.location}
-                        </Text>
-                    )}
-                    {shiftForSelectedDate.description && (
-                        <Text style={styles.shiftDescription}>
-                            Notat: {shiftForSelectedDate.description}
-                        </Text>
-                    )}
-                    <Text style={[styles.shiftDescription, styles.status]}>
-                        Status: {shiftForSelectedDate.status}
-                    </Text>
-                </View>
-            );
+        if (shiftsForSelectedDate.length === 0) {
+            return <Text style={styles.infoText}>Ingen vakt registrert denne dagen.</Text>;
         }
-        return <Text style={styles.infoText}>Ingen vakt registrert denne dagen.</Text>;
+
+        return (
+            <View style={{ gap: 12 }}>
+                <Text style={styles.shiftDate}>Vakter {selectedDate}</Text>
+
+                {shiftsForSelectedDate.map((shift) => (
+                    <View key={shift.id} style={styles.shiftCard}>
+                        <Text style={styles.shiftTime}>
+                            {shift.startTime} - {shift.endTime}
+                        </Text>
+                        {shift.userName && <Text style={styles.shiftDescription}>Ansatt: {shift.userName}</Text>}
+                        {shift.location && <Text style={styles.shiftDescription}>Sted: {shift.location}</Text>}
+                        {shift.description && <Text style={styles.shiftDescription}>Notat: {shift.description}</Text>}
+                        <Text style={[styles.shiftDescription, styles.status]}>Status: {shift.status.toUpperCase()}</Text>
+                    </View>
+                ))}
+            </View>
+        );
     };
 
     return (
@@ -135,29 +170,37 @@ const shiftForSelectedDate = allShifts.find(shift => shift.date === selectedDate
                 style={styles.calendar}
                 onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
                 markedDates={markedDates}
+                markingType="multi-dot"
             />
-            <View style={styles.detailsContainer}>
-                {renderShiftDetails()}
-            </View>
+            <View style={styles.detailsContainer}>{renderShiftDetails()}</View>
         </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
-    calendar: { borderBottomWidth: 1, borderColor: '#e0e0e0' },
+    container: { flex: 1, backgroundColor: "#f5f5f5" },
+    calendar: { borderBottomWidth: 1, borderColor: "#e0e0e0" },
     detailsContainer: { padding: 20 },
     infoContainer: { marginTop: 20 },
-    infoText: { textAlign: 'center', fontSize: 16, color: '#666', marginTop: 20 },
-    errorText: { color: 'red' },
-    shiftCard: { backgroundColor: 'white', borderRadius: 8, padding: 16, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
-    shiftDate: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
+    infoText: { textAlign: "center", fontSize: 16, color: "#666", marginTop: 20 },
+    errorText: { color: "red" },
+
+    shiftDate: { fontSize: 18, fontWeight: "bold", marginBottom: 8 },
+    coworkers: { fontSize: 14, fontWeight: "600", marginBottom: 8, color: "#333" },
+
+    shiftCard: {
+        backgroundColor: "white",
+        borderRadius: 8,
+        padding: 16,
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+    },
     shiftTime: { fontSize: 16, marginBottom: 8 },
-    shiftDescription: { fontSize: 14, color: '#555', marginBottom: 4 },
-    status: {
-        marginTop: 8,
-        fontWeight: 'bold'
-    }
+    shiftDescription: { fontSize: 14, color: "#555", marginBottom: 4 },
+    status: { marginTop: 8, fontWeight: "bold" },
 });
 
 export default HomeScreen;
