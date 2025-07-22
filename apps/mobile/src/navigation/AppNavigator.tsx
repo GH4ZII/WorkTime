@@ -5,6 +5,9 @@ import ProfileScreen from '../screens/ProfileScreen';
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/LoginScreen";
 import { useAuth } from '../context/AuthContext';
+import MyShiftsScreen from "../screens/MyShiftsScreen";
+import ChatScreen from "../screens/ChatScreen";
+import CoWorkerScreen from "../screens/CoWorkerScreen";
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -24,6 +27,27 @@ function AppDrawer() {
                 component={ProfileScreen}
                 options={{
                     title: 'Min Profil',
+                }}
+            />
+            <Drawer.Screen
+                name="Mine Skift"
+                component={MyShiftsScreen}
+                options={{
+                    title: 'Mine Skift',
+                }}
+            />
+            <Drawer.Screen
+                name="Meldinger"
+                component={ChatScreen}
+                options={{
+                    title: 'Meldinger',
+                }}
+            />
+            <Drawer.Screen
+                name="Medarbeidere"
+                component={CoWorkerScreen}
+                options={{
+                    title: 'Medarbeidere',
                 }}
             />
         </Drawer.Navigator>
