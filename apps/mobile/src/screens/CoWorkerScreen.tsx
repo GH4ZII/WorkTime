@@ -9,7 +9,6 @@ interface CoWorker {
     role: string;
 }
 
-// URL til ditt API. Sørg for at denne IP-adressen er korrekt.
 const API_URL = 'http://10.129.48.163:3001/users';
 
 const CoWorkerScreen: React.FC = () => {

@@ -22,10 +22,10 @@
 
 ### 3.2 Mine Skift
 
-- [ ] Liste over kommende og tidligere skift
-- [ ] Skiftdetaljer: dato, tid, varighet, sted, status
-- [ ] Notater på skift
-- [ ] Se kollegaer på samme skift
+- [x] Liste over kommende og tidligere skift
+- [x] Skiftdetaljer: dato, tid, varighet, sted, status
+- [x] Notater på skift
+- [x] Se kollegaer på samme skift
 
 ### 3.3 Forespørsler
 
