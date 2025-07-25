@@ -24,7 +24,18 @@ export class UsersService {
 
     // 2) Hente alle brukere
     async findAll() {
-        return this.prisma.user.findMany();
+        return this.prisma.user.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            }
+        });
     }
 
     // 3) Hente en bruker på ID

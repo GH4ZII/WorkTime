@@ -21,7 +21,11 @@ let ShiftsService = class ShiftsService {
         return this.prisma.shift.create({ data });
     }
     async findAll() {
-        return this.prisma.shift.findMany();
+        return this.prisma.shift.findMany({
+            include: {
+                user: { select: { id: true, name: true, email: true } },
+            },
+        });
     }
     async findOne(id) {
         return this.prisma.shift.findUnique({ where: { id } });

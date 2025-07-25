@@ -16,7 +16,13 @@ export declare class ShiftsService {
         createdAt: Date;
         updatedAt: Date;
     }>;
-    findAll(): Promise<{
+    findAll(): Promise<({
+        user: {
+            id: string;
+            name: string;
+            email: string;
+        };
+    } & {
         id: string;
         userId: string;
         startTime: Date;
@@ -27,7 +33,7 @@ export declare class ShiftsService {
         createdBy: string;
         createdAt: Date;
         updatedAt: Date;
-    }[]>;
+    })[]>;
     findOne(id: string): Promise<{
         id: string;
         userId: string;

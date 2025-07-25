@@ -31,7 +31,18 @@ let UsersService = class UsersService {
         });
     }
     async findAll() {
-        return this.prisma.user.findMany();
+        return this.prisma.user.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                role: true,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            }
+        });
     }
     async findOne(id) {
         return this.prisma.user.findUnique({ where: { id } });

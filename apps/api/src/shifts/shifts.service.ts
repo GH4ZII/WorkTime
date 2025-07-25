@@ -15,7 +15,11 @@ export class ShiftsService {
 
     // 2) Hente alle skift
     async findAll() {
-        return this.prisma.shift.findMany();
+        return this.prisma.shift.findMany({
+            include: {
+                user: { select: { id: true, name: true, email: true } },
+            },
+        });
     }
 
     // 3) Hente ett skift på ID
