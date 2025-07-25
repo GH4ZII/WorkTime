@@ -27,7 +27,7 @@
 - [x] Notater på skift
 - [x] Se kollegaer på samme skift
 
-### 3.3 Forespørsler
+### 3.3 Forespørsler ( Gjør det senere når Admin Dashboard er oppe )
 
 - [ ] Fraværsforespørsel: datointervall, type, beskrivelse
 - [ ] Bytteforespørsel: velg eget skift → velg kollega/skift
@@ -35,8 +35,7 @@
 
 ### 3.4 Arbeidstimer
 
-- [ ] Beregn og vis timer jobbet (uke/måned)
-- [ ] Mulighet for manuell logging (valgfritt)
+- [x] Beregn og vis timer jobbet (uke/måned)
 
 ### 3.5 Notifikasjoner
 
