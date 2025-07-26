@@ -1,7 +1,7 @@
 ﻿// create-hash.js
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-const myPlaintextPassword = 'GH4ZII'; // <-- Bytt ut dette
+const myPlaintextPassword = 'Password1!'; // <-- Bytt ut dette
 
 bcrypt.hash(myPlaintextPassword, saltRounds, function(err, hash) {
     if (err) {
