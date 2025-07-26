@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
+import { Container, Box, Typography, TextField, Button, Alert } from "@mui/material";
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -29,39 +30,56 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div style={styles.container}>
-            <form onSubmit={handleLogin} style={styles.form}>
-                <h2>Admin Login</h2>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="E-post"
-                    required
-                    style={styles.input}
-                />
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Passord"
-                    required
-                    style={styles.input}
-                />
-                {error && <p style={styles.error}>{error}</p>}
-                <button type="submit" style={styles.button}>Logg inn</button>
-            </form>
-        </div>
+        <Container component="main" maxWidth="xs">
+            <Box
+                sx={{
+                    marginTop: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                }}
+            >
+                <Typography component="h1" variant="h5">
+                    Admin Login
+                </Typography>
+                <Box component="form" onSubmit={handleLogin} sx={{ mt: 1 }}>
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="E-postadresse"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Passord"
+                        type="password"
+                        id="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    {error && <Alert severity="error" sx={{ width: '100%', mt: 2 }}>{error}</Alert>}
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                    >
+                        Logg inn
+                    </Button>
+                </Box>
+            </Box>
+        </Container>
     );
-};
-
-// Enkel styling
-const styles = {
-    container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f0f2f5' },
-    form: { display: 'flex', flexDirection: 'column' as 'column', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' },
-    input: { padding: '0.8rem', margin: '0.5rem 0', border: '1px solid #ccc', borderRadius: '4px' },
-    button: { padding: '0.8rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-    error: { color: 'red' },
 };
 
 export default Login;
