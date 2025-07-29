@@ -177,6 +177,21 @@ const HomeScreen: React.FC = () => {
 
     return (
         <ScrollView style={styles.container}>
+            <View style={styles.summaryRow}>
+                <View style={styles.summaryItem}>
+                    <Text style={styles.summaryTitle}>Arbeid</Text>
+                    {isLoading ? (
+                        <ActivityIndicator size="small" color="#5E84E2" />
+                    ): (
+                        <Text style={styles.summaryHours}>{totalHoursForMonth} timer</Text>
+                    )}
+                </View>
+
+                <View style={styles.summaryItem}>
+                    <Text style={styles.summaryTitle}>Fravær</Text>
+                    <Text style={styles.summaryHours}>0 timer</Text>
+                </View>
+            </View>
             <Calendar
                 style={styles.calendar}
                 onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
@@ -184,15 +199,6 @@ const HomeScreen: React.FC = () => {
                 markedDates={markedDates}
                 markingType="multi-dot"
             />
-            <View style={styles.summaryContainer}>
-                <Text style={styles.summaryTitle}>Arbeid</Text>
-                {isLoading ? (
-                    <ActivityIndicator size="large" color="#5E84E2" />
-                    ): (
-                        <Text style={styles.summaryHours}>{totalHoursForMonth} timer</Text>
-                    )}
-            </View>
-            <View style={styles.detailsContainer}>{renderShiftDetails()}</View>
         </ScrollView>
     );
 };
@@ -218,18 +224,24 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 2,
     },
-    summaryContainer: {
+    summaryRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        paddingHorizontal: 20,
+        paddingVertical: 10,
         backgroundColor: "white",
-        padding: 20,
-        margin: 20,
-        marginBottom: 0,
+        marginHorizontal: 20,
+        marginTop: 20,
         borderRadius: 8,
         elevation: 2,
         shadowColor: "#000",
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        alignItems: "center",
     },
+    summaryItem: {
+        alignItems: "flex-start",
+    },
+
     summaryTitle: {
         fontSize: 16,
         fontWeight: "600",
