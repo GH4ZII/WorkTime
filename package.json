@@ -37,7 +37,6 @@
     "@emotion/styled": "^11.14.1",
     "@fontsource/roboto": "^5.2.6",
     "@mui/material": "^7.2.0",
-    "@mui/x-charts": "^8.9.0",
     "@react-navigation/drawer": "^7.5.3",
     "@react-navigation/native": "^7.1.14",
     "@types/react": "^19.1.8",
