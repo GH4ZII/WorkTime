@@ -6,14 +6,16 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { EmotionCache } from '@emotion/cache';
 import createEmotionCache from "./utils/createEmotionCache";
-// Et enkelt, sentralt tema som kan utvides senere
+import { Layout } from './components/Layout';
+
+
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#1976d2', // En standard blåfarge
+            main: '#1976d2',
         },
         secondary: {
-            main: '#dc004e', // En standard rødfarge
+            main: '#dc004e',
         },
     },
 });
@@ -26,14 +28,15 @@ interface MyAppProps extends AppProps {
 }
 
 export default function MyApp(props: MyAppProps) {
-    const { Component, pageProps, emotionCache = clientSideEmotionCache } = props;
+    const {Component, pageProps, emotionCache = clientSideEmotionCache} = props;
 
     return (
         <ThemeProvider theme={theme}>
-            {/* CssBaseline normaliserer stiler på tvers av nettlesere */}
+            <Layout>
             <CssBaseline />
-            {/* Component representerer den aktive siden (f.eks. login.tsx) */}
             <Component {...pageProps} />
-        </ThemeProvider>
-    );
+        </Layout>
+</ThemeProvider>
+)
+
 }

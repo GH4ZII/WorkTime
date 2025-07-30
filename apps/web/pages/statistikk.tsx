@@ -1,11 +1,12 @@
 ﻿import React from 'react'
 import {NextPage} from 'next'
+import { Layout } from '../components/Layout'
 
 const StatisticsPage: NextPage = () => {
     return (
-        <div>
+        <Layout>
             <h1>Under Development</h1>
-        </div>
+        </Layout>
     );
 }
 
