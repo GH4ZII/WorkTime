@@ -5,8 +5,7 @@ import type { AppProps } from 'next/app';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { EmotionCache } from '@emotion/cache';
-import createEmotionCache from '../utils/createEmotionCache';
-
+import createEmotionCache from "./utils/createEmotionCache";
 // Et enkelt, sentralt tema som kan utvides senere
 const theme = createTheme({
     palette: {
@@ -27,7 +26,7 @@ interface MyAppProps extends AppProps {
 }
 
 export default function MyApp(props: MyAppProps) {
-    const { Component, pageProps, emotionCache = clientSide-sideEmotionCache } = props;
+    const { Component, pageProps, emotionCache = clientSideEmotionCache } = props;
 
     return (
         <ThemeProvider theme={theme}>
