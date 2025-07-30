@@ -1,21 +1,31 @@
-﻿import React from 'react';
+﻿import React, {useEffect} from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FaChartBar, FaUsers, FaCalendarAlt, FaEnvelope, FaHistory, FaRegHandshake, FaUmbrellaBeach, FaChartLine } from 'react-icons/fa'
+import axios from 'axios';
 
 
-type MenuItem = { label: string; icon: React.ReactNode }
+type MenuItem = { label: string; icon: React.ReactNode; href: string; }
 const menuItems: MenuItem[] = [
-    {label: 'Dashboard', icon: <FaChartBar size={20} /> },
-    {label: 'Medarbeidere', icon: <FaUsers size={20} /> },
-    {label: 'Skift', icon: <FaCalendarAlt size={20} /> },
-    {label: 'Bytteforespørsel', icon: <FaRegHandshake size={20} />},
-    {label: 'Fraværsforespørsel', icon: <FaUmbrellaBeach size={20} />},
-    {label: 'Meldinger', icon: <FaEnvelope size={20} /> },
-    {label: 'Histortikk', icon: <FaHistory size={20} />},
-    {label: 'Statistikk', icon: <FaChartLine size={20} />}
+    {label: 'Dashboard', icon: <FaChartBar size={20} />, href: '/' },
+    {label: 'Medarbeidere', icon: <FaUsers size={20} />, href: '/medarbeidere' },
+    {label: 'Skift', icon: <FaCalendarAlt size={20} />, href: '/skift' },
+    {label: 'Bytteforespørsel', icon: <FaRegHandshake size={20} />, href: '/bytteforesporsel'},
+    {label: 'Fraværsforespørsel', icon: <FaUmbrellaBeach size={20} />, href: '/fravaersforesporsel'},
+    {label: 'Meldinger', icon: <FaEnvelope size={20} />, href: '/meldinger' },
+    {label: 'Histortikk', icon: <FaHistory size={20} />, href: '/historikk'},
+    {label: 'Statistikk', icon: <FaChartLine size={20} />, href: '/statistikk'}
 ]
+
+interface Employee {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: 'ADMIN' | 'EMPLOYEE';
+}
 
 type StatCardProps = { title: string; value: string | number }
 const StatCard: React.FC<StatCardProps> = ({ title, value }) => (
@@ -26,6 +36,29 @@ const StatCard: React.FC<StatCardProps> = ({ title, value }) => (
 )
 
 const HomePage: NextPage = () => {
+    const [employees, setEmployees] = React.useState<Employee[]>([]);
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchEmployees = async () => {
+            try {
+                const response = await axios.get<Employee[]>('http://10.129.48.163:3001/users', {
+                    withCredentials: true,
+                });
+                console.log(response.data);
+                setEmployees(response.data);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchEmployees();
+    }, []);
+
+
+
     return (
         <>
         <Head>
@@ -41,10 +74,12 @@ const HomePage: NextPage = () => {
                     </div>
                     <nav>
                         {menuItems.map((menuItem) => (
+                            <Link href={menuItem.href} key={menuItem.label} style={styles.link}>
                             <div key={menuItem.label} style={styles.menuItem}>
                                 <span style={styles.menuItemIcon}>{menuItem.icon}</span>
                                 <span>{menuItem.label}</span>
                             </div>
+                            </Link>
                         ))}
                     </nav>
                 </aside>
@@ -68,22 +103,21 @@ const HomePage: NextPage = () => {
                                 <tr>
                                     <th>Ansatt</th>
                                     <th>Rolle</th>
-                                    <th>Skift</th>
+                                    <th>Telefonummer</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {[
-                                    { name: 'Jenny Wilson', role: 'Cashier', shift: '09:00' },
-                                    { name: 'Ronald Richards', role: 'Manager', shift: '12:00' },
-                                    { name: 'Kristin Watson', role: 'Thursday', shift: '08:30' },
-                                    { name: 'Jacob Jones', role: 'Friday', shift: '10:00' },
-                                ].map((row) => (
-                                    <tr key={row.name}>
-                                        <td>{row.name}</td>
-                                        <td>{row.role}</td>
-                                        <td>{row.shift}</td>
-                                    </tr>
-                                ))}
+                                {employees.length > 0 ? (
+                                    employees.map((employee) => (
+                                        <tr key={employee.id}>
+                                            <td>{employee.name}</td>
+                                            <td>{employee.role}</td>
+                                            <td>{employee.phone}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr key="no-employees"></tr>
+                                )}
                                 </tbody>
                             </table>
                         </section>
@@ -238,5 +272,10 @@ const styles: Record<string, React.CSSProperties> = {
         textAlign: 'left',
         padding: '0.75rem',
         borderBottom: '1px solid #E5E7EB',
+    },
+    link: {
+        textDecoration: 'none',
+        color: 'inherit',
+        display: 'block'
     },
 }
