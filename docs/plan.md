@@ -55,8 +55,8 @@
 
 ### 4.1 Admin Dashboard
 
-- [ ] Nøkkeltall (ansatte, skift i dag, forespørsler)
-- [ ] Oversikt over kommende skift
+- [x] Nøkkeltall (ansatte, skift i dag, forespørsler)
+- [x] Oversikt over kommende skift
 
 ### 4.2 Brukeradministrasjon
 
@@ -65,7 +65,7 @@
 
 ### 4.3 Skiftadministrasjon
 
-- [ ] Opprett, rediger, slett skift
+- [x] Opprett, rediger, slett skift
 - [ ] Koble skift til ansatte
 - [ ] Skiftkalender (visuelt)
 
