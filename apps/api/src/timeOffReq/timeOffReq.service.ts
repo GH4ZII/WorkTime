@@ -1,7 +1,8 @@
-﻿import {Injectable} from "@nestjs/common";
+﻿import {Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import {PrismaService} from "../prisma.service"; // din Prisma-klient
 import { CreateTimeOffRequestDto} from "./dto/create-timeoff-request.dto";
 import { UpdateTimeOffRequestDto } from "./dto/update-timeoff-request.dto";
+import { RequestStatus } from "generated/prisma";
 
 @Injectable()
 export class TimeOffReqService {
@@ -48,6 +49,39 @@ export class TimeOffReqService {
         });
     }
 
+    async approve(id: string) {
+        const request = await this.findOne(id);
+
+        if (!request) {
+            throw new NotFoundException('Forespørsel ikke funnet');
+        }
+
+        if (request.status !== RequestStatus.PENDING) {
+            throw new BadRequestException('Forespørsel er allerede behandlet');
+        }
+
+        return this.prisma.timeOffRequest.update({
+            where: { id },
+            data: { status: RequestStatus.APPROVED }
+        });
+    }
+
+    async reject(id: string) {
+        const request = await this.findOne(id);
+
+        if (!request) {
+            throw new NotFoundException('Forespørsel ikke funnet');
+        }
+
+        if (request.status !== RequestStatus.PENDING) {
+            throw new BadRequestException('Forespørsel er allerede behandlet');
+        }
+
+        return this.prisma.timeOffRequest.update({
+            where: { id },
+            data: { status: RequestStatus.REJECTED }
+        });
+    }
 }
 
 

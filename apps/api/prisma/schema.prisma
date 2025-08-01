@@ -65,14 +65,14 @@ model User {
 
 model Shift {
   id        String      @id @default(uuid())
-  user      User        @relation(fields: [userId], references: [id])
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   startTime DateTime
   endTime   DateTime
   location  String?
   notes     String?
   status    ShiftStatus @default(PENDING)
-  createdBy String // admin user id if you wish to track
+  createdBy String
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
@@ -83,7 +83,7 @@ model Shift {
 
 model TimeOffRequest {
   id        String        @id @default(uuid())
-  user      User          @relation(fields: [userId], references: [id])
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   fromDate  DateTime
   toDate    DateTime
@@ -96,12 +96,12 @@ model TimeOffRequest {
 
 model ShiftSwapRequest {
   id            String        @id @default(uuid())
-  requestedBy   User          @relation("RequestedBy", fields: [requestedById], references: [id])
+  requestedBy   User          @relation("RequestedBy", fields: [requestedById], references: [id], onDelete: Cascade)
   requestedById String
   fromShift     Shift         @relation("SwapFrom", fields: [fromShiftId], references: [id])
   fromShiftId   String
   swapType      SwapRequestType @default(SWAP)
-  swapWith      User?          @relation("SwapWith", fields: [swapWithId], references: [id])
+  swapWith      User?          @relation("SwapWith", fields: [swapWithId], references: [id], onDelete: Cascade)
   swapWithId    String?
   toShift       Shift?         @relation("SwapTo", fields: [toShiftId], references: [id])
   toShiftId     String?
@@ -113,15 +113,12 @@ model ShiftSwapRequest {
 
 model WorkLog {
   id        String   @id @default(uuid())
-
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   shift     Shift    @relation(fields: [shiftId], references: [id])
   shiftId   String
-
   startTime DateTime
   endTime   DateTime
-
   notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,7 +126,7 @@ model WorkLog {
 
 model Notification {
   id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   title     String
   message   String
@@ -138,29 +135,28 @@ model Notification {
 }
 
 model ChatRoom {
-  id        String   @id @default(uuid())
-  name      String?
-  createdAt DateTime @default(now())
-
-  members  ChatMember[]
-  messages Message[]
+  id          String       @id @default(uuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  members     ChatMember[]
+  messages    Message[]
 }
 
 model ChatMember {
   id       String   @id @default(uuid())
   room     ChatRoom @relation(fields: [roomId], references: [id])
   roomId   String
-  user     User     @relation(fields: [userId], references: [id])
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   String
   joinedAt DateTime @default(now())
 }
 
 model Message {
-  id       String   @id @default(uuid())
-  room     ChatRoom @relation(fields: [roomId], references: [id])
-  roomId   String
-  sender   User     @relation("SentMessages", fields: [senderId], references: [id])
-  senderId String
-  content  String
-  sentAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  room      ChatRoom @relation(fields: [roomId], references: [id])
+  roomId    String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId  String
+  content   String
+  sentAt    DateTime @default(now())
 }

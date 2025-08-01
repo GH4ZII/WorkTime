@@ -13,33 +13,33 @@ export declare class ChatService {
             };
         } & {
             id: string;
-            userId: string;
             joinedAt: Date;
+            userId: string;
             roomId: string;
         })[];
     } & {
         id: string;
+        name: string;
         createdAt: Date;
-        name: string | null;
     }>;
     findAll(): import(".prisma/client").Prisma.PrismaPromise<({
+        members: {
+            id: string;
+            joinedAt: Date;
+            userId: string;
+            roomId: string;
+        }[];
         messages: {
             id: string;
-            sentAt: Date;
             roomId: string;
+            sentAt: Date;
             senderId: string;
             content: string;
         }[];
-        members: {
-            id: string;
-            userId: string;
-            joinedAt: Date;
-            roomId: string;
-        }[];
     } & {
         id: string;
+        name: string;
         createdAt: Date;
-        name: string | null;
     })[]>;
     findOne(id: string): Promise<{
         members: ({
@@ -49,19 +49,19 @@ export declare class ChatService {
             };
         } & {
             id: string;
-            userId: string;
             joinedAt: Date;
+            userId: string;
             roomId: string;
         })[];
     } & {
         id: string;
+        name: string;
         createdAt: Date;
-        name: string | null;
     }>;
     update(id: string, dto: UpdateChatDto): Promise<{
         id: string;
+        name: string;
         createdAt: Date;
-        name: string | null;
     }>;
     addMembers(roomId: string, userIds: string[]): Promise<{
         members: ({
@@ -71,14 +71,14 @@ export declare class ChatService {
             };
         } & {
             id: string;
-            userId: string;
             joinedAt: Date;
+            userId: string;
             roomId: string;
         })[];
     } & {
         id: string;
+        name: string;
         createdAt: Date;
-        name: string | null;
     }>;
     removeMembers(roomId: string, userIds: string[]): Promise<{
         members: ({
@@ -88,14 +88,14 @@ export declare class ChatService {
             };
         } & {
             id: string;
-            userId: string;
             joinedAt: Date;
+            userId: string;
             roomId: string;
         })[];
     } & {
         id: string;
+        name: string;
         createdAt: Date;
-        name: string | null;
     }>;
     getMessages(roomId: string): import(".prisma/client").Prisma.PrismaPromise<({
         sender: {
@@ -104,15 +104,15 @@ export declare class ChatService {
         };
     } & {
         id: string;
-        sentAt: Date;
         roomId: string;
+        sentAt: Date;
         senderId: string;
         content: string;
     })[]>;
     addMessage(roomId: string, dto: CreateMessageDto): Promise<{
         id: string;
-        sentAt: Date;
         roomId: string;
+        sentAt: Date;
         senderId: string;
         content: string;
     }>;

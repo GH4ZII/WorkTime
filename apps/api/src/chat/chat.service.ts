@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateChatDto} from "./dto/create-chat.dto";
 import { UpdateChatDto } from './dto/update-chat.dto';
@@ -13,6 +13,11 @@ export class ChatService {
      */
     async create(dto: CreateChatDto) {
         const { name, memberIds } = dto;
+        
+        if (!name) {
+            throw new BadRequestException('Chat room name is required');
+        }
+        
         return this.prisma.chatRoom.create({
             data: {
                 name: name,

@@ -7,56 +7,78 @@ export declare class TimeOffReqController {
     create(dto: CreateTimeOffRequestDto): Promise<{
         id: string;
         userId: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
-        createdAt: Date;
-        updatedAt: Date;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
         reason: string | null;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     findAll(): Promise<{
         id: string;
         userId: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
-        createdAt: Date;
-        updatedAt: Date;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
         reason: string | null;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
         userId: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
-        createdAt: Date;
-        updatedAt: Date;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
         reason: string | null;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        createdAt: Date;
+        updatedAt: Date;
     } | null>;
     update(id: string, dto: UpdateTimeOffRequestDto): Promise<{
         id: string;
         userId: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
-        createdAt: Date;
-        updatedAt: Date;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
         reason: string | null;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         id: string;
         userId: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
-        createdAt: Date;
-        updatedAt: Date;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
         reason: string | null;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    approve(id: string): Promise<{
+        id: string;
+        userId: string;
+        fromDate: Date;
+        toDate: Date;
+        type: import(".prisma/client").$Enums.TimeOffType;
+        reason: string | null;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    reject(id: string): Promise<{
+        id: string;
+        userId: string;
+        fromDate: Date;
+        toDate: Date;
+        type: import(".prisma/client").$Enums.TimeOffType;
+        reason: string | null;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
 }
