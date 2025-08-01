@@ -1,101 +1,262 @@
-﻿
-Arkitektur i WorkTime-prosjektet
----------------------------------------
+﻿# 🏗️ WorkTime Arkitektur
+
+## Oversikt
+
+WorkTime er bygget som en moderne, skalerbar applikasjon med monorepo-struktur. Systemet består av tre hovedkomponenter: web-adminpanel, mobil-app for ansatte, og et robust backend-API.
+
+---
 
 ## 1. Monorepo-struktur
 
 Prosjektet bruker én Git-repositorie (monorepo) med følgende hovedmapper:
 
 ```
-worktime/
-├── apps/       ← Kjørbare applikasjoner
-│   ├── web/    ← Administrasjonsportal (Next.js)
-│   ├── mobile/ ← Mobilapp for ansatte (Expo)
-│   └── api/    ← Backend-tjeneste (NestJS)
-├── packages/   ← Gjenbrukbare biblioteker
-│   ├── ui/     ← Felles React/React Native-komponenter
-│   └── types/  ← Felles TypeScript-typer
-└── docs/       ← Dokumentasjon
+WorkTime/
+├── apps/           ← Kjørbare applikasjoner
+│   ├── web/        ← Administrasjonsportal (Next.js)
+│   ├── mobile/     ← Mobilapp for ansatte (Expo)
+│   └── api/        ← Backend-tjeneste (NestJS)
+├── packages/       ← Gjenbrukbare biblioteker
+│   ├── ui/         ← Felles React/React Native-komponenter
+│   └── types/      ← Felles TypeScript-typer
+└── docs/           ← Dokumentasjon
 ```
 
-* **apps/**: Inneholder selve applikasjonene som kjøres.
-* **packages/**: Inneholder modulene som deles mellom applikasjonene.
-* **docs/**: Egen dokumentasjonsside.
+### Fordeler med Monorepo
+* **Delt kodebase**: Enkel deling av komponenter og typer
+* **Atomiske endringer**: Endringer på tvers av apper i samme commit
+* **Konsistent tooling**: Samme linting, testing og bygg-prosesser
+* **Enklere refactoring**: Endringer på tvers av hele systemet
+
+---
 
 ## 2. Workspaces og Turborepo
 
-* Prosjektet bruker **npm-workspaces** definert i rotens `package.json`. Alle undermapper under `apps/*` og `packages/*` hentes automatisk ved `npm install`.
-* **Turborepo** styrer bygg-, dev- og test-pipelines for alle pakker. Konfigurasjon i `turbo.json` (eller `turbo.config.js`) definerer:
+### NPM Workspaces
+* Defineres i rotens `package.json`
+* Alle undermapper under `apps/*` og `packages/*` installeres automatisk
+* Enkel dependency management på tvers av prosjekter
 
-    * **tasks** (tidligere `pipeline`): `dev`, `build`, `lint`, `test`.
-    * **dependsOn**: Rekkefølge basert på avhengigheter (f.eks. bygg av UI før web).
-    * **outputs**: Filmønstre som caches.
+### Turborepo
+Styrer bygg-, dev- og test-pipelines for alle pakker:
 
-Kommandoer:
+```json
+// turbo.json
+{
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
+```
 
-* `npm run dev` → starter dev-servere for **web**, **mobile** og **api** parallelt.
-* `npm run build` → bygger alle prosjekter i riktig rekkefølge.
+### Kommandoer
+```bash
+npm run dev      # Starter alle dev-servere parallelt
+npm run build    # Bygger alle prosjekter i riktig rekkefølge
+npm run lint     # Linter alle prosjekter
+npm run test     # Tester alle prosjekter
+```
 
-## 3. Beskrivelse av appene
+---
 
-### 3.1. Web (Next.js)
+## 3. Applikasjonsarkitektur
 
-* **Mappe**: `apps/web`
-* **Framework**: Next.js med React og TypeScript
-* **Formål**: Administrasjonsportal for ledelse
-* **Viktige elementer**:
+### 3.1 Web (Next.js) - Adminpanel
 
-    * `pages/` for sidestruktur
-    * `components/` for UI-komponenter (henter fra `ui`)
-    * `public/` for statiske filer
-* **Startkommando**: `npm run dev` → [http://localhost:3000](http://localhost:3000)
+**Mappe**: `apps/web`
+**Framework**: Next.js 15.3.4 med TypeScript
+**Formål**: Administrasjonsportal for ledelse
 
-### 3.2. Mobile (Expo)
+#### Struktur
+```
+apps/web/
+├── pages/           # Sidestruktur (routing)
+│   ├── index.tsx    # Dashboard
+│   ├── skift.tsx    # Skiftstyring
+│   ├── medarbeidere.tsx # Ansattstyring
+│   └── meldinger.tsx # Live chat
+├── components/      # UI-komponenter
+├── context/         # React Context (Auth, Chat)
+├── middleware.ts    # Next.js middleware
+└── _app.tsx         # Root component
+```
 
-* **Mappe**: `apps/mobile`
-* **Framework**: Expo (React Native) med TypeScript
-* **Formål**: Ansatte-brukerapp
-* **Viktige elementer**:
+#### Teknologier
+* **Next.js**: Server-side rendering og routing
+* **Material-UI**: Komponentbibliotek
+* **Socket.IO Client**: Real-time kommunikasjon
+* **Axios**: HTTP-klient med credentials
 
-    * `App.tsx` som rotkomponent
-    * `screens/` for ulike views
-    * Asset-mappe for bilder og ikoner
-* **Startkommando**: `npm run dev` → Expo CLI med QR-kode
+#### Port**: [http://localhost:3000](http://localhost:3000)
 
-### 3.3. API (NestJS)
+### 3.2 Mobile (Expo) - Ansatt-app
 
-* **Mappe**: `apps/api`
-* **Framework**: NestJS med TypeScript
-* **Formål**: Tilby API-endepunkter for web og mobile
-* **Viktige elementer**:
+**Mappe**: `apps/mobile`
+**Framework**: Expo (React Native) med TypeScript
+**Formål**: Ansatte-brukerapp
 
-    * `src/app.module.ts` for modul-oppsett
-    * `controllers/` og `services/` for logikk
-    * `prisma/` eller ORM for database (PostgreSQL)
-* **Startkommando**: `npm run dev` → [http://localhost:3001](http://localhost:3001)
+#### Struktur
+```
+apps/mobile/
+├── App.tsx          # Root component
+├── src/
+│   ├── screens/     # App-skjermer
+│   ├── components/  # UI-komponenter
+│   ├── navigation/  # React Navigation
+│   └── context/     # State management
+└── assets/          # Bilder og ikoner
+```
+
+#### Teknologier
+* **Expo**: React Native framework
+* **React Navigation**: Navigasjon mellom skjermer
+* **Socket.IO Client**: Real-time kommunikasjon
+* **AsyncStorage**: Lokal data-lagring
+
+#### Port**: Expo CLI med QR-kode
+
+### 3.3 API (NestJS) - Backend
+
+**Mappe**: `apps/api`
+**Framework**: NestJS med TypeScript
+**Formål**: REST API og WebSocket-server
+
+#### Struktur
+```
+apps/api/
+├── src/
+│   ├── app.module.ts    # Root module
+│   ├── auth/            # Autentisering
+│   ├── users/           # Brukerstyring
+│   ├── shifts/          # Skiftstyring
+│   ├── chat/            # Chat-system
+│   ├── worklog/         # Timeregistrering
+│   └── prisma.service.ts # Database service
+├── prisma/
+│   ├── schema.prisma    # Database schema
+│   └── migrations/      # Database migrasjoner
+└── generated/           # Prisma client
+```
+
+#### Teknologier
+* **NestJS**: Enterprise-grade Node.js framework
+* **Prisma**: Type-safe database ORM
+* **Socket.IO**: WebSocket-server for real-time
+* **JWT**: Token-basert autentisering
+* **PostgreSQL**: Relasjonsdatabase
+
+#### Port**: [http://localhost:3001](http://localhost:3001)
+
+---
 
 ## 4. Fellespakker
 
-### 4.1. UI-komponentbibliotek
+### 4.1 UI-komponentbibliotek
 
-* **Mappe**: `packages/ui/src`
-* **Innhold**: Gjenbrukbare komponenter
+**Mappe**: `packages/ui/src`
+**Formål**: Gjenbrukbare komponenter på tvers av web og mobile
 
-### 4.2. Type-definisjoner
+```typescript
+// Eksempel på delt komponent
+export const Button = ({ children, ...props }) => {
+  return <button {...props}>{children}</button>
+}
+```
 
-* **Mappe**: `packages/types/src`
-* **Innhold**: TypeScript-interfaces og typer (f.eks. `User`, `Task`)
-* **Bruk**: Importer med `import { User } from 'types'`
+### 4.2 Type-definisjoner
 
-## 5. Database og miljø
+**Mappe**: `packages/types/src`
+**Formål**: Delt TypeScript-interfaces og typer
 
-* **Database**: PostgreSQL kjøres vanligvis via Docker Compose i prosjektroten.
-* **Miljøvariabler**: Defineres i `.env`-filer for hver app (`apps/api/.env`, `apps/web/.env.local`).
+```typescript
+// Eksempel på delt type
+export interface User {
+  id: string
+  name: string
+  email: string
+  role: 'ADMIN' | 'EMPLOYEE'
+}
+```
 
-## 6. Oppsummering
+---
 
-* Monorepo gir én samlet kodebase.
-* Workspaces + Turborepo gir enkel installasjon, bygg og dev-oppsett.
-* Klare skiller mellom apper (`apps/`) og delte biblioteker (`packages/`).
-* Dokumentasjon i `docs/`
+## 5. Database-arkitektur
 
+### PostgreSQL Schema
+
+```sql
+-- Hovedtabeller
+users           -- Ansatte og admin
+shifts          -- Skift-informasjon
+work_logs       -- Timeregistrering
+time_off_requests    -- Fraværsforespørsler
+shift_swap_requests  -- Skiftbytte-forespørsler
+chat_rooms      -- Chat-rom
+messages        -- Chat-meldinger
+notifications   -- Push-varsler
+```
+
+### Prisma ORM
+* **Type-safe**: Automatisk TypeScript-generering
+* **Migrations**: Versjonert database-endringer
+* **Relations**: Automatisk håndtering av relasjoner
+
+---
+
+## 6. Kommunikasjon og Real-time
+
+### REST API
+* **HTTP/HTTPS**: Standard REST-endepunkter
+* **JWT Authentication**: Token-basert sikkerhet
+* **CORS**: Cross-origin resource sharing
+
+### WebSocket (Socket.IO)
+* **Real-time chat**: Sanntids meldinger
+* **Live updates**: Skift-endringer og forespørsler
+* **Typing indicators**: Viser når noen skriver
+
+### Event Flow
+```
+1. Bruker logger inn → JWT token genereres
+2. WebSocket-tilkobling etableres
+3. Real-time events sendes mellom klienter
+4. Database oppdateres via REST API
+```
+
+---
+
+## 7. Sikkerhet
+
+### Autentisering
+* **Session-based**: Cookie-basert med JWT
+* **Role-based**: ADMIN vs EMPLOYEE tilganger
+* **Middleware**: Beskyttede ruter
+
+### Validering
+* **DTOs**: Data Transfer Objects for input-validering
+* **Prisma**: Type-safe database-operasjoner
+* **CORS**: Begrenset cross-origin tilgang
+
+---
+
+## 8. Deployment og Miljøer
+
+### Development
+* **Lokal utvikling**: Alle tjenester kjører lokalt
+* **Hot reload**: Automatisk oppdatering ved endringer
+* **Database**: PostgreSQL via Docker
+
+### Production
+* **Web**: Vercel/Netlify
+* **API**: Railway/Heroku
+* **Database**: PostgreSQL (Railway/Supabase)
+* **Mobile**: Expo EAS Build
+
+---

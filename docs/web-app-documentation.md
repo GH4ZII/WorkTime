@@ -2,26 +2,40 @@
 
 ## Oversikt
 
-Web-applikasjonen er bygget med Next.js og fungerer som et administrasjonspanel for WorkTime-systemet. Applikasjonen bruker Material-UI for styling og har en enkel autentiseringsflyt basert på cookies.
+Web-applikasjonen er bygget med Next.js og fungerer som et administrasjonspanel for WorkTime-systemet. Den gir admin full kontroll over skift, ansatte, forespørsler og live chat-funksjonalitet.
 
 ## Teknisk Stack
 
 - **Framework**: Next.js 15.3.4
-- **Styling**: Material-UI (MUI) med Emotion
 - **Autentisering**: Cookie-basert med JWT tokens
 - **HTTP Client**: Axios
+- **Real-time**: Socket.IO Client for live chat
 - **Språk**: TypeScript
+- **UI**: Material-UI med Emotion CSS-in-JS
 
 ## Prosjektstruktur
 
 ```
 apps/web/
-├── _app.tsx                 # Hovedapp-komponent
+├── _app.tsx                 # Hovedapp-komponent med ChatProvider
 ├── middleware.ts            # Next.js middleware for autentisering
 ├── pages/
 │   ├── _document.tsx        # HTML-dokument template
 │   ├── index.tsx           # Hovedsiden (Admin Dashboard)
-│   └── login.tsx           # Innloggingsside
+│   ├── login.tsx           # Innloggingsside
+│   ├── skift.tsx           # Skift-administrasjon
+│   ├── medarbeidere.tsx    # Ansatte-administrasjon
+│   ├── bytteforesporsel.tsx # Skift-bytte forespørsler
+│   ├── fravaersforesporsel.tsx # Fraværsforespørsler
+│   ├── meldinger.tsx       # Live chat-system
+│   ├── historikk.tsx       # Historikk og rapporter
+│   └── statistikk.tsx      # Statistikk og analytics
+├── components/
+│   ├── Layout.tsx          # Hovedlayout-komponent
+│   ├── Sidebar.tsx         # Navigasjonssidebar
+│   └── Chat.tsx            # Chat-komponent
+├── context/
+│   └── ChatContext.tsx     # WebSocket context for live chat
 ├── utils/
 │   └── createEmotionCache.ts # Emotion cache konfigurasjon
 └── package.json
@@ -61,6 +75,61 @@ Alle sider unntatt `/login` krever autentisering:
 - Middleware sjekker `auth_token` cookie
 - Hvis token mangler → automatisk omdirigering til login
 - Hvis token finnes → tilgang tillatt
+
+## Hovedsider og Funksjonalitet
+
+### Dashboard (`/`)
+- **Funksjon**: Oversikt over systemet
+- **Innhold**: Velkomstmelding og navigasjon til andre seksjoner
+
+### Skift-administrasjon (`/skift`)
+- **Funksjon**: Administrere skift og arbeidstider
+- **Features**:
+  - Opprette nye skift med ansatt, dato, tid og lokasjon
+  - Kalender-visning med tabs (i dag, siste uke, siste måned)
+  - Redigere og slette eksisterende skift
+  - Visning av skift med ansatt navn og varighet
+- **API-endepunkter**: `/shifts` (GET, POST, PUT, DELETE)
+
+### Ansatte-administrasjon (`/medarbeidere`)
+- **Funksjon**: Administrere ansatte og brukerkontoer
+- **Features**:
+  - Oversikt over alle ansatte med detaljer
+  - Legge til nye ansatte med navn, e-post, rolle, telefon
+  - Redigere eksisterende ansatte
+  - Slette ansatte (med cascade delete av relatert data)
+  - Automatisk ansettelsesdato (kan settes manuelt)
+- **API-endepunkter**: `/users` (GET, POST, PUT, DELETE)
+
+### Skift-bytte forespørsler (`/bytteforesporsel`)
+- **Funksjon**: Håndtere forespørsler om å bytte skift
+- **Features**:
+  - Visning av alle forespørsler med ansatt navn og skift-detaljer
+  - Godkjenne eller avvise forespørsler
+  - Visning av skift som skal byttes med dato/tid
+  - Status-indikatorer (venter, godkjent, avvist)
+- **API-endepunkter**: `/shift-swap-requests` (GET, POST, PUT, DELETE)
+
+### Fraværsforespørsler (`/fravaersforesporsel`)
+- **Funksjon**: Håndtere forespørsler om fravær
+- **Features**:
+  - Visning av fraværsforespørsler med ansatt navn og periode
+  - Godkjenne eller avvise forespørsler
+  - Formatert visning av datoer på norsk
+  - Status-håndtering
+- **API-endepunkter**: `/time-off-requests` (GET, POST, PUT, DELETE)
+
+### Live Chat (`/meldinger`)
+- **Funksjon**: Sanntids kommunikasjon mellom admin og ansatte
+- **Features**:
+  - WebSocket-basert live chat
+  - Chat-rom administrasjon
+  - Sanntids meldingsutveksling
+  - Typing indicators
+  - Persistent message storage
+  - Cross-platform støtte (web + mobil)
+- **API-endepunkter**: `/chatrooms` (GET, POST, PUT, DELETE)
+- **WebSocket**: Socket.IO for real-time kommunikasjon
 
 ## Komponenter og Filer
 
@@ -125,6 +194,7 @@ MyDocument.getInitialProps = async (ctx) => {
 
 **Hovedfunksjoner**:
 - Material-UI Theme Provider
+- ChatProvider for WebSocket-tilkobling
 - CSS Baseline for konsistent styling
 - Emotion cache håndtering
 - Sentral tema-konfigurasjon
@@ -139,36 +209,45 @@ const theme = createTheme({
 });
 ```
 
-### `login.tsx`
+### `ChatContext.tsx`
 
-**Funksjon**: Innloggingsside med form og autentisering
+**Funksjon**: Global state management for WebSocket-tilkobling
 
-**Funksjonalitet**:
-- E-post og passord input-felter
-- Form validation
-- API-kall til backend for autentisering
-- Cookie-setting ved vellykket innlogging
-- Feilhåndtering og brukervennlige meldinger
+**Hovedfunksjoner**:
+- WebSocket-tilkobling til chat-server
+- Room management (join/leave)
+- Message sending
+- Connection status tracking
 
-**API-integrasjon**:
 ```typescript
-const response = await axios.post('http://10.129.48.163:3001/auth/login', {
-    email,
-    password,
-});
-
-// Lagrer JWT token som cookie
-document.cookie = `auth_token=${response.data.access_token}; path=/;`;
+interface ChatContextType {
+  socket: Socket | null;
+  isConnected: boolean;
+  joinRoom: (roomId: string) => void;
+  leaveRoom: (roomId: string) => void;
+  sendMessage: (roomId: string, message: string, senderId: string) => void;
+}
 ```
 
-### `index.tsx`
+### `Layout.tsx`
 
-**Funksjon**: Admin Dashboard hovedside
+**Funksjon**: Hovedlayout-komponent med sidebar og navigasjon
 
-**Innhold**:
-- Velkomstmelding
-- Enkel layout med sentrert innhold
-- Responsivt design
+**Features**:
+- Responsiv sidebar med navigasjonslenker
+- Konsistent layout på tvers av sider
+- Material-UI styling
+
+### `Chat.tsx`
+
+**Funksjon**: Chat-komponent for live messaging
+
+**Features**:
+- Real-time message display
+- Message input med Enter-støtte
+- Typing indicators
+- Auto-scroll til nyeste melding
+- Message bubbles med sender info og timestamp
 
 ## Styling og UI
 
@@ -177,6 +256,7 @@ document.cookie = `auth_token=${response.data.access_token}; path=/;`;
 - **Theme Provider**: Sentral tema-konfigurasjon i `_app.tsx`
 - **CssBaseline**: Normaliserer stiler på tvers av nettlesere
 - **Responsive Design**: Bruker MUI's Grid og Container komponenter
+- **Custom Components**: Inline styles for spesialiserte komponenter
 
 ### Emotion CSS-in-JS
 
@@ -184,30 +264,69 @@ document.cookie = `auth_token=${response.data.access_token}; path=/;`;
 - **Cache Management**: `createEmotionCache.ts` håndterer CSS-caching
 - **Performance**: Kritiske stiler ekstraheres for raskere lasting
 
+### Responsive Design
+
+- **Mobile-first**: Alle komponenter er mobile-responsive
+- **Grid Layout**: Bruker CSS Grid for fleksibel layout
+- **Breakpoints**: Material-UI breakpoints for konsistent responsivitet
+
+## Real-time Funksjonalitet
+
+### WebSocket Integration
+
+**Chat System**:
+- Socket.IO client for real-time kommunikasjon
+- Automatic reconnection ved tap av tilkobling
+- Room-based messaging
+- Typing indicators
+- Message persistence
+
+**Event Handling**:
+```typescript
+// Join chat room
+socket.emit('joinRoom', roomId);
+
+// Send message
+socket.emit('sendMessage', { roomId, message: { content, senderId } });
+
+// Receive message
+socket.on('newMessage', (message) => {
+  // Update UI with new message
+});
+```
+
+## API-integrasjon
+
+### Backend-kommunikasjon
+
+**Base URL**: `http://10.129.48.163:3001`
+
+**Endepunkter**:
+- **Autentisering**: `/auth/login`
+- **Skift**: `/shifts`
+- **Ansatte**: `/users`
+- **Skift-bytte**: `/shift-swap-requests`
+- **Fravær**: `/time-off-requests`
+- **Chat**: `/chatrooms`
+- **WebSocket**: `ws://10.129.48.163:3001`
+
+**HTTP Client**: Axios med `withCredentials: true`
+
+
 ## Sikkerhet
 
 ### Autentisering
 - **JWT Tokens**: Brukes for session management
 - **Cookie-basert**: Tokens lagres som HTTP cookies
 - **Middleware Protection**: Alle sider unntatt login krever autentisering
+- **Session validation**: Automatisk validering av tokens
 
 ### Sikkerhetsforbedringer for Produksjon
 - [ ] HTTP-only cookies for bedre sikkerhet
 - [ ] CSRF beskyttelse
 - [ ] Rate limiting på login-endepunkter
 - [ ] HTTPS enforcement
-
-## API-integrasjon
-
-### Backend-kommunikasjon
-- **Base URL**: `http://10.129.48.163:3001`
-- **Autentisering**: `/auth/login` endepunkt
-- **HTTP Client**: Axios for API-kall
-
-### Feilhåndtering
-- Try-catch blokker for API-kall
-- Brukervennlige feilmeldinger
-- Console logging for debugging
+- [ ] Content Security Policy (CSP)
 
 ## Utvikling og Deployment
 
@@ -225,15 +344,16 @@ document.cookie = `auth_token=${response.data.access_token}; path=/;`;
 - **Core**: Next.js, React, TypeScript
 - **UI**: Material-UI, Emotion
 - **HTTP**: Axios
+- **Real-time**: Socket.IO Client
 - **Types**: Lokale type-definisjoner
 
-## Fremtidige Forbedringer
+### Development Workflow
+1. **Hot reloading**: Automatisk oppdatering ved kodeendringer
+2. **Type checking**: TypeScript type checking
+3. **Linting**: ESLint for kodekvalitet
+4. **Error boundaries**: Graceful error handling
 
-### Funksjonalitet
-- [ ] Admin dashboard med faktisk funksjonalitet
-- [ ] Brukeradministrasjon
-- [ ] Shift management
-- [ ] Rapporter og statistikk
+## Fremtidige Forbedringer
 
 ### Teknisk
 - [ ] State management (Redux/Zustand)
@@ -241,31 +361,28 @@ document.cookie = `auth_token=${response.data.access_token}; path=/;`;
 - [ ] Error boundaries
 - [ ] Loading states og skeleton screens
 - [ ] PWA-funksjonalitet
+- [ ] Offline support
+- [ ] Push notifications
+
+### Funksjonalitet
+- [ ] Advanced filtering og søk
+- [ ] Export til PDF/Excel
+- [ ] Dashboard widgets
+- [ ] Customizable layouts
+- [ ] Multi-language support
+- [ ] Dark mode
 
 ### Sikkerhet
 - [ ] Refresh token implementasjon
 - [ ] Session timeout
 - [ ] Two-factor authentication
 - [ ] Audit logging
+- [ ] Role-based access control
 
-## Troubleshooting
+### Ytelse
+- [ ] Virtual scrolling for store lister
+- [ ] Image optimization
+- [ ] Service worker caching
+- [ ] Progressive loading
+- [ ] Performance monitoring
 
-### Vanlige Problemer
-
-1. **Middleware kjører ikke**:
-   - Sjekk matcher-konfigurasjon i `middleware.ts`
-   - Verifiser at filen er i riktig plassering
-
-2. **Stiler lastes ikke**:
-   - Sjekk Emotion cache konfigurasjon
-   - Verifiser at `_document.tsx` er korrekt satt opp
-
-3. **Autentisering fungerer ikke**:
-   - Sjekk API-endepunkt URL
-   - Verifiser cookie-setting
-   - Kontroller backend-tilgjengelighet
-
-### Debugging
-- Bruk browser developer tools for cookie-inspisering
-- Console logging i middleware og login-komponenter
-- Network tab for API-kall debugging 
