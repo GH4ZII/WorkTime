@@ -18,6 +18,7 @@ export class UsersService {
                 phone: data.phone,
                 passwordHash: hash, // Hash passordet før lagring
                 role: data.role as Role, // Brukerens rolle
+                hireDate: data.hireDate ? new Date(data.hireDate) : new Date(),
             },
         });
     }
@@ -31,6 +32,7 @@ export class UsersService {
                 email: true,
                 phone: true,
                 role: true,
+                hireDate: true,
             },
             orderBy: {
                 createdAt: 'desc',

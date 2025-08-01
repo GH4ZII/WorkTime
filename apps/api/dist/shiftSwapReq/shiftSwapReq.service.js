@@ -13,6 +13,7 @@ exports.ShiftSwapReqService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
 const client_1 = require("@prisma/client");
+const prisma_1 = require("../../generated/prisma/index.js");
 let ShiftSwapReqService = class ShiftSwapReqService {
     prisma;
     constructor(prisma) {
@@ -68,6 +69,32 @@ let ShiftSwapReqService = class ShiftSwapReqService {
         await this.findOne(id);
         return this.prisma.shiftSwapRequest.delete({
             where: { id },
+        });
+    }
+    async approve(id) {
+        const request = await this.findOne(id);
+        if (!request) {
+            throw new common_1.NotFoundException('Forespørsel ikke funnet');
+        }
+        if (request.status !== prisma_1.RequestStatus.PENDING) {
+            throw new common_1.BadRequestException('Forespørsel er allerede behandlet');
+        }
+        return this.prisma.shiftSwapRequest.update({
+            where: { id },
+            data: { status: prisma_1.RequestStatus.APPROVED }
+        });
+    }
+    async reject(id) {
+        const request = await this.findOne(id);
+        if (!request) {
+            throw new common_1.NotFoundException('Forespørsel ikke funnet');
+        }
+        if (request.status !== prisma_1.RequestStatus.PENDING) {
+            throw new common_1.BadRequestException('Forespørsel er allerede behandlet');
+        }
+        return this.prisma.shiftSwapRequest.update({
+            where: { id },
+            data: { status: prisma_1.RequestStatus.REJECTED }
         });
     }
 };

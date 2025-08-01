@@ -9,7 +9,6 @@ interface Employee {
     email: string;
     role?: string;
     phone?: string;
-    department?: string;
     hireDate?: string;
 }
 
@@ -19,7 +18,7 @@ interface CreateEmployeeDto {
     password: string;
     role?: string;
     phone?: string;
-    department?: string;
+    hireDate?: string;
 }
 
 const CoWorkerPage: NextPage = () => {
@@ -38,7 +37,7 @@ const CoWorkerPage: NextPage = () => {
         password: '',
         role: '',
         phone: '',
-        department: ''
+        hireDate: new Date().toISOString().split('T')[0]
     });
 
     // Form state for redigering
@@ -48,7 +47,7 @@ const CoWorkerPage: NextPage = () => {
         password: '',
         role: '',
         phone: '',
-        department: ''
+        hireDate: '',
     });
 
     useEffect(() => {
@@ -86,7 +85,7 @@ const CoWorkerPage: NextPage = () => {
             });
             
             setSuccess('Ansatt opprettet!');
-            setForm({ name: '', email: '', password: '', role: '', phone: '', department: '' });
+            setForm({ name: '', email: '', password: '', role: '', phone: '', hireDate: new Date().toISOString().split('T')[0] });
             setShowForm(false);
             fetchEmployees();
             
@@ -115,7 +114,7 @@ const CoWorkerPage: NextPage = () => {
             setSuccess('Ansatt oppdatert!');
             setShowEditForm(false);
             setEditingEmployee(null);
-            setEditForm({ name: '', email: '', password: '', role: '', phone: '', department: '' });
+            setEditForm({ name: '', email: '', password: '', role: '', phone: '', hireDate: '' });
             fetchEmployees();
             
             setTimeout(() => setSuccess(null), 3000);
@@ -151,7 +150,7 @@ const CoWorkerPage: NextPage = () => {
             password: '', // Tomt for sikkerhet
             role: employee.role || '',
             phone: employee.phone || '',
-            department: employee.department || ''
+            hireDate: employee.hireDate || '',
         });
         setShowEditForm(true);
     };
@@ -256,12 +255,13 @@ const CoWorkerPage: NextPage = () => {
                                 />
                             </label>
                             <label style={styles.label}>
-                                Avdeling
+                                Ansettelsesdato *
                                 <input
-                                    type="text"
-                                    name="department"
-                                    value={form.department}
+                                    type="date"
+                                    name="hireDate"
+                                    value={form.hireDate}
                                     onChange={handleChange}
+                                    required
                                     style={styles.input}
                                 />
                             </label>
@@ -352,12 +352,13 @@ const CoWorkerPage: NextPage = () => {
                                 />
                             </label>
                             <label style={styles.label}>
-                                Avdeling
+                                Ansettelsesdato *
                                 <input
-                                    type="text"
-                                    name="department"
-                                    value={editForm.department}
+                                    type="date"
+                                    name="hireDate"
+                                    value={editForm.hireDate}
                                     onChange={handleEditChange}
+                                    required
                                     style={styles.input}
                                 />
                             </label>
@@ -413,7 +414,6 @@ const CoWorkerPage: NextPage = () => {
                                     <p><strong>E-post:</strong> {employee.email}</p>
                                     <p><strong>Rolle:</strong> {getRoleDisplayName(employee.role)}</p>
                                     <p><strong>Telefon:</strong> {employee.phone || 'Ikke satt'}</p>
-                                    <p><strong>Avdeling:</strong> {employee.department || 'Ikke satt'}</p>
                                     <p><strong>Ansettelsesdato:</strong> {formatDate(employee.hireDate)}</p>
                                 </div>
                             </div>

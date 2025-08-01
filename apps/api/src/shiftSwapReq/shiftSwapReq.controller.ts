@@ -31,4 +31,14 @@ export class ShiftSwapReqController {
     remove(@Param('id') id: string) {
         return this.service.remove(id);
     }
+
+    @Post(':id/approve')
+    approve(@Param('id') id: string) {
+        return this.service.approve(id);
+    }
+
+    @Post(':id/reject')
+    reject(@Param('id') id: string) {
+        return this.service.reject(id);
+    }
 }

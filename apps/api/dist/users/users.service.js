@@ -27,6 +27,7 @@ let UsersService = class UsersService {
                 phone: data.phone,
                 passwordHash: hash,
                 role: data.role,
+                hireDate: data.hireDate ? new Date(data.hireDate) : new Date(),
             },
         });
     }
@@ -38,6 +39,7 @@ let UsersService = class UsersService {
                 email: true,
                 phone: true,
                 role: true,
+                hireDate: true,
             },
             orderBy: {
                 createdAt: 'desc',

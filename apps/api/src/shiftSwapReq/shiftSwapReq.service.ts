@@ -1,8 +1,9 @@
-﻿import { Injectable, BadRequestException } from '@nestjs/common';
+﻿import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateShiftSwapRequestDto } from './dto/create-shiftswap-request.dto';
 import { SwapRequestType } from '@prisma/client';
 import {UpdateShiftSwapRequestDto} from "./dto/update-shiftswap-request.dto";
+import { RequestStatus } from 'generated/prisma';
 
 @Injectable()
 export class ShiftSwapReqService {
@@ -73,6 +74,40 @@ export class ShiftSwapReqService {
 
         return this.prisma.shiftSwapRequest.delete({
             where: { id },
+        });
+    }
+
+    async approve(id: string) {
+        const request = await this.findOne(id);
+        
+        if (!request) {
+            throw new NotFoundException('Forespørsel ikke funnet');
+        }
+
+        if (request.status !== RequestStatus.PENDING) {
+            throw new BadRequestException('Forespørsel er allerede behandlet');
+        }
+
+        return this.prisma.shiftSwapRequest.update({
+            where: { id },
+            data: { status: RequestStatus.APPROVED }
+        });
+    }
+
+    async reject(id: string) {
+        const request = await this.findOne(id);
+        
+        if (!request) {
+            throw new NotFoundException('Forespørsel ikke funnet');
+        }
+
+        if (request.status !== RequestStatus.PENDING) {
+            throw new BadRequestException('Forespørsel er allerede behandlet');
+        }
+
+        return this.prisma.shiftSwapRequest.update({
+            where: { id },
+            data: { status: RequestStatus.REJECTED }
         });
     }
 }

@@ -4,4 +4,5 @@
     phone?: string;
     password: string;
     role: 'USER' | 'ADMIN'; // Brukerens rolle, enten 'USER' eller 'ADMIN'
+    hireDate?: string;
 }

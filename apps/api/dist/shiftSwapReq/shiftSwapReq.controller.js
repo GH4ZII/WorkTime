@@ -37,6 +37,12 @@ let ShiftSwapReqController = class ShiftSwapReqController {
     remove(id) {
         return this.service.remove(id);
     }
+    approve(id) {
+        return this.service.approve(id);
+    }
+    reject(id) {
+        return this.service.reject(id);
+    }
 };
 exports.ShiftSwapReqController = ShiftSwapReqController;
 __decorate([
@@ -74,6 +80,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ShiftSwapReqController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Post)(':id/approve'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ShiftSwapReqController.prototype, "approve", null);
+__decorate([
+    (0, common_1.Post)(':id/reject'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ShiftSwapReqController.prototype, "reject", null);
 exports.ShiftSwapReqController = ShiftSwapReqController = __decorate([
     (0, common_1.Controller)('shift-swap-requests'),
     __metadata("design:paramtypes", [shiftSwapReq_service_1.ShiftSwapReqService])
