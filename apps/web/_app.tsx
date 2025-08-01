@@ -6,8 +6,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { EmotionCache } from '@emotion/cache';
 import createEmotionCache from "./utils/createEmotionCache";
-import { Layout } from './components/Layout';
-
+import { ChatProvider } from './context/ChatContext';
 
 const theme = createTheme({
     palette: {
@@ -32,11 +31,10 @@ export default function MyApp(props: MyAppProps) {
 
     return (
         <ThemeProvider theme={theme}>
-            <Layout>
-            <CssBaseline />
-            <Component {...pageProps} />
-        </Layout>
-</ThemeProvider>
-)
-
+            <ChatProvider>
+                <CssBaseline />
+                <Component {...pageProps} />
+            </ChatProvider>
+        </ThemeProvider>
+    );
 }

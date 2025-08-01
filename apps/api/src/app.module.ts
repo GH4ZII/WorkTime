@@ -8,10 +8,11 @@ import { ShiftSwapReqModule } from "./shiftSwapReq/shiftSwapReq.module";
 import { WorklogModule} from "./worklog/worklog.module";
 import { NotificationModule} from "./notifications/notification.module";
 import { AuthModule } from "./auth/auth.module";
+import { ChatModule } from "./chat/chat.module";
 
 @Module({
   imports: [ShiftsModule, UsersModule, TimeOffReqModule, ShiftSwapReqModule, WorklogModule,
-  NotificationModule, AuthModule],
+  NotificationModule, AuthModule, ChatModule],
   controllers: [AppController],
   providers: [AppService],
 })
