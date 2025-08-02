@@ -14,26 +14,10 @@ export class AuthController {
         return this.authService.login(req.user);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get('me')
     async getProfile(@Request() req) {
-        // Sjekk om bruker er i session (fra cookie)
-        if (req.user) {
-            return req.user;
-        }
-        
-        // Sjekk om vi har en auth_token cookie
-        const authToken = req.cookies?.auth_token;
-        if (authToken) {
-            try {
-                // Dekode JWT-token for å få brukerdata
-                const decoded = this.authService.verifyToken(authToken);
-                return decoded;
-            } catch (error) {
-                console.error('Invalid token:', error);
-                return null;
-            }
-        }
-        
-        return null;
+        console.log('AuthController: getProfile called, user:', req.user);
+        return req.user;
     }
 }

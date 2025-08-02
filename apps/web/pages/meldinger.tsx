@@ -62,11 +62,11 @@ const MessagesPage: NextPage = () => {
       });
       console.log('Current user response:', response.data);
       
-      if (response.data) {
+      if (response.data && response.data.id) {
         setCurrentUser(response.data);
+        console.log('Current user set:', response.data);
       } else {
-        console.log('No user data returned - user not logged in');
-        // Redirect to login or show login prompt
+        console.log('No user data returned or missing ID - user not logged in');
         alert('Du må være innlogget for å bruke chat-funksjonaliteten');
       }
     } catch (error) {
@@ -79,6 +79,8 @@ const MessagesPage: NextPage = () => {
       
       if (error.response?.status === 401) {
         alert('Du må være innlogget for å bruke chat-funksjonaliteten');
+      } else {
+        alert('Kunne ikke hente brukerdata. Vennligst prøv å logge inn på nytt.');
       }
     }
   };

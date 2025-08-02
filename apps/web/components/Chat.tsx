@@ -6,7 +6,10 @@ interface Message {
   id: string;
   content: string;
   senderId: string;
-  senderName: string;
+  sender: {
+    id: string;
+    name: string;
+  };
   sentAt: string;
 }
 
@@ -91,11 +94,35 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
   };
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && isConnected) {
+    console.log('handleSendMessage called:', { newMessage, isConnected, roomId, currentUserId });
+    
+    if (!newMessage.trim()) {
+      console.log('Message is empty, not sending');
+      return;
+    }
+    
+    if (!isConnected) {
+      console.log('Not connected to chat server');
+      setError('Ikke tilkoblet chat-server');
+      return;
+    }
+    
+    if (!roomId || !currentUserId) {
+      console.log('Missing roomId or currentUserId:', { roomId, currentUserId });
+      setError('Mangler rom-ID eller bruker-ID');
+      return;
+    }
+    
+    try {
+      console.log('Sending message:', { roomId, message: newMessage, senderId: currentUserId });
       sendMessage(roomId, newMessage, currentUserId);
       setNewMessage('');
       setIsTyping(false);
       socket?.emit('typing', { roomId, userId: currentUserId, isTyping: false });
+      setError(null); // Clear any previous errors
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Kunne ikke sende melding');
     }
   };
 
@@ -104,6 +131,12 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
     if (!isTyping) {
       setIsTyping(true);
       socket?.emit('typing', { roomId, userId: currentUserId, isTyping: true });
+      
+      // Clear typing indicator after 3 seconds
+      setTimeout(() => {
+        setIsTyping(false);
+        socket?.emit('typing', { roomId, userId: currentUserId, isTyping: false });
+      }, 3000);
     }
   };
 
@@ -143,7 +176,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
             }}
           >
             <div style={styles.messageHeader}>
-              <span style={styles.senderName}>{message.senderName}</span>
+              <span style={styles.senderName}>{message.sender.name}</span>
               <span style={styles.messageTime}>
                 {new Date(message.sentAt).toLocaleTimeString('nb-NO', {
                   hour: '2-digit',
@@ -175,7 +208,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
         />
         <button 
           onClick={handleSendMessage} 
-          style={styles.sendButton}
+          style={!isConnected || !newMessage.trim() ? styles.sendButtonDisabled : styles.sendButton}
           disabled={!isConnected || !newMessage.trim()}
         >
           Send
@@ -255,6 +288,15 @@ const styles: Record<string, React.CSSProperties> = {
     border: 'none',
     borderRadius: '20px',
     cursor: 'pointer',
+  },
+  sendButtonDisabled: {
+    padding: '8px 16px',
+    backgroundColor: '#6c757d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '20px',
+    cursor: 'not-allowed',
+    opacity: 0.6,
   },
   loadingMessage: {
     textAlign: 'center',

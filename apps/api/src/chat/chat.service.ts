@@ -132,6 +132,9 @@ export class ChatService {
                 roomId: roomId,
                 senderId: dto.senderId,
             },
+            include: {
+                sender: { select: { id: true, name: true } }, // Inkluder info om avsender
+            },
         });
     }
 }

@@ -36,6 +36,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Disconnected from chat server');
     });
 
+    newSocket.on('connect_error', (error) => {
+      console.error('Chat connection error:', error);
+      setIsConnected(false);
+    });
+
+    newSocket.on('error', (error) => {
+      console.error('Chat socket error:', error);
+      setIsConnected(false);
+    });
+
     setSocket(newSocket);
 
     return () => {
@@ -57,6 +67,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendMessage = (roomId: string, message: string, senderId: string) => {
     if (socket) {
+      console.log('ChatContext: Sending message via socket:', { roomId, message, senderId });
       socket.emit('sendMessage', {
         roomId,
         message: {
@@ -64,6 +75,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           senderId,
         },
       });
+    } else {
+      console.error('ChatContext: Socket is null, cannot send message');
+      throw new Error('Socket is not connected');
     }
   };
 
