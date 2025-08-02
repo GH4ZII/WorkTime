@@ -20,17 +20,30 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { socket, isConnected, joinRoom, leaveRoom, sendMessage } = useChat();
 
+  console.log('Chat: roomId =', roomId);
+  console.log('Chat: currentUserId =', currentUserId);
+  console.log('Chat: isConnected =', isConnected);
+
   useEffect(() => {
+    console.log('Chat: useEffect triggered, isConnected =', isConnected, 'roomId =', roomId);
+    
     if (isConnected && roomId) {
+      console.log('Chat: Joining room and loading messages');
       joinRoom(roomId);
       loadMessages();
+    } else {
+      console.log('Chat: Not connected or no roomId');
+      setIsLoading(false);
     }
 
     return () => {
       if (roomId) {
+        console.log('Chat: Leaving room');
         leaveRoom(roomId);
       }
     };
@@ -59,12 +72,21 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
 
   const loadMessages = async () => {
     try {
+      console.log('Chat: Loading messages for room', roomId);
+      setIsLoading(true);
+      setError(null);
+      
       const response = await axios.get(`http://10.129.48.163:3001/chatrooms/${roomId}/messages`, {
         withCredentials: true,
       });
+      
+      console.log('Chat: Messages loaded:', response.data);
       setMessages(response.data);
     } catch (error) {
-      console.error('Failed to load messages:', error);
+      console.error('Chat: Failed to load messages:', error);
+      setError('Kunne ikke laste meldinger');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -94,6 +116,24 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
   return (
     <div style={styles.chatContainer}>
       <div style={styles.messagesContainer}>
+        {isLoading && (
+          <div style={styles.loadingMessage}>
+            Laster meldinger...
+          </div>
+        )}
+        
+        {error && (
+          <div style={styles.errorMessage}>
+            {error}
+          </div>
+        )}
+        
+        {!isLoading && !error && messages.length === 0 && (
+          <div style={styles.emptyMessage}>
+            Ingen meldinger ennå. Start samtalen!
+          </div>
+        )}
+        
         {messages.map((message) => (
           <div
             key={message.id}
@@ -114,6 +154,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
             <div style={styles.messageContent}>{message.content}</div>
           </div>
         ))}
+        
         {typingUsers.length > 0 && (
           <div style={styles.typingIndicator}>
             {typingUsers.join(', ')} skriver...
@@ -130,8 +171,13 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
           onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
           placeholder="Skriv en melding..."
           style={styles.messageInput}
+          disabled={!isConnected}
         />
-        <button onClick={handleSendMessage} style={styles.sendButton}>
+        <button 
+          onClick={handleSendMessage} 
+          style={styles.sendButton}
+          disabled={!isConnected || !newMessage.trim()}
+        >
           Send
         </button>
       </div>
@@ -209,6 +255,27 @@ const styles: Record<string, React.CSSProperties> = {
     border: 'none',
     borderRadius: '20px',
     cursor: 'pointer',
+  },
+  loadingMessage: {
+    textAlign: 'center',
+    padding: '20px',
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  errorMessage: {
+    textAlign: 'center',
+    padding: '20px',
+    color: '#dc3545',
+    backgroundColor: '#f8d7da',
+    border: '1px solid #f5c6cb',
+    borderRadius: '4px',
+    margin: '10px',
+  },
+  emptyMessage: {
+    textAlign: 'center',
+    padding: '20px',
+    color: '#666',
+    fontStyle: 'italic',
   },
 };
 
