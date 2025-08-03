@@ -11,6 +11,7 @@ Chat-systemet i WorkTime-applikasjonen er bygget med **WebSocket** (Socket.IO) f
 - **ChatService**: Business logic for chat-rom og meldinger
 - **ChatController**: REST API for chat-rom administrasjon
 - **Prisma**: Database lagring av chat-rom og meldinger
+- **JWT Authentication**: Sikker autentisering via JWT tokens
 
 ### Frontend (React + Socket.IO Client)
 - **ChatContext**: Global state management for WebSocket-tilkobling
@@ -54,6 +55,53 @@ model Message {
   sentAt    DateTime @default(now())
 }
 ```
+
+## Autentisering og Sikkerhet
+
+### JWT Authentication
+Chat-systemet bruker JWT (JSON Web Tokens) for sikker autentisering:
+
+#### JWT Strategy
+```typescript
+// apps/api/src/auth/strategies/jwt.strategy.ts
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor() {
+    super({
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (request) => {
+          return request?.cookies?.auth_token;
+        },
+      ]),
+      ignoreExpiration: false,
+      secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
+    });
+  }
+
+  async validate(payload: any) {
+    return { 
+      id: payload.sub, 
+      email: payload.username, 
+      name: payload.name,
+      role: payload.role 
+    };
+  }
+}
+```
+
+#### JWT Payload Structure
+```typescript
+{
+  username: string,    // User email
+  sub: string,         // User ID
+  name: string,        // User name
+  role: string         // User role (ADMIN/EMPLOYEE)
+}
+```
+
+### Auth Endpoints
+- `POST /auth/login` - Logg inn (LocalAuthGuard)
+- `GET /auth/me` - Hent brukerdata (JwtAuthGuard)
 
 ## WebSocket Events
 
@@ -128,11 +176,125 @@ interface ChatProps {
 }
 ```
 
+### Message Interface
+```typescript
+interface Message {
+  id: string;
+  content: string;
+  senderId: string;
+  sender: {
+    id: string;
+    name: string;
+  };
+  sentAt: string;
+}
+```
+
+## Feilhåndtering
+
+### Backend Feilhåndtering
+
+#### ChatGateway
+```typescript
+@SubscribeMessage('sendMessage')
+async handleMessage(client: Socket, payload: { roomId: string; message: CreateMessageDto }) {
+  try {
+    // Validate payload
+    if (!payload.roomId || !payload.message || !payload.message.content || !payload.message.senderId) {
+      return { success: false, error: 'Invalid message payload' };
+    }
+    
+    // Save message to database
+    const savedMessage = await this.chatService.addMessage(payload.roomId, payload.message);
+    
+    // Broadcast to all users in the room
+    this.server.to(payload.roomId).emit('newMessage', savedMessage);
+    
+    return { success: true, message: savedMessage };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+```
+
+#### ChatService
+```typescript
+async addMessage(roomId: string, dto: CreateMessageDto) {
+  return this.prisma.message.create({
+    data: {
+      content: dto.content,
+      roomId: roomId,
+      senderId: dto.senderId,
+    },
+    include: {
+      sender: { select: { id: true, name: true } }, // Inkluder info om avsender
+    },
+  });
+}
+```
+
+### Frontend Feilhåndtering
+
+#### Chat Component
+```typescript
+const handleSendMessage = () => {
+  if (!newMessage.trim()) {
+    return;
+  }
+  
+  if (!isConnected) {
+    setError('Ikke tilkoblet chat-server');
+    return;
+  }
+  
+  if (!roomId || !currentUserId) {
+    setError('Mangler rom-ID eller bruker-ID');
+    return;
+  }
+  
+  try {
+    sendMessage(roomId, newMessage, currentUserId);
+    setNewMessage('');
+    setError(null);
+  } catch (error) {
+    setError('Kunne ikke sende melding');
+  }
+};
+```
+
+#### ChatContext
+```typescript
+const sendMessage = (roomId: string, message: string, senderId: string) => {
+  if (socket) {
+    socket.emit('sendMessage', {
+      roomId,
+      message: {
+        content: message,
+        senderId,
+      },
+    });
+  } else {
+    throw new Error('Socket is not connected');
+  }
+};
+```
+
+### WebSocket Tilkobling
+- Automatisk reconnect ved tap av tilkobling
+- Feilhåndtering for connection errors
+- Visuell indikator for tilkoblingsstatus
+
+### API Feil
+- Graceful error handling for API-kall
+- Brukervennlige feilmeldinger
+- Retry-logikk for mislykkede forespørsler
+
 ## Sikkerhet
 
 ### Autentisering
-- WebSocket-tilkoblinger krever gyldig session
+- WebSocket-tilkoblinger krever gyldig JWT token
 - Alle API-kall bruker `withCredentials: true`
+- JWT tokens sendes via cookies for sikkerhet
 - Bruker-ID valideres på server-side
 
 ### Tilgangskontroll
@@ -144,10 +306,11 @@ interface ChatProps {
 
 ### Features
 - **Live messaging**: Sanntids oppdatering av meldinger
-- **Typing indicators**: Viser når andre skriver
+- **Typing indicators**: Viser når andre skriver (med 3-sekunders timeout)
 - **Persistent storage**: Meldinger lagres i database
 - **Cross-platform**: Fungerer på både web og mobil
 - **Real-time notifications**: Umiddelbar varsling om nye meldinger
+- **Error feedback**: Tydelige feilmeldinger for brukere
 
 ### UI/UX
 - **Responsive design**: Tilpasser seg skjermstørrelse
@@ -155,18 +318,7 @@ interface ChatProps {
 - **Timestamp**: Viser når meldinger ble sendt
 - **Auto-scroll**: Automatisk scrolling til nyeste melding
 - **Loading states**: Viser når data lastes
-
-## Feilhåndtering
-
-### WebSocket Tilkobling
-- Automatisk reconnect ved tap av tilkobling
-- Fallback til polling hvis WebSocket ikke fungerer
-- Visuell indikator for tilkoblingsstatus
-
-### API Feil
-- Graceful error handling for API-kall
-- Brukervennlige feilmeldinger
-- Retry-logikk for mislykkede forespørsler
+- **Disabled states**: Visuell feedback for deaktiverte knapper
 
 ## Ytelse
 
@@ -197,4 +349,4 @@ interface ChatProps {
 - **Offline support**: Caching av meldinger
 - **Message editing**: Rediger sendte meldinger
 - **Message deletion**: Slett egne meldinger
-```
+- **Message threading**: Svar på spesifikke meldinger

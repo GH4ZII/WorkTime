@@ -33,10 +33,6 @@ const MessagesPage: NextPage = () => {
   const [newChatName, setNewChatName] = useState('');
   const { isConnected } = useChat();
 
-  console.log('MessagesPage: selectedRoom =', selectedRoom);
-  console.log('MessagesPage: currentUser =', currentUser);
-  console.log('MessagesPage: chatRooms =', chatRooms);
-
   useEffect(() => {
     fetchChatRooms();
     fetchCurrentUser();
@@ -56,17 +52,13 @@ const MessagesPage: NextPage = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      console.log('Fetching current user...');
       const response = await axios.get('http://10.129.48.163:3001/auth/me', {
         withCredentials: true,
       });
-      console.log('Current user response:', response.data);
       
       if (response.data && response.data.id) {
         setCurrentUser(response.data);
-        console.log('Current user set:', response.data);
       } else {
-        console.log('No user data returned or missing ID - user not logged in');
         alert('Du må være innlogget for å bruke chat-funksjonaliteten');
       }
     } catch (error) {

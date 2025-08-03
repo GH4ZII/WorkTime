@@ -24,11 +24,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private chatService: ChatService) {}
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
     // Remove user from connected users
     for (const [socketId, userId] of this.connectedUsers.entries()) {
       if (socketId === client.id) {
@@ -41,20 +39,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('joinRoom')
   handleJoinRoom(client: Socket, roomId: string) {
     client.join(roomId);
-    console.log(`User joined room: ${roomId}`);
   }
 
   @SubscribeMessage('leaveRoom')
   handleLeaveRoom(client: Socket, roomId: string) {
     client.leave(roomId);
-    console.log(`User left room: ${roomId}`);
   }
 
   @SubscribeMessage('sendMessage')
   async handleMessage(client: Socket, payload: { roomId: string; message: CreateMessageDto }) {
-    try {
-      console.log('ChatGateway: Received message:', payload);
-      
+    try {      
       // Validate payload
       if (!payload.roomId || !payload.message || !payload.message.content || !payload.message.senderId) {
         console.error('ChatGateway: Invalid payload:', payload);
@@ -63,11 +57,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       
       // Save message to database
       const savedMessage = await this.chatService.addMessage(payload.roomId, payload.message);
-      console.log('ChatGateway: Message saved:', savedMessage);
       
       // Broadcast to all users in the room
       this.server.to(payload.roomId).emit('newMessage', savedMessage);
-      console.log('ChatGateway: Message broadcasted to room:', payload.roomId);
       
       return { success: true, message: savedMessage };
     } catch (error) {
