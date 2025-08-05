@@ -36,8 +36,8 @@ const VacancyPage: NextPage = () => {
         try {
             setLoading(true);
             const [requestsResponse, usersResponse] = await Promise.all([
-                axios.get<TimeOffRequest[]>('http://10.129.48.163:3001/time-off-requests', { withCredentials: true }),
-                axios.get<User[]>('http://10.129.48.163:3001/users', { withCredentials: true })
+                axios.get<TimeOffRequest[]>('http://localhost:3001/time-off-requests', { withCredentials: true }),
+                axios.get<User[]>('http://localhost:3001/users', { withCredentials: true })
             ]);
 
             setTimeOffRequests(requestsResponse.data);
@@ -76,7 +76,7 @@ const VacancyPage: NextPage = () => {
 
     const handleApprove = async (requestId: string) => {
         try {
-            await axios.post(`http://10.129.48.163:3001/time-off-requests/${requestId}/approve`, {}, { withCredentials: true });
+            await axios.post(`http://localhost:3001/time-off-requests/${requestId}/approve`, {}, { withCredentials: true });
             fetchData();
         } catch (err: any) {
             setError(err.message);
@@ -85,7 +85,7 @@ const VacancyPage: NextPage = () => {
 
     const handleReject = async (requestId: string) => {
         try {
-            await axios.post(`http://10.129.48.163:3001/time-off-requests/${requestId}/reject`, {}, { withCredentials: true });
+            await axios.post(`http://localhost:3001/time-off-requests/${requestId}/reject`, {}, { withCredentials: true });
             fetchData();
         } catch (err: any) {
             setError(err.message);

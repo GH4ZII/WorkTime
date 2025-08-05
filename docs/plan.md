@@ -60,19 +60,19 @@
 
 ### 4.2 Brukeradministrasjon
 
-- [ ] CRUD for ansatte
-- [ ] Søk og filtrer ansatte
+- [x] CRUD for ansatte
+- [x] Søk og filtrer ansatte
 
 ### 4.3 Skiftadministrasjon
 
 - [x] Opprett, rediger, slett skift
-- [ ] Koble skift til ansatte
-- [ ] Skiftkalender (visuelt)
+- [x] Koble skift til ansatte
+- [x] Skiftkalender (visuelt)
 
 ### 4.4 Håndtering av forespørsler
 
-- [ ] Liste og godkjenning/avvisning av fraværsforespørsler
-- [ ] Liste og godkjenning/avvisning av bytteforespørsler
+- [x] Liste og godkjenning/avvisning av fraværsforespørsler
+- [x] Liste og godkjenning/avvisning av bytteforespørsler
 
 ### 4.5 Rapporter & Statistikk
 
@@ -85,7 +85,7 @@
 
 ### 5.1 Sanntid (WebSocket)
 
-- [ ] Socket.io i NestJS backend
+- [x] Socket.io i NestJS backend
 - [ ] Emit & lytte til events (skift, forespørsler)
 
 ### 5.2 Mobilapp
@@ -95,25 +95,13 @@
 
 ### 5.3 Chat
 
-- [ ] Opprett og bli med i chat-rom
-- [ ] Send og motta meldinger live
-- [ ] Direktemeldinger & grupper
+- [x] Opprett og bli med i chat-rom
+- [x] Send og motta meldinger live
+- [x] Direktemeldinger & grupper
 
 ---
 
-## 🧪 M6 – Testing, Dokumentasjon & Deployment
-
-### 6.1 Testing
-
-- [ ] Enhetstester for services
-- [ ] E2E-tester for API med Supertest
-- [ ] Manuelle tester på mobil og web
-
-### 6.2 Dokumentasjon
-
-- [ ] Swagger `/docs` med `@nestjs/swagger`
-- [ ] Arkitektur.md: ER-diagram + flyt
-- [ ] Functionality.md: dekker sanntid & chat
+## 🧪 M6 – Deployment
 
 ### 6.3 Deployment
 

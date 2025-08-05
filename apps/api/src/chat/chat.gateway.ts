@@ -11,7 +11,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 
 @WebSocketGateway({
   cors: {
-    origin: ["http://localhost:3000", "http://10.129.48.163:3000"],
+    origin: ["http://localhost:3000"],
     credentials: true
   }
 })

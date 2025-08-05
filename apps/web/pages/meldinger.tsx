@@ -41,7 +41,7 @@ const MessagesPage: NextPage = () => {
 
   const fetchChatRooms = async () => {
     try {
-      const response = await axios.get('http://10.129.48.163:3001/chatrooms', {
+      const response = await axios.get('http://localhost:3001/chatrooms', {
         withCredentials: true,
       });
       setChatRooms(response.data);
@@ -52,7 +52,7 @@ const MessagesPage: NextPage = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await axios.get('http://10.129.48.163:3001/auth/me', {
+      const response = await axios.get('http://localhost:3001/auth/me', {
         withCredentials: true,
       });
       
@@ -79,7 +79,7 @@ const MessagesPage: NextPage = () => {
 
   const fetchAllUsers = async () => {
     try {
-      const response = await axios.get('http://10.129.48.163:3001/users', {
+      const response = await axios.get('http://localhost:3001/users', {
         withCredentials: true,
       });
       setAllUsers(response.data);
@@ -95,7 +95,7 @@ const MessagesPage: NextPage = () => {
     }
 
     try {
-      const response = await axios.post('http://10.129.48.163:3001/chatrooms', {
+      const response = await axios.post('http://localhost:3001/chatrooms', {
         name: newChatName,
         memberIds: selectedUsers,
       }, {

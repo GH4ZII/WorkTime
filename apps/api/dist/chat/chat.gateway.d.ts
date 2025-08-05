@@ -17,11 +17,16 @@ export declare class ChatGateway implements OnGatewayConnection, OnGatewayDiscon
     }): Promise<{
         success: boolean;
         message: {
+            sender: {
+                id: string;
+                name: string;
+            };
+        } & {
             id: string;
-            sentAt: Date;
             roomId: string;
             senderId: string;
             content: string;
+            sentAt: Date;
         };
         error?: undefined;
     } | {

@@ -110,6 +110,11 @@ export declare class ChatService {
         content: string;
     })[]>;
     addMessage(roomId: string, dto: CreateMessageDto): Promise<{
+        sender: {
+            id: string;
+            name: string;
+        };
+    } & {
         id: string;
         sentAt: Date;
         roomId: string;

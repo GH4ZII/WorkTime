@@ -19,6 +19,9 @@ let ChatService = class ChatService {
     }
     async create(dto) {
         const { name, memberIds } = dto;
+        if (!name) {
+            throw new common_1.BadRequestException('Chat room name is required');
+        }
         return this.prisma.chatRoom.create({
             data: {
                 name: name,
@@ -100,6 +103,9 @@ let ChatService = class ChatService {
                 content: dto.content,
                 roomId: roomId,
                 senderId: dto.senderId,
+            },
+            include: {
+                sender: { select: { id: true, name: true } },
             },
         });
     }

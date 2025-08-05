@@ -9,7 +9,7 @@ interface CoWorker {
     role: string;
 }
 
-const API_URL = 'http://10.129.48.163:3001/users';
+const API_URL = 'http://localhost:3001/users';
 
 const CoWorkerScreen: React.FC = () => {
     // State-variabler for data, lasting og feil

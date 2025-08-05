@@ -60,7 +60,7 @@ Når en admin navigerer til web-applikasjonen, skjer følgende:
 
 1. **Login-side** (`/login`):
    - Admin fyller ut e-post og passord
-   - Form submission sender data til API: `http://10.129.48.163:3001/auth/login`
+   - Form submission sender data til API: `http://localhost:3001/auth/login`
    - Ved vellykket innlogging:
      - JWT token lagres som cookie: `auth_token=${response.data.access_token}`
      - Omdirigering til hovedsiden (`/`)
@@ -299,7 +299,7 @@ socket.on('newMessage', (message) => {
 
 ### Backend-kommunikasjon
 
-**Base URL**: `http://10.129.48.163:3001`
+**Base URL**: `http://localhost:3001`
 
 **Endepunkter**:
 - **Autentisering**: `/auth/login`
@@ -308,7 +308,7 @@ socket.on('newMessage', (message) => {
 - **Skift-bytte**: `/shift-swap-requests`
 - **Fravær**: `/time-off-requests`
 - **Chat**: `/chatrooms`
-- **WebSocket**: `ws://10.129.48.163:3001`
+- **WebSocket**: `ws://localhost:3001`
 
 **HTTP Client**: Axios med `withCredentials: true`
 

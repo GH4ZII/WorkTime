@@ -54,7 +54,7 @@ const HomePage: NextPage = () => {
 
     //Hent alle time off requests
     useEffect(() => {
-        axios.get<TimeOffRequest[]>('http://10.129.48.163:3001/time-off-requests', { withCredentials: true })
+        axios.get<TimeOffRequest[]>('http://localhost:3001/time-off-requests', { withCredentials: true })
             .then(res => setTimeOffRequests(res.data))
             .catch(err => setError(err.message))
             .finally(() => setLoading(false));
@@ -62,7 +62,7 @@ const HomePage: NextPage = () => {
 
     // Hent alle skiftene
     useEffect(() => {
-        axios.get<Shift[]>('http://10.129.48.163:3001/shifts', { withCredentials: true })
+        axios.get<Shift[]>('http://localhost:3001/shifts', { withCredentials: true })
             .then(res => setShifts(res.data))
             .catch(err => setError(err.message))
             .finally(() => setLoading(false));
@@ -85,7 +85,7 @@ const HomePage: NextPage = () => {
     useEffect(() => {
         const fetchEmployees = async () => {
             try {
-                const response = await axios.get<Employee[]>('http://10.129.48.163:3001/users', {
+                const response = await axios.get<Employee[]>('http://localhost:3001/users', {
                     withCredentials: true,
                 });
                 setEmployees(response.data);
@@ -102,7 +102,7 @@ const HomePage: NextPage = () => {
     useEffect(() => {
         const fetchSwapRequests = async () => {
             try {
-                const response = await axios.get<SwapRequest[]>('http://10.129.48.163:3001/shift-swap-requests', {
+                const response = await axios.get<SwapRequest[]>('http://localhost:3001/shift-swap-requests', {
                     withCredentials: true,
                 });
                 setSwapRequests(response.data);

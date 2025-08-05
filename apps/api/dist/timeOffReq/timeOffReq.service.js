@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TimeOffReqService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
+const prisma_1 = require("../../generated/prisma/index.js");
 let TimeOffReqService = class TimeOffReqService {
     prisma;
     constructor(prisma) {
@@ -51,6 +52,32 @@ let TimeOffReqService = class TimeOffReqService {
     async remove(id) {
         return this.prisma.timeOffRequest.delete({
             where: { id },
+        });
+    }
+    async approve(id) {
+        const request = await this.findOne(id);
+        if (!request) {
+            throw new common_1.NotFoundException('Forespørsel ikke funnet');
+        }
+        if (request.status !== prisma_1.RequestStatus.PENDING) {
+            throw new common_1.BadRequestException('Forespørsel er allerede behandlet');
+        }
+        return this.prisma.timeOffRequest.update({
+            where: { id },
+            data: { status: prisma_1.RequestStatus.APPROVED }
+        });
+    }
+    async reject(id) {
+        const request = await this.findOne(id);
+        if (!request) {
+            throw new common_1.NotFoundException('Forespørsel ikke funnet');
+        }
+        if (request.status !== prisma_1.RequestStatus.PENDING) {
+            throw new common_1.BadRequestException('Forespørsel er allerede behandlet');
+        }
+        return this.prisma.timeOffRequest.update({
+            where: { id },
+            data: { status: prisma_1.RequestStatus.REJECTED }
         });
     }
 };

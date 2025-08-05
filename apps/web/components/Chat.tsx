@@ -79,7 +79,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
       setIsLoading(true);
       setError(null);
       
-      const response = await axios.get(`http://10.129.48.163:3001/chatrooms/${roomId}/messages`, {
+      const response = await axios.get(`http://localhost:3001/chatrooms/${roomId}/messages`, {
         withCredentials: true,
       });
       

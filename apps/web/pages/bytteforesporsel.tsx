@@ -42,13 +42,13 @@ const ShiftSwapPage: NextPage = () => {
         try {
             setLoading(true);
             const [swapResponse, usersResponse, shiftsResponse] = await Promise.all([
-                axios.get<ShiftSwapRequest[]>('http://10.129.48.163:3001/shift-swap-requests', {
+                axios.get<ShiftSwapRequest[]>('http://localhost:3001/shift-swap-requests', {
                     withCredentials: true
                 }),
-                axios.get<User[]>('http://10.129.48.163:3001/users', {
+                axios.get<User[]>('http://localhost:3001/users', {
                     withCredentials: true
                 }),
-                axios.get<Shift[]>('http://10.129.48.163:3001/shifts', {
+                axios.get<Shift[]>('http://localhost:3001/shifts', {
                     withCredentials: true
                 })
             ]);
@@ -120,7 +120,7 @@ const ShiftSwapPage: NextPage = () => {
 
     const handleApprove = async (requestId: string) => {
         try {
-            await axios.post(`http://10.129.48.163:3001/shift-swap-requests/${requestId}/approve`, {}, {
+            await axios.post(`http://localhost:3001/shift-swap-requests/${requestId}/approve`, {}, {
                 withCredentials: true
             });
             fetchData();
@@ -131,7 +131,7 @@ const ShiftSwapPage: NextPage = () => {
 
     const handleReject = async (requestId: string) => {
         try {
-            await axios.post(`http://10.129.48.163:3001/shift-swap-requests/${requestId}/reject`, {}, {
+            await axios.post(`http://localhost:3001/shift-swap-requests/${requestId}/reject`, {}, {
                 withCredentials: true
             });
             fetchData();

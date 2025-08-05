@@ -57,7 +57,7 @@ const CoWorkerPage: NextPage = () => {
     const fetchEmployees = async () => {
         try {
             setLoading(true);
-            const response = await axios.get<Employee[]>('http://10.129.48.163:3001/users', { 
+            const response = await axios.get<Employee[]>('http://localhost:3001/users', { 
                 withCredentials: true 
             });
             setEmployees(response.data);
@@ -80,7 +80,7 @@ const CoWorkerPage: NextPage = () => {
         e.preventDefault();
         
         try {
-            await axios.post('http://10.129.48.163:3001/users', form, { 
+            await axios.post('http://localhost:3001/users', form, { 
                 withCredentials: true 
             });
             
@@ -107,7 +107,7 @@ const CoWorkerPage: NextPage = () => {
                 delete updateData.password;
             }
 
-            await axios.put(`http://10.129.48.163:3001/users/${editingEmployee.id}`, updateData, { 
+            await axios.put(`http://localhost:3001/users/${editingEmployee.id}`, updateData, { 
                 withCredentials: true 
             });
             
@@ -129,7 +129,7 @@ const CoWorkerPage: NextPage = () => {
         }
 
         try {
-            await axios.delete(`http://10.129.48.163:3001/users/${employeeId}`, { 
+            await axios.delete(`http://localhost:3001/users/${employeeId}`, { 
                 withCredentials: true 
             });
             

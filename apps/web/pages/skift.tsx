@@ -79,7 +79,7 @@ const ShiftPage: NextPage = () => {
 
     const fetchEmployees = async () => {
         try {
-            const res = await axios.get<Employee[]>('http://10.129.48.163:3001/users', { withCredentials: true })
+            const res = await axios.get<Employee[]>('http://localhost:3001/users', { withCredentials: true })
             setEmployees(res.data)
         } catch (err: any) {
             setError(err.message)
@@ -88,7 +88,7 @@ const ShiftPage: NextPage = () => {
 
     const fetchShifts = async () => {
         try {
-            const res = await axios.get<Shift[]>('http://10.129.48.163:3001/shifts', { withCredentials: true })
+            const res = await axios.get<Shift[]>('http://localhost:3001/shifts', { withCredentials: true })
             setShifts(res.data)
         } catch (err: any) {
             setError(err.message)
@@ -121,7 +121,7 @@ const ShiftPage: NextPage = () => {
         }
         
         try {
-            await axios.post('http://10.129.48.163:3001/shifts', payload, { withCredentials: true })
+            await axios.post('http://localhost:3001/shifts', payload, { withCredentials: true })
             setForm({ userId: '', date: '', startTime: '', endTime: '', location: '', notes: '', createdBy: 'admin' })
             setShowForm(false)
             setSuccess('Skift opprettet!')
@@ -151,7 +151,7 @@ const ShiftPage: NextPage = () => {
         }
         
         try {
-            await axios.put(`http://10.129.48.163:3001/shifts/${editingShift.id}`, payload, { withCredentials: true })
+            await axios.put(`http://localhost:3001/shifts/${editingShift.id}`, payload, { withCredentials: true })
             setShowEditForm(false)
             setEditingShift(null)
             setSuccess('Skift oppdatert!')
@@ -167,7 +167,7 @@ const ShiftPage: NextPage = () => {
         if (!confirm('Er du sikker på at du vil slette dette skiftet?')) return
         
         try {
-            await axios.delete(`http://10.129.48.163:3001/shifts/${shiftId}`, { withCredentials: true })
+            await axios.delete(`http://localhost:3001/shifts/${shiftId}`, { withCredentials: true })
             setSuccess('Skift slettet!')
             fetchShifts()
             setTimeout(() => setSuccess(null), 3000)

@@ -22,7 +22,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io('http://10.129.48.163:3001', {
+    const newSocket = io('http://localhost:3001', {
       withCredentials: true,
     });
 
