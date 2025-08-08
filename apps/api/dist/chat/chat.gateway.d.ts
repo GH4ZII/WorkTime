@@ -23,10 +23,10 @@ export declare class ChatGateway implements OnGatewayConnection, OnGatewayDiscon
             };
         } & {
             id: string;
+            sentAt: Date;
             roomId: string;
             senderId: string;
             content: string;
-            sentAt: Date;
         };
         error?: undefined;
     } | {
