@@ -2,6 +2,32 @@
 import {NextPage} from "next";
 import { Layout } from '../components/Layout';
 import axios from 'axios';
+import {
+    Box,
+    Card,
+    CardContent,
+    Typography,
+    Button,
+    Chip,
+    Avatar,
+    IconButton,
+    Alert,
+    CircularProgress,
+    Grid,
+    Divider,
+    Tooltip,
+    Paper
+} from '@mui/material';
+import {
+    SwapHoriz as SwapIcon,
+    Check as CheckIcon,
+    Close as CloseIcon,
+    Person as PersonIcon,
+    Schedule as ScheduleIcon,
+    AccessTime as TimeIcon,
+    CalendarToday as CalendarIcon,
+    ArrowForward as ArrowIcon
+} from '@mui/icons-material';
 
 interface User {
     id: string;
@@ -156,222 +182,253 @@ const ShiftSwapPage: NextPage = () => {
     const getStatusColor = (status?: string) => {
         switch (status) {
             case 'PENDING':
-                return '#F59E0B';
+                return 'warning';
             case 'APPROVED':
-                return '#059669';
+                return 'success';
             case 'REJECTED':
-                return '#DC2626';
+                return 'error';
             default:
-                return '#6B7280';
+                return 'default';
         }
     };
 
+    if (loading) {
+        return (
+            <Layout>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                    <CircularProgress size={60} />
+                </Box>
+            </Layout>
+        );
+    }
+
     return (
         <Layout>
-            <h1>Bytteforespørsler</h1>
-            <div style={styles.container}>
-                <div style={styles.requestList}>
-                    {loading ? (
-                        <p>Laster forespørsler...</p>
-                    ) : (
-                        swapRequests.map(request => {
+            <Box sx={{ p: 3 }}>
+                {error && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                )}
+
+                {/* Header */}
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                    <SwapIcon sx={{ mr: 2, color: 'primary.main', fontSize: 32 }} />
+                    <Box>
+                        <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
+                            Bytteforespørsler
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            Administrer forespørsler om skiftbytte
+                        </Typography>
+                    </Box>
+                </Box>
+
+                {swapRequests.length === 0 ? (
+                    <Card elevation={2}>
+                        <CardContent>
+                            <Box sx={{ textAlign: 'center', py: 4 }}>
+                                <SwapIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                                <Typography variant="h6" color="text.secondary">
+                                    Ingen forespørsler funnet
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Det er ingen aktive bytteforespørsler for øyeblikket
+                                </Typography>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Grid container spacing={3}>
+                        {swapRequests.map(request => {
                             const fromShiftInfo = getShiftInfo(request.fromShiftId);
                             const toShiftInfo = request.toShiftId ? getShiftInfo(request.toShiftId) : null;
                             
                             return (
-                                <div key={request.id} style={styles.requestCard}>
-                                    <div style={styles.requestHeader}>
-                                        <h3 style={styles.requestTitle}>
-                                            {getRequestTitle(request)}
-                                        </h3>
-                                        <span style={{
-                                            ...styles.statusBadge,
-                                            backgroundColor: getStatusColor(request.status)
-                                        }}>
-                                            {getStatusDisplay(request.status)}
-                                        </span>
-                                    </div>
-                                    
-                                    <p style={styles.requestDescription}>
-                                        {getRequestDescription(request)}
-                                    </p>
-                                    
-                                    <div style={styles.shiftsContainer}>
-                                        <div style={styles.shiftCard}>
-                                            <h4 style={styles.shiftTitle}>Fra skift</h4>
-                                            {fromShiftInfo ? (
-                                                <div style={styles.shiftDetails}>
-                                                    <p><strong>Ansatt:</strong> {fromShiftInfo.userName}</p>
-                                                    <p><strong>Tid:</strong> {fromShiftInfo.startTime} - {fromShiftInfo.endTime}</p>
-                                                    <p><strong>Varighet:</strong> {fromShiftInfo.duration}</p>
-                                                </div>
-                                            ) : (
-                                                <p style={styles.errorText}>Skift ikke funnet</p>
-                                            )}
-                                        </div>
-                                        
-                                        {request.swapType === 'SWAP' && toShiftInfo && (
-                                            <div style={styles.swapArrow}>↔</div>
-                                        )}
-                                        
-                                        {request.swapType === 'SWAP' && toShiftInfo && (
-                                            <div style={styles.shiftCard}>
-                                                <h4 style={styles.shiftTitle}>Til skift</h4>
-                                                <div style={styles.shiftDetails}>
-                                                    <p><strong>Ansatt:</strong> {toShiftInfo.userName}</p>
-                                                    <p><strong>Tid:</strong> {toShiftInfo.startTime} - {toShiftInfo.endTime}</p>
-                                                    <p><strong>Varighet:</strong> {toShiftInfo.duration}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                <Grid item xs={12} key={request.id}>
+                                    <Card 
+                                        elevation={2}
+                                        sx={{
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                                            }
+                                        }}
+                                    >
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+                                                <Box sx={{ flexGrow: 1 }}>
+                                                    <Typography variant="h5" component="h2" fontWeight="bold" sx={{ mb: 1 }}>
+                                                        {getRequestTitle(request)}
+                                                    </Typography>
+                                                    <Typography variant="body1" color="text.secondary">
+                                                        {getRequestDescription(request)}
+                                                    </Typography>
+                                                </Box>
+                                                <Chip
+                                                    label={getStatusDisplay(request.status)}
+                                                    color={getStatusColor(request.status) as any}
+                                                    variant={request.status === 'PENDING' ? 'filled' : 'outlined'}
+                                                    sx={{ ml: 2 }}
+                                                />
+                                            </Box>
 
-                                    {request.status === 'PENDING' && (
-                                        <div style={styles.actions}>
-                                            <button 
-                                                style={styles.approveButton}
-                                                onClick={() => handleApprove(request.id)}
-                                            >
-                                                Godkjenn
-                                            </button>
-                                            <button 
-                                                style={styles.rejectButton}
-                                                onClick={() => handleReject(request.id)}
-                                            >
-                                                Avvis
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
+                                            <Divider sx={{ my: 3 }} />
+
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                                                {/* Fra skift */}
+                                                <Card 
+                                                    elevation={1}
+                                                    sx={{ 
+                                                        flex: 1,
+                                                        background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)'
+                                                    }}
+                                                >
+                                                    <CardContent>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                            <Avatar sx={{ mr: 1, bgcolor: 'primary.main', width: 32, height: 32 }}>
+                                                                {fromShiftInfo?.userName.charAt(0) || '?'}
+                                                            </Avatar>
+                                                            <Typography variant="h6" fontWeight="bold">
+                                                                Fra skift
+                                                            </Typography>
+                                                        </Box>
+                                                        {fromShiftInfo ? (
+                                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                    <PersonIcon fontSize="small" color="action" />
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        {fromShiftInfo.userName}
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                    <CalendarIcon fontSize="small" color="action" />
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        {fromShiftInfo.startTime}
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                    <TimeIcon fontSize="small" color="action" />
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        {fromShiftInfo.startTime.split(',')[1]} - {fromShiftInfo.endTime}
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Chip
+                                                                    label={fromShiftInfo.duration}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                />
+                                                            </Box>
+                                                        ) : (
+                                                            <Typography color="error" variant="body2">
+                                                                Skift ikke funnet
+                                                            </Typography>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+
+                                                {/* Pil for bytte */}
+                                                {request.swapType === 'SWAP' && toShiftInfo && (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+                                                        <ArrowIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+                                                    </Box>
+                                                )}
+
+                                                {/* Til skift */}
+                                                {request.swapType === 'SWAP' && toShiftInfo && (
+                                                    <Card 
+                                                        elevation={1}
+                                                        sx={{ 
+                                                            flex: 1,
+                                                            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)'
+                                                        }}
+                                                    >
+                                                        <CardContent>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                                <Avatar sx={{ mr: 1, bgcolor: 'secondary.main', width: 32, height: 32 }}>
+                                                                    {toShiftInfo.userName.charAt(0)}
+                                                                </Avatar>
+                                                                <Typography variant="h6" fontWeight="bold">
+                                                                    Til skift
+                                                                </Typography>
+                                                            </Box>
+                                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                    <PersonIcon fontSize="small" color="action" />
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        {toShiftInfo.userName}
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                    <CalendarIcon fontSize="small" color="action" />
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        {toShiftInfo.startTime}
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                    <TimeIcon fontSize="small" color="action" />
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        {toShiftInfo.startTime.split(',')[1]} - {toShiftInfo.endTime}
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Chip
+                                                                    label={toShiftInfo.duration}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    color="secondary"
+                                                                />
+                                                            </Box>
+                                                        </CardContent>
+                                                    </Card>
+                                                )}
+                                            </Box>
+
+                                            {request.status === 'PENDING' && (
+                                                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                                                    <Button
+                                                        variant="outlined"
+                                                        color="error"
+                                                        startIcon={<CloseIcon />}
+                                                        onClick={() => handleReject(request.id)}
+                                                        sx={{
+                                                            borderRadius: 2,
+                                                            px: 3,
+                                                            py: 1
+                                                        }}
+                                                    >
+                                                        Avvis
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="success"
+                                                        startIcon={<CheckIcon />}
+                                                        onClick={() => handleApprove(request.id)}
+                                                        sx={{
+                                                            borderRadius: 2,
+                                                            px: 3,
+                                                            py: 1,
+                                                            background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                                                            '&:hover': {
+                                                                background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
+                                                            }
+                                                        }}
+                                                    >
+                                                        Godkjenn
+                                                    </Button>
+                                                </Box>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
                             );
-                        })
-                    )}
-                    {error && <p style={styles.error}>{error}</p>}
-                    {swapRequests.length === 0 && !loading && (
-                        <p style={styles.noRequests}>Ingen forespørsler funnet</p>
-                    )}
-                </div>
-            </div>
+                        })}
+                    </Grid>
+                )}
+            </Box>
         </Layout>
     );
 }
 
 export default ShiftSwapPage;
-
-const styles: Record<string, React.CSSProperties> = {
-    container: {
-        padding: '1rem',
-        maxWidth: '1200px',
-        margin: '0 auto'
-    },
-    requestList: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem'
-    },
-    requestCard: {
-        border: '1px solid #E5E7EB',
-        borderRadius: '8px',
-        padding: '1.5rem',
-        backgroundColor: '#F9FAFB',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-    },
-    requestHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '1rem'
-    },
-    requestTitle: {
-        margin: 0,
-        fontSize: '1.25rem',
-        fontWeight: '600',
-        color: '#1F2937'
-    },
-    statusBadge: {
-        padding: '0.25rem 0.75rem',
-        borderRadius: '9999px',
-        color: '#FFF',
-        fontSize: '0.875rem',
-        fontWeight: '500'
-    },
-    requestDescription: {
-        color: '#4B5563',
-        marginBottom: '1rem',
-        fontSize: '1rem'
-    },
-    shiftsContainer: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem',
-        marginBottom: '1rem',
-        flexWrap: 'wrap'
-    },
-    shiftCard: {
-        backgroundColor: '#FFF',
-        padding: '1rem',
-        borderRadius: '6px',
-        border: '1px solid #E5E7EB',
-        flex: 1,
-        minWidth: '250px'
-    },
-    shiftTitle: {
-        margin: '0 0 0.5rem 0',
-        fontSize: '1rem',
-        fontWeight: '600',
-        color: '#374151'
-    },
-    shiftDetails: {
-        fontSize: '0.875rem'
-    },
-    swapArrow: {
-        fontSize: '1.5rem',
-        fontWeight: 'bold',
-        color: '#6B7280',
-        padding: '0 0.5rem'
-    },
-    errorText: {
-        color: '#DC2626',
-        fontSize: '0.875rem'
-    },
-    actions: {
-        display: 'flex',
-        gap: '0.5rem',
-        marginTop: '1rem'
-    },
-    approveButton: {
-        padding: '0.75rem 1.5rem',
-        backgroundColor: '#059669',
-        color: '#FFF',
-        border: 'none',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        fontSize: '0.875rem',
-        fontWeight: '500',
-        transition: 'background-color 0.2s'
-    },
-    rejectButton: {
-        padding: '0.75rem 1.5rem',
-        backgroundColor: '#DC2626',
-        color: '#FFF',
-        border: 'none',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        fontSize: '0.875rem',
-        fontWeight: '500',
-        transition: 'background-color 0.2s'
-    },
-    error: {
-        color: '#DC2626',
-        backgroundColor: '#FEE2E2',
-        padding: '1rem',
-        borderRadius: '4px',
-        border: '1px solid #FCA5A5'
-    },
-    noRequests: {
-        textAlign: 'center',
-        color: '#6B7280',
-        padding: '2rem',
-        fontSize: '1.1rem'
-    }
-};

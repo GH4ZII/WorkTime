@@ -2,6 +2,33 @@
 import {NextPage} from 'next'
 import { Layout } from '../components/Layout'
 import axios from 'axios'
+import {
+    Box,
+    Card,
+    CardContent,
+    Typography,
+    Button,
+    Chip,
+    Avatar,
+    IconButton,
+    Alert,
+    CircularProgress,
+    Grid,
+    Divider,
+    Tooltip,
+    Paper
+} from '@mui/material';
+import {
+    Event as EventIcon,
+    Check as CheckIcon,
+    Close as CloseIcon,
+    Person as PersonIcon,
+    BeachAccess as VacationIcon,
+    LocalHospital as SickIcon,
+    Help as OtherIcon,
+    CalendarToday as CalendarIcon,
+    AccessTime as TimeIcon
+} from '@mui/icons-material';
 
 interface TimeOffRequest {
     id: string;
@@ -20,7 +47,6 @@ interface User {
     id: string;
     name: string;
 }
-
 
 const VacancyPage: NextPage = () => {
     const [timeOffRequests, setTimeOffRequests] = useState<TimeOffRequest[]>([]);
@@ -108,125 +134,234 @@ const VacancyPage: NextPage = () => {
     const getStatusColor = (status?: string) => {
         switch (status) {
             case 'PENDING':
-                return 'yellow';
+                return 'warning';
             case 'APPROVED':
-                return 'green';
+                return 'success';
             case 'REJECTED':
-                return 'red';
+                return 'error';
             default:
-                return 'yellow';
+                return 'default';
         }
     };
+
+    const getTypeIcon = (type: string) => {
+        switch (type) {
+            case 'VACATION':
+                return <VacationIcon />;
+            case 'SICK':
+                return <SickIcon />;
+            case 'OTHER':
+                return <OtherIcon />;
+            default:
+                return <EventIcon />;
+        }
+    };
+
+    const getTypeColor = (type: string) => {
+        switch (type) {
+            case 'VACATION':
+                return 'success';
+            case 'SICK':
+                return 'error';
+            case 'OTHER':
+                return 'warning';
+            default:
+                return 'default';
+        }
+    };
+
+    const getTypeLabel = (type: string) => {
+        switch (type) {
+            case 'VACATION':
+                return 'Ferie';
+            case 'SICK':
+                return 'Syk';
+            case 'OTHER':
+                return 'Annet';
+            default:
+                return type;
+        }
+    };
+
+    const calculateDuration = (fromDate: string, toDate: string) => {
+        const start = new Date(fromDate);
+        const end = new Date(toDate);
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        return diffDays;
+    };
+
+    if (loading) {
+        return (
+            <Layout>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                    <CircularProgress size={60} />
+                </Box>
+            </Layout>
+        );
+    }
+
     return (
         <Layout>
-            <h1>Fraværsforespørsler</h1>
-            <div style={styles.container}>
-                <div style={styles.requestList}>
-                    {loading ? (
-                        <p>Laster forespørsler...</p>
-                    ) : (
-                        timeOffRequests.map(request => {
+            <Box sx={{ p: 3 }}>
+                {error && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                )}
 
+                {/* Header */}
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                    <EventIcon sx={{ mr: 2, color: 'primary.main', fontSize: 32 }} />
+                    <Box>
+                        <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
+                            Fraværsforespørsler
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            Administrer forespørsler om fravær
+                        </Typography>
+                    </Box>
+                </Box>
+
+                {timeOffRequests.length === 0 ? (
+                    <Card elevation={2}>
+                        <CardContent>
+                            <Box sx={{ textAlign: 'center', py: 4 }}>
+                                <EventIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                                <Typography variant="h6" color="text.secondary">
+                                    Ingen forespørsler funnet
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Det er ingen aktive fraværsforespørsler for øyeblikket
+                                </Typography>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Grid container spacing={3}>
+                        {timeOffRequests.map(request => {
+                            const duration = calculateDuration(request.fromDate, request.toDate);
+                            
                             return (
-                                <div key={request.id} style={styles.requestCard}>
-                                    <div style={styles.requestHeader}>
-                                        <h3 style={styles.requestTitle}>
-                                            {getRequestTitle(request)}
-                                        </h3>
-                                        <span style={{
-                                            ...styles.statusBadge,
-                                            backgroundColor: getStatusColor(request.status)
-                                        }}>
-                                            {getStatusDisplay(request.status)}
-                                        </span>
-                                    </div>
-                                    <div style={styles.requestContent}>
-                                        <p style={styles.requestDescription}>
-                                            {getRequestDescription(request)}
-                                        </p>
-                                    </div>
-                                    <div style={styles.requestActions}>
-                                        {request.status === 'PENDING' && (
-                                            <>
-                                                <button style={styles.approveButton} onClick={() => handleApprove(request.id)}>Godkjenn</button>
-                                                <button style={styles.rejectButton} onClick={() => handleReject(request.id)}>Avvis</button>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
+                                <Grid item xs={12} md={6} lg={4} key={request.id}>
+                                    <Card 
+                                        elevation={2}
+                                        sx={{
+                                            height: '100%',
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                                            }
+                                        }}
+                                    >
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                <Avatar 
+                                                    sx={{ 
+                                                        bgcolor: 'primary.main', 
+                                                        mr: 2,
+                                                        width: 48,
+                                                        height: 48
+                                                    }}
+                                                >
+                                                    {getUserName(request.userId).charAt(0)}
+                                                </Avatar>
+                                                <Box sx={{ flexGrow: 1 }}>
+                                                    <Typography variant="h6" fontWeight="bold">
+                                                        {getUserName(request.userId)}
+                                                    </Typography>
+                                                    <Chip
+                                                        icon={getTypeIcon(request.type)}
+                                                        label={getTypeLabel(request.type)}
+                                                        color={getTypeColor(request.type) as any}
+                                                        size="small"
+                                                        sx={{ mt: 0.5 }}
+                                                    />
+                                                </Box>
+                                                <Chip
+                                                    label={getStatusDisplay(request.status)}
+                                                    color={getStatusColor(request.status) as any}
+                                                    variant={request.status === 'PENDING' ? 'filled' : 'outlined'}
+                                                    size="small"
+                                                />
+                                            </Box>
+
+                                            <Divider sx={{ my: 2 }} />
+
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <CalendarIcon fontSize="small" color="action" />
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Fra: {formatFromDate(request.fromDate)}
+                                                    </Typography>
+                                                </Box>
+                                                
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <CalendarIcon fontSize="small" color="action" />
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Til: {formatToDate(request.toDate)}
+                                                    </Typography>
+                                                </Box>
+                                                
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <TimeIcon fontSize="small" color="action" />
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Varighet: {duration} dag{duration !== 1 ? 'er' : ''}
+                                                    </Typography>
+                                                </Box>
+
+                                                {request.reason && (
+                                                    <Box sx={{ mt: 1 }}>
+                                                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                                            "{request.reason}"
+                                                        </Typography>
+                                                    </Box>
+                                                )}
+                                            </Box>
+
+                                            {request.status === 'PENDING' && (
+                                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                                    <Button
+                                                        variant="outlined"
+                                                        color="error"
+                                                        size="small"
+                                                        startIcon={<CloseIcon />}
+                                                        onClick={() => handleReject(request.id)}
+                                                        sx={{ flex: 1 }}
+                                                    >
+                                                        Avvis
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="success"
+                                                        size="small"
+                                                        startIcon={<CheckIcon />}
+                                                        onClick={() => handleApprove(request.id)}
+                                                        sx={{ 
+                                                            flex: 1,
+                                                            background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                                                            '&:hover': {
+                                                                background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
+                                                            }
+                                                        }}
+                                                    >
+                                                        Godkjenn
+                                                    </Button>
+                                                </Box>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
                             );
-                        })
-                    )}
-                </div>
-            </div>
+                        })}
+                    </Grid>
+                )}
+            </Box>
         </Layout>
     );
 }
 
 export default VacancyPage;
-
-const styles: Record<string, React.CSSProperties> = {
-    container: {
-        maxWidth: '800px',
-        margin: '0 auto',
-        padding: '20px',
-        backgroundColor: '#f5f5f5',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    },
-    requestList: {
-        display: 'flex',
-        flexDirection: 'column' as const,
-        gap: '16px',
-    },
-    requestCard: {
-        backgroundColor: '#fff',
-        padding: '16px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    },
-    requestHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '12px',
-    },
-    requestTitle: {
-        fontSize: '18px',
-        fontWeight: 'bold',
-    },
-    statusBadge: {
-        padding: '4px 8px',
-        borderRadius: '4px',
-        fontSize: '12px',
-        fontWeight: 'bold',
-    },
-    requestContent: {
-        marginBottom: '12px',
-    },
-    requestDescription: {
-        margin: '0',
-    },
-    requestActions: {
-        display: 'flex',
-        gap: '8px',
-    },
-    approveButton: {
-        backgroundColor: '#22c55e',
-        color: '#fff',
-        border: 'none',
-        padding: '8px 16px',
-        borderRadius: '4px',
-        cursor: 'pointer',
-    },
-    rejectButton: {
-        backgroundColor: '#ef4444',
-        color: '#fff',
-        border: 'none',
-        padding: '8px 16px',
-        borderRadius: '4px',
-        cursor: 'pointer',
-    },
-}
 
 

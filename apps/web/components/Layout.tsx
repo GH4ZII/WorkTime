@@ -1,22 +1,21 @@
 ﻿import React from 'react'
 import { Sidebar } from './Sidebar'
+import { Box } from '@mui/material'
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div style={layoutStyles.container}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         <Sidebar />
-        <main style={layoutStyles.main}>{children}</main>
-    </div>
+        <Box 
+            component="main" 
+            sx={{ 
+                flexGrow: 1,
+                ml: 0, // Remove margin since Drawer handles positioning
+                backgroundColor: '#f8fafc',
+                minHeight: '100vh',
+                overflow: 'auto'
+            }}
+        >
+            {children}
+        </Box>
+    </Box>
 )
-
-const layoutStyles: Record<string, React.CSSProperties> = {
-    container: {
-        display: 'flex',
-    },
-    main: {
-        marginLeft: 240,
-        padding: '2rem',
-        width: 'calc(100% - 240px)',
-        minHeight: '100vh',
-        backgroundColor: '#F3F4F6',
-    },
-}

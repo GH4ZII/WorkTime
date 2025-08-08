@@ -2,6 +2,44 @@
 import { NextPage } from "next";
 import axios from 'axios';
 import { Layout } from '../components/Layout';
+import { useData } from '../context/DataContext';
+import {
+    Box,
+    Card,
+    CardContent,
+    Typography,
+    Button,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Chip,
+    Avatar,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Alert,
+    CircularProgress,
+    Grid,
+    Divider,
+    Tooltip,
+    Paper
+} from '@mui/material';
+import {
+    Add as AddIcon,
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    Person as PersonIcon,
+    Email as EmailIcon,
+    Phone as PhoneIcon,
+    Work as WorkIcon,
+    CalendarToday as CalendarIcon,
+    Save as SaveIcon,
+    Cancel as CancelIcon
+} from '@mui/icons-material';
 
 interface Employee {
     id: string;
@@ -22,13 +60,12 @@ interface CreateEmployeeDto {
 }
 
 const CoWorkerPage: NextPage = () => {
-    const [employees, setEmployees] = useState<Employee[]>([]);
+    const { employees, loading, error, refreshEmployees } = useData();
     const [showForm, setShowForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const [localError, setLocalError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
 
     // Form state for ny ansatt
     const [form, setForm] = useState<CreateEmployeeDto>({
@@ -51,22 +88,8 @@ const CoWorkerPage: NextPage = () => {
     });
 
     useEffect(() => {
-        fetchEmployees();
+        refreshEmployees();
     }, []);
-
-    const fetchEmployees = async () => {
-        try {
-            setLoading(true);
-            const response = await axios.get<Employee[]>('http://localhost:3001/users', { 
-                withCredentials: true 
-            });
-            setEmployees(response.data);
-        } catch (err: any) {
-            setError('Kunne ikke hente ansatte: ' + err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -87,11 +110,11 @@ const CoWorkerPage: NextPage = () => {
             setSuccess('Ansatt opprettet!');
             setForm({ name: '', email: '', password: '', role: '', phone: '', hireDate: new Date().toISOString().split('T')[0] });
             setShowForm(false);
-            fetchEmployees();
+            refreshEmployees();
             
             setTimeout(() => setSuccess(null), 3000);
         } catch (err: any) {
-            setError('Kunne ikke opprette ansatt: ' + err.message);
+            setLocalError('Kunne ikke opprette ansatt: ' + err.message);
         }
     };
 
@@ -115,11 +138,11 @@ const CoWorkerPage: NextPage = () => {
             setShowEditForm(false);
             setEditingEmployee(null);
             setEditForm({ name: '', email: '', password: '', role: '', phone: '', hireDate: '' });
-            fetchEmployees();
+            refreshEmployees();
             
             setTimeout(() => setSuccess(null), 3000);
         } catch (err: any) {
-            setError('Kunne ikke oppdatere ansatt: ' + err.message);
+            setLocalError('Kunne ikke oppdatere ansatt: ' + err.message);
         }
     };
 
@@ -134,11 +157,11 @@ const CoWorkerPage: NextPage = () => {
             });
             
             setSuccess('Ansatt slettet!');
-            fetchEmployees();
+            refreshEmployees();
             
             setTimeout(() => setSuccess(null), 3000);
         } catch (err: any) {
-            setError('Kunne ikke slette ansatt: ' + err.message);
+            setLocalError('Kunne ikke slette ansatt: ' + err.message);
         }
     };
 
@@ -171,427 +194,425 @@ const CoWorkerPage: NextPage = () => {
         }
     };
 
+    const getRoleColor = (role?: string) => {
+        switch (role) {
+            case 'ADMIN':
+                return 'primary';
+            case 'EMPLOYEE':
+                return 'default';
+            default:
+                return 'default';
+        }
+    };
+
+    if (loading) {
+        return (
+            <Layout>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                    <CircularProgress size={60} />
+                </Box>
+            </Layout>
+        );
+    }
+
     return (
         <Layout>
-            <header style={styles.header}>
-                <h1>Medarbeider Administrasjon</h1>
-                <button 
-                    style={styles.addButton} 
-                    onClick={() => setShowForm(true)}
-                >
-                    Legg til ny ansatt
-                </button>
-            </header>
-
-            {error && <div style={styles.message.error}>{error}</div>}
-            {success && <div style={styles.message.success}>{success}</div>}
-
-            {/* Skjema for ny ansatt */}
-            {showForm && (
-                <section style={styles.formSection}>
-                    <h2>Legg til ny ansatt</h2>
-                    <form onSubmit={handleSubmit} style={styles.form}>
-                        <div style={styles.formRow}>
-                            <label style={styles.label}>
-                                Navn *
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={form.name}
-                                    onChange={handleChange}
-                                    required
-                                    style={styles.input}
-                                />
-                            </label>
-                            <label style={styles.label}>
-                                E-post *
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={form.email}
-                                    onChange={handleChange}
-                                    required
-                                    style={styles.input}
-                                />
-                            </label>
-                        </div>
-
-                        <div style={styles.formRow}>
-                            <label style={styles.label}>
-                                Passord *
-                                <input
-                                    type="password"
-                                    name="password"
-                                    value={form.password}
-                                    onChange={handleChange}
-                                    required
-                                    style={styles.input}
-                                />
-                            </label>
-                            <label style={styles.label}>
-                                Rolle
-                                <select
-                                    name="role"
-                                    value={form.role}
-                                    onChange={handleChange}
-                                    style={styles.input}
-                                >
-                                    <option value="">Velg rolle</option>
-                                    <option value="EMPLOYEE">Ansatt</option>
-                                    <option value="ADMIN">Administrator</option>
-                                </select>
-                            </label>
-                        </div>
-
-                        <div style={styles.formRow}>
-                            <label style={styles.label}>
-                                Telefon
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={form.phone}
-                                    onChange={handleChange}
-                                    style={styles.input}
-                                />
-                            </label>
-                            <label style={styles.label}>
-                                Ansettelsesdato *
-                                <input
-                                    type="date"
-                                    name="hireDate"
-                                    value={form.hireDate}
-                                    onChange={handleChange}
-                                    required
-                                    style={styles.input}
-                                />
-                            </label>
-                        </div>
-
-                        <div style={styles.formButtons}>
-                            <button type="submit" style={styles.submitButton}>
-                                Lagre ansatt
-                            </button>
-                            <button 
-                                type="button" 
-                                onClick={() => setShowForm(false)}
-                                style={styles.cancelButton}
-                            >
-                                Avbryt
-                            </button>
-                        </div>
-                    </form>
-                </section>
-            )}
-
-            {/* Skjema for redigering */}
-            {showEditForm && editingEmployee && (
-                <section style={styles.formSection}>
-                    <h2>Rediger ansatt: {editingEmployee.name}</h2>
-                    <form onSubmit={handleEdit} style={styles.form}>
-                        <div style={styles.formRow}>
-                            <label style={styles.label}>
-                                Navn *
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={editForm.name}
-                                    onChange={handleEditChange}
-                                    required
-                                    style={styles.input}
-                                />
-                            </label>
-                            <label style={styles.label}>
-                                E-post *
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={editForm.email}
-                                    onChange={handleEditChange}
-                                    required
-                                    style={styles.input}
-                                />
-                            </label>
-                        </div>
-
-                        <div style={styles.formRow}>
-                            <label style={styles.label}>
-                                Nytt passord (la stå tomt for å beholde)
-                                <input
-                                    type="password"
-                                    name="password"
-                                    value={editForm.password}
-                                    onChange={handleEditChange}
-                                    style={styles.input}
-                                    placeholder="La stå tomt for å beholde nåværende"
-                                />
-                            </label>
-                            <label style={styles.label}>
-                                Rolle
-                                <select
-                                    name="role"
-                                    value={editForm.role}
-                                    onChange={handleEditChange}
-                                    style={styles.input}
-                                >
-                                    <option value="">Velg rolle</option>
-                                    <option value="EMPLOYEE">Ansatt</option>
-                                    <option value="ADMIN">Administrator</option>
-                                </select>
-                            </label>
-                        </div>
-
-                        <div style={styles.formRow}>
-                            <label style={styles.label}>
-                                Telefon
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={editForm.phone}
-                                    onChange={handleEditChange}
-                                    style={styles.input}
-                                />
-                            </label>
-                            <label style={styles.label}>
-                                Ansettelsesdato *
-                                <input
-                                    type="date"
-                                    name="hireDate"
-                                    value={editForm.hireDate}
-                                    onChange={handleEditChange}
-                                    required
-                                    style={styles.input}
-                                />
-                            </label>
-                        </div>
-
-                        <div style={styles.formButtons}>
-                            <button type="submit" style={styles.submitButton}>
-                                Oppdater ansatt
-                            </button>
-                            <button 
-                                type="button" 
-                                onClick={() => setShowEditForm(false)}
-                                style={styles.cancelButton}
-                            >
-                                Avbryt
-                            </button>
-                        </div>
-                    </form>
-                </section>
-            )}
-
-            {/* Oversikt over ansatte */}
-            <section style={styles.employeesSection}>
-                <h2>Oversikt over ansatte ({employees.length})</h2>
-                
-                {loading ? (
-                    <div style={styles.loading}>Laster ansatte...</div>
-                ) : employees.length === 0 ? (
-                    <div style={styles.noEmployees}>Ingen ansatte funnet</div>
-                ) : (
-                    <div style={styles.employeesGrid}>
-                        {employees.map(employee => (
-                            <div key={employee.id} style={styles.employeeCard}>
-                                <div style={styles.employeeHeader}>
-                                    <h3 style={styles.employeeName}>{employee.name}</h3>
-                                    <div style={styles.employeeActions}>
-                                        <button
-                                            style={styles.actionButton.edit}
-                                            onClick={() => startEdit(employee)}
-                                        >
-                                            Rediger
-                                        </button>
-                                        <button
-                                            style={styles.actionButton.delete}
-                                            onClick={() => handleDelete(employee.id, employee.name)}
-                                        >
-                                            Slett
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div style={styles.employeeDetails}>
-                                    <p><strong>E-post:</strong> {employee.email}</p>
-                                    <p><strong>Rolle:</strong> {getRoleDisplayName(employee.role)}</p>
-                                    <p><strong>Telefon:</strong> {employee.phone || 'Ikke satt'}</p>
-                                    <p><strong>Ansettelsesdato:</strong> {formatDate(employee.hireDate)}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+            <Box sx={{ p: 3 }}>
+                {(error || localError) && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error || localError}
+                    </Alert>
                 )}
-            </section>
+                
+                {success && (
+                    <Alert severity="success" sx={{ mb: 3 }}>
+                        {success}
+                    </Alert>
+                )}
+
+                {/* Header */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                    <Box>
+                        <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
+                            Medarbeider Administrasjon
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            Administrer ansatte og deres roller
+                        </Typography>
+                    </Box>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => setShowForm(true)}
+                        sx={{
+                            py: 1.5,
+                            px: 3,
+                            borderRadius: 2,
+                            fontSize: '1rem',
+                            fontWeight: 'bold',
+                            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                            '&:hover': {
+                                background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
+                                transform: 'translateY(-1px)',
+                                boxShadow: '0 8px 25px rgba(25, 118, 210, 0.3)',
+                            },
+                            transition: 'all 0.3s ease',
+                        }}
+                    >
+                        Legg til ny ansatt
+                    </Button>
+                </Box>
+
+                {/* Skjema for ny ansatt */}
+                <Dialog 
+                    open={showForm} 
+                    onClose={() => setShowForm(false)}
+                    maxWidth="md"
+                    fullWidth
+                >
+                    <DialogTitle sx={{ pb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <PersonIcon color="primary" />
+                            <Typography variant="h6" fontWeight="bold">
+                                Legg til ny ansatt
+                            </Typography>
+                        </Box>
+                    </DialogTitle>
+                    <form onSubmit={handleSubmit}>
+                        <DialogContent>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Navn"
+                                        name="name"
+                                        value={form.name}
+                                        onChange={handleChange}
+                                        required
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="E-post"
+                                        name="email"
+                                        type="email"
+                                        value={form.email}
+                                        onChange={handleChange}
+                                        required
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Passord"
+                                        name="password"
+                                        type="password"
+                                        value={form.password}
+                                        onChange={handleChange}
+                                        required
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Rolle</InputLabel>
+                                        <Select
+                                            name="role"
+                                            value={form.role}
+                                            onChange={handleChange}
+                                            label="Rolle"
+                                        >
+                                            <MenuItem value="">Velg rolle</MenuItem>
+                                            <MenuItem value="EMPLOYEE">Ansatt</MenuItem>
+                                            <MenuItem value="ADMIN">Administrator</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Telefon"
+                                        name="phone"
+                                        value={form.phone}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Ansettelsesdato"
+                                        name="hireDate"
+                                        type="date"
+                                        value={form.hireDate}
+                                        onChange={handleChange}
+                                        required
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </DialogContent>
+                        <DialogActions sx={{ p: 3, pt: 1 }}>
+                            <Button
+                                onClick={() => setShowForm(false)}
+                                startIcon={<CancelIcon />}
+                                variant="outlined"
+                            >
+                                Avbryt
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                startIcon={<SaveIcon />}
+                                sx={{
+                                    background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
+                                    }
+                                }}
+                            >
+                                Lagre ansatt
+                            </Button>
+                        </DialogActions>
+                    </form>
+                </Dialog>
+
+                {/* Skjema for redigering */}
+                <Dialog 
+                    open={showEditForm} 
+                    onClose={() => setShowEditForm(false)}
+                    maxWidth="md"
+                    fullWidth
+                >
+                    <DialogTitle sx={{ pb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <EditIcon color="primary" />
+                            <Typography variant="h6" fontWeight="bold">
+                                Rediger ansatt: {editingEmployee?.name}
+                            </Typography>
+                        </Box>
+                    </DialogTitle>
+                    <form onSubmit={handleEdit}>
+                        <DialogContent>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Navn"
+                                        name="name"
+                                        value={editForm.name}
+                                        onChange={handleEditChange}
+                                        required
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="E-post"
+                                        name="email"
+                                        type="email"
+                                        value={editForm.email}
+                                        onChange={handleEditChange}
+                                        required
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Nytt passord (la stå tomt for å beholde)"
+                                        name="password"
+                                        type="password"
+                                        value={editForm.password}
+                                        onChange={handleEditChange}
+                                        variant="outlined"
+                                        placeholder="La stå tomt for å beholde nåværende"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Rolle</InputLabel>
+                                        <Select
+                                            name="role"
+                                            value={editForm.role}
+                                            onChange={handleEditChange}
+                                            label="Rolle"
+                                        >
+                                            <MenuItem value="">Velg rolle</MenuItem>
+                                            <MenuItem value="EMPLOYEE">Ansatt</MenuItem>
+                                            <MenuItem value="ADMIN">Administrator</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Telefon"
+                                        name="phone"
+                                        value={editForm.phone}
+                                        onChange={handleEditChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Ansettelsesdato"
+                                        name="hireDate"
+                                        type="date"
+                                        value={editForm.hireDate}
+                                        onChange={handleEditChange}
+                                        required
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </DialogContent>
+                        <DialogActions sx={{ p: 3, pt: 1 }}>
+                            <Button
+                                onClick={() => setShowEditForm(false)}
+                                startIcon={<CancelIcon />}
+                                variant="outlined"
+                            >
+                                Avbryt
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                startIcon={<SaveIcon />}
+                                sx={{
+                                    background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
+                                    }
+                                }}
+                            >
+                                Oppdater ansatt
+                            </Button>
+                        </DialogActions>
+                    </form>
+                </Dialog>
+
+                {/* Oversikt over ansatte */}
+                <Card elevation={2}>
+                    <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <WorkIcon sx={{ mr: 1, color: 'primary.main' }} />
+                            <Typography variant="h5" component="h2" fontWeight="bold">
+                                Oversikt over ansatte ({employees.length})
+                            </Typography>
+                        </Box>
+
+                        {employees.length === 0 ? (
+                            <Box sx={{ textAlign: 'center', py: 4 }}>
+                                <PersonIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                                <Typography variant="h6" color="text.secondary">
+                                    Ingen ansatte funnet
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Legg til din første ansatt for å komme i gang
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Grid container spacing={3}>
+                                {employees.map(employee => (
+                                    <Grid item xs={12} sm={6} lg={4} key={employee.id}>
+                                        <Card 
+                                            elevation={1}
+                                            sx={{
+                                                height: '100%',
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-2px)',
+                                                    boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                                                }
+                                            }}
+                                        >
+                                            <CardContent>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                    <Avatar 
+                                                        sx={{ 
+                                                            bgcolor: 'primary.main', 
+                                                            mr: 2,
+                                                            width: 48,
+                                                            height: 48
+                                                        }}
+                                                    >
+                                                        {employee.name.charAt(0)}
+                                                    </Avatar>
+                                                    <Box sx={{ flexGrow: 1 }}>
+                                                        <Typography variant="h6" fontWeight="bold">
+                                                            {employee.name}
+                                                        </Typography>
+                                                        <Chip
+                                                            label={getRoleDisplayName(employee.role)}
+                                                            color={getRoleColor(employee.role) as any}
+                                                            size="small"
+                                                        />
+                                                    </Box>
+                                                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                        <Tooltip title="Rediger">
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => startEdit(employee)}
+                                                                sx={{ color: 'primary.main' }}
+                                                            >
+                                                                <EditIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title="Slett">
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleDelete(employee.id, employee.name)}
+                                                                sx={{ color: 'error.main' }}
+                                                            >
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </Box>
+                                                </Box>
+
+                                                <Divider sx={{ my: 2 }} />
+
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <EmailIcon fontSize="small" color="action" />
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {employee.email}
+                                                        </Typography>
+                                                    </Box>
+                                                    
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <PhoneIcon fontSize="small" color="action" />
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {employee.phone || 'Ikke satt'}
+                                                        </Typography>
+                                                    </Box>
+                                                    
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <CalendarIcon fontSize="small" color="action" />
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {formatDate(employee.hireDate)}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        )}
+                    </CardContent>
+                </Card>
+            </Box>
         </Layout>
     );
 };
 
 export default CoWorkerPage;
-
-const styles: Record<string, React.CSSProperties> = {
-    header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-        paddingBottom: '1rem',
-        borderBottom: '2px solid #E5E7EB'
-    },
-    addButton: {
-        padding: '0.75rem 1.5rem',
-        backgroundColor: '#2563EB',
-        color: '#FFF',
-        border: 'none',
-        borderRadius: 8,
-        cursor: 'pointer',
-        fontSize: '1rem',
-        fontWeight: '500',
-        transition: 'background-color 0.2s'
-    },
-    formSection: {
-        backgroundColor: '#FFF',
-        padding: '2rem',
-        borderRadius: 12,
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        marginBottom: '2rem'
-    },
-    form: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem'
-    },
-    formRow: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '1rem'
-    },
-    label: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
-        fontWeight: '500'
-    },
-    input: {
-        padding: '0.75rem',
-        border: '1px solid #D1D5DB',
-        borderRadius: 6,
-        fontSize: '1rem',
-        transition: 'border-color 0.2s'
-    },
-    formButtons: {
-        display: 'flex',
-        gap: '1rem',
-        marginTop: '1rem'
-    },
-    submitButton: {
-        padding: '0.75rem 1.5rem',
-        backgroundColor: '#059669',
-        color: '#FFF',
-        border: 'none',
-        borderRadius: 6,
-        cursor: 'pointer',
-        fontSize: '1rem',
-        fontWeight: '500'
-    },
-    cancelButton: {
-        padding: '0.75rem 1.5rem',
-        backgroundColor: '#6B7280',
-        color: '#FFF',
-        border: 'none',
-        borderRadius: 6,
-        cursor: 'pointer',
-        fontSize: '1rem',
-        fontWeight: '500'
-    },
-    employeesSection: {
-        backgroundColor: '#FFF',
-        padding: '2rem',
-        borderRadius: 12,
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-    },
-    loading: {
-        textAlign: 'center',
-        padding: '2rem',
-        color: '#6B7280',
-        fontSize: '1.1rem'
-    },
-    noEmployees: {
-        textAlign: 'center',
-        padding: '2rem',
-        color: '#6B7280',
-        fontSize: '1.1rem'
-    },
-    employeesGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-        gap: '1.5rem'
-    },
-    employeeCard: {
-        border: '1px solid #E5E7EB',
-        borderRadius: 8,
-        padding: '1.5rem',
-        backgroundColor: '#F9FAFB',
-        transition: 'box-shadow 0.2s'
-    },
-    employeeHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: '1rem',
-        paddingBottom: '1rem',
-        borderBottom: '1px solid #E5E7EB'
-    },
-    employeeName: {
-        margin: 0,
-        fontSize: '1.25rem',
-        fontWeight: '600',
-        color: '#1F2937'
-    },
-    employeeActions: {
-        display: 'flex',
-        gap: '0.5rem'
-    },
-    actionButton: {
-        edit: {
-            padding: '0.5rem 1rem',
-            backgroundColor: '#059669',
-            color: '#FFF',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-        },
-        delete: {
-            padding: '0.5rem 1rem',
-            backgroundColor: '#DC2626',
-            color: '#FFF',
-            border: 'none',
-            borderRadius: 4,
-            cursor: 'pointer',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-        }
-    },
-    employeeDetails: {
-        fontSize: '0.875rem',
-        lineHeight: '1.5'
-    },
-    message: {
-        error: {
-            backgroundColor: '#FEE2E2',
-            color: '#DC2626',
-            padding: '1rem',
-            borderRadius: 8,
-            marginBottom: '1rem',
-            border: '1px solid #FCA5A5'
-        },
-        success: {
-            backgroundColor: '#D1FAE5',
-            color: '#059669',
-            padding: '1rem',
-            borderRadius: 8,
-            marginBottom: '1rem',
-            border: '1px solid #A7F3D0'
-        }
-    }
-};

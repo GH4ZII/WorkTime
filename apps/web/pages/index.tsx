@@ -1,8 +1,8 @@
 ﻿import React, {useEffect} from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import axios from 'axios';
 import { Layout } from '../components/Layout';
+import { useData } from '../context/DataContext';
 import {
     Box,
     Card,
@@ -115,32 +115,18 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => (
 );
 
 const HomePage: NextPage = () => {
-    const [timeOffRequests, setTimeOffRequests] = React.useState<TimeOffRequest[]>([]);
-    const [swapRequests, setSwapRequests] = React.useState<SwapRequest[]>([]);
-    const [shifts, setShifts] = React.useState<Shift[]>([]);
-    const [employees, setEmployees] = React.useState<Employee[]>([]);
-    const [loading, setLoading] = React.useState(true);
-    const [error, setError] = React.useState<string | null>(null);
+    const { 
+        employees, 
+        shifts, 
+        timeOffRequests, 
+        swapRequests, 
+        loading, 
+        error 
+    } = useData();
 
     const totalEmployees = employees.length;
     const totalRequests = timeOffRequests.length + swapRequests.length;
     const pendingRequests = timeOffRequests.filter(req => req.type === 'VACATION').length;
-
-    //Hent alle time off requests
-    useEffect(() => {
-        axios.get<TimeOffRequest[]>('http://localhost:3001/time-off-requests', { withCredentials: true })
-            .then(res => setTimeOffRequests(res.data))
-            .catch(err => setError(err.message))
-            .finally(() => setLoading(false));
-    }, []);
-
-    // Hent alle skiftene
-    useEffect(() => {
-        axios.get<Shift[]>('http://localhost:3001/shifts', { withCredentials: true })
-            .then(res => setShifts(res.data))
-            .catch(err => setError(err.message))
-            .finally(() => setLoading(false));
-    }, []);
 
     // Oppslagskart
     const shiftDateById = React.useMemo(() => {
@@ -154,40 +140,6 @@ const HomePage: NextPage = () => {
         const d = new Date(iso);
         return d.toLocaleDateString('no-NO');
     };
-
-    // Hent alle employees
-    useEffect(() => {
-        const fetchEmployees = async () => {
-            try {
-                const response = await axios.get<Employee[]>('http://localhost:3001/users', {
-                    withCredentials: true,
-                });
-                setEmployees(response.data);
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchEmployees();
-    }, []);
-
-    // Hent alle swap requests
-    useEffect(() => {
-        const fetchSwapRequests = async () => {
-            try {
-                const response = await axios.get<SwapRequest[]>('http://localhost:3001/shift-swap-requests', {
-                    withCredentials: true,
-                });
-                setSwapRequests(response.data);
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchSwapRequests();
-    }, []);
 
     const getRequestTypeColor = (type: string) => {
         switch (type) {

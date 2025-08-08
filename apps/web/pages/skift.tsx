@@ -3,6 +3,50 @@ import React, { useState, useEffect } from 'react'
 import type { NextPage } from 'next'
 import axios from 'axios'
 import { Layout } from '../components/Layout'
+import {
+    Box,
+    Card,
+    CardContent,
+    Typography,
+    Button,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Chip,
+    Avatar,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Alert,
+    CircularProgress,
+    Grid,
+    Divider,
+    Tooltip,
+    Paper,
+    Tabs,
+    Tab,
+    Badge
+} from '@mui/material';
+import {
+    Add as AddIcon,
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    Person as PersonIcon,
+    Schedule as ScheduleIcon,
+    LocationOn as LocationIcon,
+    Notes as NotesIcon,
+    AccessTime as TimeIcon,
+    CalendarToday as CalendarIcon,
+    Save as SaveIcon,
+    Cancel as CancelIcon,
+    Today as TodayIcon,
+    DateRange as DateRangeIcon,
+    Event as EventIcon
+} from '@mui/icons-material';
 
 interface Employee {
     id: string
@@ -71,6 +115,7 @@ const ShiftPage: NextPage = () => {
     // String | null - for feilmeldinger
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         fetchEmployees()
@@ -79,10 +124,13 @@ const ShiftPage: NextPage = () => {
 
     const fetchEmployees = async () => {
         try {
+            setLoading(true)
             const res = await axios.get<Employee[]>('http://localhost:3001/users', { withCredentials: true })
             setEmployees(res.data)
         } catch (err: any) {
             setError(err.message)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -250,303 +298,497 @@ const ShiftPage: NextPage = () => {
         return employee?.name || 'Ukjent'
     }
 
+    const getTabIcon = (tab: TabType) => {
+        switch (tab) {
+            case 'today':
+                return <TodayIcon />
+            case 'week':
+                return <DateRangeIcon />
+            case 'month':
+                return <EventIcon />
+            default:
+                return <TodayIcon />
+        }
+    }
+
+    const getTabLabel = (tab: TabType) => {
+        switch (tab) {
+            case 'today':
+                return 'I dag'
+            case 'week':
+                return 'Siste uke'
+            case 'month':
+                return 'Siste måned'
+            default:
+                return 'I dag'
+        }
+    }
+
     const filteredShifts = getFilteredShifts()
+
+    if (loading) {
+        return (
+            <Layout>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                    <CircularProgress size={60} />
+                </Box>
+            </Layout>
+        );
+    }
 
     return (
         <Layout>
-            <header style={styles.header}>
-                <h1>Shift Management</h1>
-                <button style={styles.button} onClick={() => setShowForm(true)}>
-                    Opprett nytt skift
-                </button>
-            </header>
+            <Box sx={{ p: 3 }}>
+                {error && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                )}
+                
+                {success && (
+                    <Alert severity="success" sx={{ mb: 3 }}>
+                        {success}
+                    </Alert>
+                )}
 
-            {error && <div style={styles.message.error}>{error}</div>}
-            {success && <div style={styles.message.success}>{success}</div>}
+                {/* Header */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                    <Box>
+                        <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
+                            Skift Administrasjon
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            Administrer skift og arbeidstider
+                        </Typography>
+                    </Box>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => setShowForm(true)}
+                        sx={{
+                            py: 1.5,
+                            px: 3,
+                            borderRadius: 2,
+                            fontSize: '1rem',
+                            fontWeight: 'bold',
+                            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                            '&:hover': {
+                                background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
+                                transform: 'translateY(-1px)',
+                                boxShadow: '0 8px 25px rgba(25, 118, 210, 0.3)',
+                            },
+                            transition: 'all 0.3s ease',
+                        }}
+                    >
+                        Opprett nytt skift
+                    </Button>
+                </Box>
 
-            {showForm && (
-                <section style={styles.formSection}>
-                    <h2>Opprett Skift</h2>
-                    <form onSubmit={handleSubmit} style={styles.form}>
-                        <label>
-                            Ansatt:
-                            <select name="userId" value={form.userId} onChange={handleChange} required>
-                                <option value="">Velg ansatt</option>
-                                {employees.map(emp => (
-                                    <option key={emp.id} value={emp.id}>{emp.name}</option>
-                                ))}
-                            </select>
-                        </label>
-
-                        <label>
-                            Dato:
-                            <input type="date" name="date" value={form.date} onChange={handleChange} required />
-                        </label>
-
-                        <label>
-                            Starttid:
-                            <input type="time" name="startTime" value={form.startTime} onChange={handleChange} required />
-                        </label>
-
-                        <label>
-                            Sluttid:
-                            <input type="time" name="endTime" value={form.endTime} onChange={handleChange} required />
-                        </label>
-
-                        <label>
-                            Lokasjon (valgfritt):
-                            <input type="text" name="location" value={form.location} onChange={handleChange} />
-                        </label>
-
-                        <label>
-                            Notater (valgfritt):
-                            <textarea name="notes" value={form.notes} onChange={handleChange} />
-                        </label>
-
-                        <div style={styles.formButtons}>
-                            <button type="submit">Lagre</button>
-                            <button type="button" onClick={() => setShowForm(false)}>Avbryt</button>
-                        </div>
+                {/* Skjema for nytt skift */}
+                <Dialog 
+                    open={showForm} 
+                    onClose={() => setShowForm(false)}
+                    maxWidth="md"
+                    fullWidth
+                >
+                    <DialogTitle sx={{ pb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <ScheduleIcon color="primary" />
+                            <Typography variant="h6" fontWeight="bold">
+                                Opprett nytt skift
+                            </Typography>
+                        </Box>
+                    </DialogTitle>
+                    <form onSubmit={handleSubmit}>
+                        <DialogContent>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Ansatt</InputLabel>
+                                        <Select
+                                            name="userId"
+                                            value={form.userId}
+                                            onChange={handleChange}
+                                            label="Ansatt"
+                                            required
+                                        >
+                                            {employees.map(emp => (
+                                                <MenuItem key={emp.id} value={emp.id}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
+                                                            {emp.name.charAt(0)}
+                                                        </Avatar>
+                                                        {emp.name}
+                                                    </Box>
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Dato"
+                                        name="date"
+                                        type="date"
+                                        value={form.date}
+                                        onChange={handleChange}
+                                        required
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Starttid"
+                                        name="startTime"
+                                        type="time"
+                                        value={form.startTime}
+                                        onChange={handleChange}
+                                        required
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Sluttid"
+                                        name="endTime"
+                                        type="time"
+                                        value={form.endTime}
+                                        onChange={handleChange}
+                                        required
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Lokasjon (valgfritt)"
+                                        name="location"
+                                        value={form.location}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        label="Notater (valgfritt)"
+                                        name="notes"
+                                        value={form.notes}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                        multiline
+                                        rows={3}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </DialogContent>
+                        <DialogActions sx={{ p: 3, pt: 1 }}>
+                            <Button
+                                onClick={() => setShowForm(false)}
+                                startIcon={<CancelIcon />}
+                                variant="outlined"
+                            >
+                                Avbryt
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                startIcon={<SaveIcon />}
+                                sx={{
+                                    background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
+                                    }
+                                }}
+                            >
+                                Lagre skift
+                            </Button>
+                        </DialogActions>
                     </form>
-                </section>
-            )}
+                </Dialog>
 
-            {showEditForm && editingShift && (
-                <section style={styles.formSection}>
-                    <h2>Rediger Skift</h2>
-                    <form onSubmit={handleEdit} style={styles.form}>
-                        <label>
-                            Ansatt:
-                            <select name="userId" value={editForm.userId} onChange={handleEditChange} required>
-                                <option value="">Velg ansatt</option>
-                                {employees.map(emp => (
-                                    <option key={emp.id} value={emp.id}>{emp.name}</option>
-                                ))}
-                            </select>
-                        </label>
-
-                        <label>
-                            Dato:
-                            <input type="date" name="date" value={editForm.date} onChange={handleEditChange} required />
-                        </label>
-
-                        <label>
-                            Starttid:
-                            <input type="time" name="startTime" value={editForm.startTime} onChange={handleEditChange} required />
-                        </label>
-
-                        <label>
-                            Sluttid:
-                            <input type="time" name="endTime" value={editForm.endTime} onChange={handleEditChange} required />
-                        </label>
-
-                        <label>
-                            Lokasjon (valgfritt):
-                            <input type="text" name="location" value={editForm.location} onChange={handleEditChange} />
-                        </label>
-
-                        <label>
-                            Notater (valgfritt):
-                            <textarea name="notes" value={editForm.notes} onChange={handleEditChange} />
-                        </label>
-
-                        <div style={styles.formButtons}>
-                            <button type="submit">Oppdater</button>
-                            <button type="button" onClick={() => setShowEditForm(false)}>Avbryt</button>
-                        </div>
+                {/* Skjema for redigering */}
+                <Dialog 
+                    open={showEditForm} 
+                    onClose={() => setShowEditForm(false)}
+                    maxWidth="md"
+                    fullWidth
+                >
+                    <DialogTitle sx={{ pb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <EditIcon color="primary" />
+                            <Typography variant="h6" fontWeight="bold">
+                                Rediger skift
+                            </Typography>
+                        </Box>
+                    </DialogTitle>
+                    <form onSubmit={handleEdit}>
+                        <DialogContent>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Ansatt</InputLabel>
+                                        <Select
+                                            name="userId"
+                                            value={editForm.userId}
+                                            onChange={handleEditChange}
+                                            label="Ansatt"
+                                            required
+                                        >
+                                            {employees.map(emp => (
+                                                <MenuItem key={emp.id} value={emp.id}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
+                                                            {emp.name.charAt(0)}
+                                                        </Avatar>
+                                                        {emp.name}
+                                                    </Box>
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Dato"
+                                        name="date"
+                                        type="date"
+                                        value={editForm.date}
+                                        onChange={handleEditChange}
+                                        required
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Starttid"
+                                        name="startTime"
+                                        type="time"
+                                        value={editForm.startTime}
+                                        onChange={handleEditChange}
+                                        required
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Sluttid"
+                                        name="endTime"
+                                        type="time"
+                                        value={editForm.endTime}
+                                        onChange={handleEditChange}
+                                        required
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Lokasjon (valgfritt)"
+                                        name="location"
+                                        value={editForm.location}
+                                        onChange={handleEditChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        label="Notater (valgfritt)"
+                                        name="notes"
+                                        value={editForm.notes}
+                                        onChange={handleEditChange}
+                                        variant="outlined"
+                                        multiline
+                                        rows={3}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </DialogContent>
+                        <DialogActions sx={{ p: 3, pt: 1 }}>
+                            <Button
+                                onClick={() => setShowEditForm(false)}
+                                startIcon={<CancelIcon />}
+                                variant="outlined"
+                            >
+                                Avbryt
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                startIcon={<SaveIcon />}
+                                sx={{
+                                    background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
+                                    }
+                                }}
+                            >
+                                Oppdater skift
+                            </Button>
+                        </DialogActions>
                     </form>
-                </section>
-            )}
+                </Dialog>
 
-            {/* Kalender med tabs */}
-            <section style={styles.calendarSection}>
-                <div style={styles.tabContainer}>
-                    <button 
-                        style={{ ...styles.tab, ...(activeTab === 'today' ? styles.activeTab : {}) }}
-                        onClick={() => setActiveTab('today')}
-                    >
-                        I dag
-                    </button>
-                    <button 
-                        style={{ ...styles.tab, ...(activeTab === 'week' ? styles.activeTab : {}) }}
-                        onClick={() => setActiveTab('week')}
-                    >
-                        Siste uke
-                    </button>
-                    <button 
-                        style={{ ...styles.tab, ...(activeTab === 'month' ? styles.activeTab : {}) }}
-                        onClick={() => setActiveTab('month')}
-                    >
-                        Siste måned
-                    </button>
-                </div>
+                {/* Kalender med tabs */}
+                <Card elevation={2}>
+                    <CardContent sx={{ p: 0 }}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <Tabs 
+                                value={activeTab} 
+                                onChange={(_, newValue) => setActiveTab(newValue)}
+                                variant="fullWidth"
+                            >
+                                {(['today', 'week', 'month'] as TabType[]).map((tab) => (
+                                    <Tab
+                                        key={tab}
+                                        value={tab}
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                {getTabIcon(tab)}
+                                                {getTabLabel(tab)}
+                                                <Badge 
+                                                    badgeContent={tab === 'today' ? filteredShifts.length : undefined} 
+                                                    color="primary"
+                                                />
+                                            </Box>
+                                        }
+                                        sx={{ py: 2 }}
+                                    />
+                                ))}
+                            </Tabs>
+                        </Box>
 
-                <div style={styles.calendarContent}>
-                    {filteredShifts.length === 0 ? (
-                        <p style={styles.noShifts}>Ingen skift funnet for valgt periode</p>
-                    ) : (
-                        <div style={styles.shiftGrid}>
-                            {filteredShifts.map(shift => (
-                                <div key={shift.id} style={styles.shiftCard}>
-                                    <div style={styles.shiftHeader}>
-                                        <h3>{getEmployeeName(shift.userId)}</h3>
-                                        <div style={styles.shiftActions}>
-                                            <button 
-                                                style={styles.actionButton.edit}
-                                                onClick={() => startEdit(shift)}
+                        <Box sx={{ p: 3 }}>
+                            {filteredShifts.length === 0 ? (
+                                <Box sx={{ textAlign: 'center', py: 4 }}>
+                                    <ScheduleIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                                    <Typography variant="h6" color="text.secondary">
+                                        Ingen skift funnet
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Ingen skift funnet for valgt periode
+                                    </Typography>
+                                </Box>
+                            ) : (
+                                <Grid container spacing={3}>
+                                    {filteredShifts.map(shift => (
+                                        <Grid item xs={12} sm={6} lg={4} key={shift.id}>
+                                            <Card 
+                                                elevation={1}
+                                                sx={{
+                                                    height: '100%',
+                                                    transition: 'all 0.3s ease',
+                                                    '&:hover': {
+                                                        transform: 'translateY(-2px)',
+                                                        boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                                                    }
+                                                }}
                                             >
-                                                Rediger
-                                            </button>
-                                            <button 
-                                                style={styles.actionButton.delete}
-                                                onClick={() => handleDelete(shift.id)}
-                                            >
-                                                Slett
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div style={styles.shiftDetails}>
-                                        <p><strong>Dato:</strong> {formatDateTime(shift.startTime)}</p>
-                                        <p><strong>Tid:</strong> {formatTime(shift.startTime)} - {formatTime(shift.endTime)}</p>
-                                        <p><strong>Varighet:</strong> {getDuration(shift.startTime, shift.endTime)}</p>
-                                        {shift.location && <p><strong>Lokasjon:</strong> {shift.location}</p>}
-                                        {shift.notes && <p><strong>Notater:</strong> {shift.notes}</p>}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </section>
+                                                <CardContent>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                        <Avatar 
+                                                            sx={{ 
+                                                                bgcolor: 'primary.main', 
+                                                                mr: 2,
+                                                                width: 40,
+                                                                height: 40
+                                                            }}
+                                                        >
+                                                            {getEmployeeName(shift.userId).charAt(0)}
+                                                        </Avatar>
+                                                        <Box sx={{ flexGrow: 1 }}>
+                                                            <Typography variant="h6" fontWeight="bold">
+                                                                {getEmployeeName(shift.userId)}
+                                                            </Typography>
+                                                            <Chip
+                                                                label={getDuration(shift.startTime, shift.endTime)}
+                                                                color="primary"
+                                                                size="small"
+                                                                variant="outlined"
+                                                            />
+                                                        </Box>
+                                                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                            <Tooltip title="Rediger">
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => startEdit(shift)}
+                                                                    sx={{ color: 'primary.main' }}
+                                                                >
+                                                                    <EditIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            <Tooltip title="Slett">
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => handleDelete(shift.id)}
+                                                                    sx={{ color: 'error.main' }}
+                                                                >
+                                                                    <DeleteIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </Box>
+                                                    </Box>
+
+                                                    <Divider sx={{ my: 2 }} />
+
+                                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <CalendarIcon fontSize="small" color="action" />
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {formatDateTime(shift.startTime)}
+                                                            </Typography>
+                                                        </Box>
+                                                        
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <TimeIcon fontSize="small" color="action" />
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
+                                                            </Typography>
+                                                        </Box>
+                                                        
+                                                        {shift.location && (
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <LocationIcon fontSize="small" color="action" />
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    {shift.location}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                        
+                                                        {shift.notes && (
+                                                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                                                                <NotesIcon fontSize="small" color="action" sx={{ mt: 0.5 }} />
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    {shift.notes}
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                    </Box>
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            )}
+                        </Box>
+                    </CardContent>
+                </Card>
+            </Box>
         </Layout>
     )
 }
 
 export default ShiftPage
-
-const styles: Record<string, React.CSSProperties> = {
-    header: { 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '1.5rem' 
-    },
-    button: { 
-        padding: '0.5rem 1rem', 
-        backgroundColor: '#2563EB', 
-        color: '#FFF', 
-        border: 'none', 
-        borderRadius: 4, 
-        cursor: 'pointer' 
-    },
-    formSection: { 
-        backgroundColor: '#FFF', 
-        padding: '1rem', 
-        borderRadius: 8, 
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)', 
-        marginBottom: '2rem' 
-    },
-    form: { 
-        display: 'grid', 
-        gap: '1rem' 
-    },
-    formButtons: { 
-        display: 'flex', 
-        gap: '1rem', 
-        marginTop: '1rem' 
-    },
-    calendarSection: { 
-        backgroundColor: '#FFF', 
-        borderRadius: 8, 
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)', 
-        marginBottom: '2rem',
-        overflow: 'hidden'
-    },
-    tabContainer: { 
-        display: 'flex', 
-        borderBottom: '1px solid #E5E7EB' 
-    },
-    tab: { 
-        flex: 1, 
-        padding: '1rem', 
-        border: 'none', 
-        backgroundColor: 'transparent', 
-        cursor: 'pointer',
-        fontSize: '1rem',
-        fontWeight: '500'
-    },
-    activeTab: { 
-        backgroundColor: '#2563EB', 
-        color: '#FFF' 
-    },
-    calendarContent: { 
-        padding: '1rem' 
-    },
-    noShifts: { 
-        textAlign: 'center', 
-        color: '#6B7280', 
-        padding: '2rem' 
-    },
-    shiftGrid: { 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-        gap: '1rem' 
-    },
-    shiftCard: { 
-        border: '1px solid #E5E7EB', 
-        borderRadius: 8, 
-        padding: '1rem',
-        backgroundColor: '#F9FAFB'
-    },
-    shiftHeader: { 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '1rem' 
-    },
-    shiftActions: { 
-        display: 'flex', 
-        gap: '0.5rem' 
-    },
-    actionButton: {
-        edit: { 
-            padding: '0.25rem 0.5rem', 
-            backgroundColor: '#059669', 
-            color: '#FFF', 
-            border: 'none', 
-            borderRadius: 4, 
-            cursor: 'pointer',
-            fontSize: '0.875rem'
-        },
-        delete: { 
-            padding: '0.25rem 0.5rem', 
-            backgroundColor: '#DC2626', 
-            color: '#FFF', 
-            border: 'none', 
-            borderRadius: 4, 
-            cursor: 'pointer',
-            fontSize: '0.875rem'
-        }
-    },
-    shiftDetails: { 
-        fontSize: '0.875rem' 
-    },
-    message: {
-        error: { 
-            backgroundColor: '#FEE2E2', 
-            color: '#DC2626', 
-            padding: '1rem', 
-            borderRadius: 8, 
-            marginBottom: '1rem',
-            border: '1px solid #FCA5A5'
-        },
-        success: { 
-            backgroundColor: '#D1FAE5', 
-            color: '#059669', 
-            padding: '1rem', 
-            borderRadius: 8, 
-            marginBottom: '1rem',
-            border: '1px solid #A7F3D0'
-        }
-    }
-}

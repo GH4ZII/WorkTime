@@ -7,6 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { EmotionCache } from '@emotion/cache';
 import createEmotionCache from "../utils/createEmotionCache";
 import { ChatProvider } from '../context/ChatContext';
+import { DataProvider } from '../context/DataContext';
 
 const theme = createTheme({
     palette: {
@@ -31,10 +32,12 @@ export default function MyApp(props: MyAppProps) {
 
     return (
         <ThemeProvider theme={theme}>
-            <ChatProvider>
-                <CssBaseline />
-                <Component {...pageProps} />
-            </ChatProvider>
+            <DataProvider>
+                <ChatProvider>
+                    <CssBaseline />
+                    <Component {...pageProps} />
+                </ChatProvider>
+            </DataProvider>
         </ThemeProvider>
     );
 }
