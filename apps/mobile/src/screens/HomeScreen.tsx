@@ -2,6 +2,7 @@
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import { Calendar, LocaleConfig, DateData } from "react-native-calendars";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
 // Norsk språk i kalender
 LocaleConfig.locales["no"] = {
@@ -72,7 +73,7 @@ const HomeScreen: React.FC = () => {
                 setIsLoading(true);
                 setError(null);
 
-                const response = await axios.get<RawShiftFromAPI[]>("http://localhost:3001/shifts");
+                const response = await axios.get<RawShiftFromAPI[]>(API_ENDPOINTS.SHIFTS);
 
                 const processed: ProcessedShift[] = response.data.map((raw) => {
                     const start = new Date(raw.startTime);

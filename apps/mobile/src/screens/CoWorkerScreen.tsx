@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView, ActivityIndicator } from 'react-native';
+import { API_ENDPOINTS } from '../config/api';
 
 // Interface for en medarbeider
 interface CoWorker {
@@ -8,8 +9,6 @@ interface CoWorker {
     email: string;
     role: string;
 }
-
-const API_URL = 'http://localhost:3001/users';
 
 const CoWorkerScreen: React.FC = () => {
     // State-variabler for data, lasting og feil
@@ -22,7 +21,7 @@ const CoWorkerScreen: React.FC = () => {
         const fetchCoWorkers = async () => {
             try {
                 // 1. Vent på at fetch skal fullføre
-                const response = await fetch(API_URL);
+                const response = await fetch(API_ENDPOINTS.USERS);
                 if (!response.ok) {
                     // Kast en feil hvis serveren svarer med en feilkode (f.eks. 404, 500)
                     throw new Error('Klarte ikke å hente medarbeidere. Sjekk nettverksforbindelsen.');
