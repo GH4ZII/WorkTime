@@ -1,8 +1,10 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Dimensions, TouchableOpacity } from "react-native";
 import { Calendar, LocaleConfig, DateData } from "react-native-calendars";
 import axios from "axios";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS } from "../config/api-simple";
+
+const { width } = Dimensions.get('window');
 
 // Norsk språk i kalender
 LocaleConfig.locales["no"] = {
@@ -96,8 +98,12 @@ const HomeScreen: React.FC = () => {
 
                 setAllShifts(processed);
             } catch (err) {
-                console.error("Error fetching shifts:", err);
-                setError("Kunne ikke hente skift. Vennligst prøv igjen senere.");
+                console.error("❌ Error fetching shifts:", err);
+                if (err.response) {
+                    console.error("Response status:", err.response.status);
+                    console.error("Response data:", err.response.data);
+                }
+                setError(`Kunne ikke hente skift: ${err.message}`);
             } finally {
                 setIsLoading(false);
             }
@@ -106,16 +112,12 @@ const HomeScreen: React.FC = () => {
         fetchAndProcessShifts();
     }, []);
 
-
-// Memoized kalkulering for totale timer i den viste måneden
+    // Memoized kalkulering for totale timer i den viste måneden
     const totalHoursForMonth = useMemo(() => {
-
-        // 1. Filtrer vaktene
         const approvedShiftsInMonth = allShifts.filter(shift =>
             shift.date.startsWith(currentMonth) && shift.status === ShiftStatus.APPROVED
         );
         const total = approvedShiftsInMonth.reduce((sum, shift) => sum + shift.duration, 0);
-
         return total.toFixed(1);
     }, [allShifts, currentMonth]);
 
@@ -133,7 +135,7 @@ const HomeScreen: React.FC = () => {
             if (!m[shift.date]) m[shift.date] = { dots: [] };
             m[shift.date].dots.push({
                 key: shift.id,
-                color: shift.status === ShiftStatus.APPROVED ? "#1E90FF" : "#FFA500",
+                color: shift.status === ShiftStatus.APPROVED ? "#27ae60" : "#f39c12",
             });
         });
 
@@ -141,35 +143,118 @@ const HomeScreen: React.FC = () => {
             m[selectedDate] = {
                 ...(m[selectedDate] || { dots: [] }),
                 selected: true,
-                selectedColor: "#1E90FF",
+                selectedColor: "#3498db",
             };
         }
 
         return m;
     }, [allShifts, selectedDate]);
 
+    const getStatusColor = (status: ShiftStatus) => {
+        switch (status) {
+            case ShiftStatus.APPROVED:
+                return "#27ae60";
+            case ShiftStatus.PENDING:
+                return "#f39c12";
+            case ShiftStatus.REJECTED:
+                return "#e74c3c";
+            default:
+                return "#95a5a6";
+        }
+    };
+
+    const getStatusText = (status: ShiftStatus) => {
+        switch (status) {
+            case ShiftStatus.APPROVED:
+                return "Godkjent";
+            case ShiftStatus.PENDING:
+                return "Venter";
+            case ShiftStatus.REJECTED:
+                return "Avvist";
+            default:
+                return status;
+        }
+    };
+
     const renderShiftDetails = () => {
-        if (isLoading) return <ActivityIndicator size="large" color="#5E84E2" style={styles.infoContainer} />;
-        if (error) return <Text style={[styles.infoText, styles.errorText]}>{error}</Text>;
-        if (!selectedDate) return <Text style={styles.infoText}>Trykk på en dato for å se detaljer.</Text>;
+        if (isLoading) {
+            return (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#3498db" />
+                    <Text style={styles.loadingText}>Laster skift...</Text>
+                </View>
+            );
+        }
+        
+        if (error) {
+            return (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorIcon}>⚠️</Text>
+                    <Text style={styles.errorText}>{error}</Text>
+                    <TouchableOpacity style={styles.retryButton}>
+                        <Text style={styles.retryButtonText}>Prøv igjen</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+        
+        if (!selectedDate) {
+            return (
+                <View style={styles.infoContainer}>
+                    <Text style={styles.infoIcon}>📅</Text>
+                    <Text style={styles.infoText}>Trykk på en dato for å se detaljer</Text>
+                </View>
+            );
+        }
 
         if (shiftsForSelectedDate.length === 0) {
-            return <Text style={styles.infoText}>Ingen vakt registrert denne dagen.</Text>;
+            return (
+                <View style={styles.infoContainer}>
+                    <Text style={styles.infoIcon}>📝</Text>
+                    <Text style={styles.infoText}>Ingen vakt registrert denne dagen</Text>
+                </View>
+            );
         }
 
         return (
-            <View style={{ gap: 12 }}>
+            <View style={styles.shiftsContainer}>
                 <Text style={styles.shiftDate}>Vakter {selectedDate}</Text>
+                <Text style={styles.shiftCount}>{shiftsForSelectedDate.length} vakt(er)</Text>
 
                 {shiftsForSelectedDate.map((shift) => (
                     <View key={shift.id} style={styles.shiftCard}>
-                        <Text style={styles.shiftTime}>
-                            {shift.startTime} - {shift.endTime}
-                        </Text>
-                        {shift.userName && <Text style={styles.shiftDescription}>Ansatt: {shift.userName}</Text>}
-                        {shift.location && <Text style={styles.shiftDescription}>Sted: {shift.location}</Text>}
-                        {shift.description && <Text style={styles.shiftDescription}>Notat: {shift.description}</Text>}
-                        <Text style={[styles.shiftDescription, styles.status]}>Status: {shift.status.toUpperCase()}</Text>
+                        <View style={styles.shiftHeader}>
+                            <View style={styles.timeContainer}>
+                                <Text style={styles.shiftTime}>
+                                    {shift.startTime} - {shift.endTime}
+                                </Text>
+                                <Text style={styles.shiftDuration}>{shift.duration.toFixed(1)} timer</Text>
+                            </View>
+                            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(shift.status) }]}>
+                                <Text style={styles.statusText}>{getStatusText(shift.status)}</Text>
+                            </View>
+                        </View>
+                        
+                        {shift.userName && (
+                            <View style={styles.shiftDetail}>
+                                <Text style={styles.detailLabel}>👤 Ansatt:</Text>
+                                <Text style={styles.detailValue}>{shift.userName}</Text>
+                            </View>
+                        )}
+                        
+                        {shift.location && (
+                            <View style={styles.shiftDetail}>
+                                <Text style={styles.detailLabel}>📍 Sted:</Text>
+                                <Text style={styles.detailValue}>{shift.location}</Text>
+                            </View>
+                        )}
+                        
+                        {shift.description && (
+                            <View style={styles.shiftDetail}>
+                                <Text style={styles.detailLabel}>📝 Notat:</Text>
+                                <Text style={styles.detailValue}>{shift.description}</Text>
+                            </View>
+                        )}
                     </View>
                 ))}
             </View>
@@ -177,74 +262,263 @@ const HomeScreen: React.FC = () => {
     };
 
     return (
-        <ScrollView style={styles.container}>
-            <Calendar
-                style={styles.calendar}
-                onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
-                onMonthChange={(month) => setCurrentMonth(month.dateString.slice(0, 7))}
-                markedDates={markedDates}
-                markingType="multi-dot"
-            />
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+            {/* Header Section */}
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>Kalender</Text>
+                <Text style={styles.headerSubtitle}>Oversikt over dine vakter</Text>
+            </View>
+
+            {/* Calendar Section */}
+            <View style={styles.calendarContainer}>
+                <Calendar
+                    style={styles.calendar}
+                    onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
+                    onMonthChange={(month) => setCurrentMonth(month.dateString.slice(0, 7))}
+                    markedDates={markedDates}
+                    markingType="multi-dot"
+                    theme={{
+                        backgroundColor: '#ffffff',
+                        calendarBackground: '#ffffff',
+                        textSectionTitleColor: '#2c3e50',
+                        selectedDayBackgroundColor: '#3498db',
+                        selectedDayTextColor: '#ffffff',
+                        todayTextColor: '#3498db',
+                        dayTextColor: '#2c3e50',
+                        textDisabledColor: '#bdc3c7',
+                        dotColor: '#3498db',
+                        selectedDotColor: '#ffffff',
+                        arrowColor: '#3498db',
+                        monthTextColor: '#2c3e50',
+                        indicatorColor: '#3498db',
+                        textDayFontWeight: '400',
+                        textMonthFontWeight: '600',
+                        textDayHeaderFontWeight: '500',
+                        textDayFontSize: 16,
+                        textMonthFontSize: 18,
+                        textDayHeaderFontSize: 14,
+                    }}
+                />
+            </View>
+
+            {/* Summary Section */}
             <View style={styles.summaryContainer}>
-                <Text style={styles.summaryTitle}>Arbeid</Text>
-                {isLoading ? (
-                    <ActivityIndicator size="large" color="#5E84E2" />
-                    ): (
+                <View style={styles.summaryCard}>
+                    <Text style={styles.summaryTitle}>Arbeid denne måneden</Text>
+                    {isLoading ? (
+                        <ActivityIndicator size="small" color="#3498db" />
+                    ) : (
                         <Text style={styles.summaryHours}>{totalHoursForMonth} timer</Text>
                     )}
+                </View>
             </View>
-            <View style={styles.detailsContainer}>{renderShiftDetails()}</View>
+
+            {/* Details Section */}
+            <View style={styles.detailsContainer}>
+                {renderShiftDetails()}
+            </View>
         </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#f5f5f5" },
-    calendar: { borderBottomWidth: 1, borderColor: "#e0e0e0" },
-    detailsContainer: { padding: 20 },
-    infoContainer: { marginTop: 20 },
-    infoText: { textAlign: "center", fontSize: 16, color: "#666", marginTop: 20 },
-    errorText: { color: "red" },
-
-    shiftDate: { fontSize: 18, fontWeight: "bold", marginBottom: 8 },
-    coworkers: { fontSize: 14, fontWeight: "600", marginBottom: 8, color: "#333" },
-
-    shiftCard: {
-        backgroundColor: "white",
-        borderRadius: 8,
-        padding: 16,
-        elevation: 2,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f9fa',
+    },
+    header: {
+        backgroundColor: '#3498db',
+        paddingTop: 50,
+        paddingBottom: 20,
+        paddingHorizontal: 20,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+    },
+    headerTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#ffffff',
+        marginBottom: 4,
+    },
+    headerSubtitle: {
+        fontSize: 16,
+        color: '#ecf0f1',
+    },
+    calendarContainer: {
+        backgroundColor: '#ffffff',
+        margin: 20,
+        borderRadius: 16,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
         shadowOpacity: 0.1,
-        shadowRadius: 2,
+        shadowRadius: 8,
+        elevation: 4,
+        overflow: 'hidden',
+    },
+    calendar: {
+        borderBottomWidth: 0,
     },
     summaryContainer: {
-        backgroundColor: "white",
+        paddingHorizontal: 20,
+        marginBottom: 20,
+    },
+    summaryCard: {
+        backgroundColor: '#ffffff',
         padding: 20,
-        margin: 20,
-        marginBottom: 0,
-        borderRadius: 8,
-        elevation: 2,
-        shadowColor: "#000",
+        borderRadius: 16,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
-        alignItems: "center",
+        shadowRadius: 8,
+        elevation: 4,
     },
     summaryTitle: {
         fontSize: 16,
-        fontWeight: "600",
-        color: "#333",
+        fontWeight: '600',
+        color: '#2c3e50',
+        marginBottom: 8,
     },
     summaryHours: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "#1E90FF",
-        marginTop: 4,
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#3498db',
     },
-    shiftTime: { fontSize: 16, marginBottom: 8 },
-    shiftDescription: { fontSize: 14, color: "#555", marginBottom: 4 },
-    status: { marginTop: 8, fontWeight: "bold" },
+    detailsContainer: {
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+    },
+    loadingContainer: {
+        alignItems: 'center',
+        paddingVertical: 40,
+    },
+    loadingText: {
+        marginTop: 16,
+        fontSize: 16,
+        color: '#7f8c8d',
+    },
+    errorContainer: {
+        alignItems: 'center',
+        paddingVertical: 40,
+    },
+    errorIcon: {
+        fontSize: 48,
+        marginBottom: 16,
+    },
+    errorText: {
+        fontSize: 16,
+        color: '#e74c3c',
+        textAlign: 'center',
+        marginBottom: 20,
+        paddingHorizontal: 20,
+    },
+    retryButton: {
+        backgroundColor: '#e74c3c',
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 8,
+    },
+    retryButtonText: {
+        color: '#ffffff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    infoContainer: {
+        alignItems: 'center',
+        paddingVertical: 40,
+    },
+    infoIcon: {
+        fontSize: 48,
+        marginBottom: 16,
+    },
+    infoText: {
+        fontSize: 16,
+        color: '#7f8c8d',
+        textAlign: 'center',
+        paddingHorizontal: 20,
+    },
+    shiftsContainer: {
+        gap: 16,
+    },
+    shiftDate: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#2c3e50',
+        marginBottom: 4,
+    },
+    shiftCount: {
+        fontSize: 14,
+        color: '#7f8c8d',
+        marginBottom: 16,
+    },
+    shiftCard: {
+        backgroundColor: '#ffffff',
+        borderRadius: 16,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    shiftHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 16,
+    },
+    timeContainer: {
+        flex: 1,
+    },
+    shiftTime: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#2c3e50',
+        marginBottom: 4,
+    },
+    shiftDuration: {
+        fontSize: 14,
+        color: '#7f8c8d',
+    },
+    statusBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        minWidth: 80,
+        alignItems: 'center',
+    },
+    statusText: {
+        color: '#ffffff',
+        fontSize: 12,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+    },
+    shiftDetail: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    detailLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#7f8c8d',
+        marginRight: 8,
+        minWidth: 60,
+    },
+    detailValue: {
+        fontSize: 14,
+        color: '#2c3e50',
+        flex: 1,
+    },
 });
 
 export default HomeScreen;

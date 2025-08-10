@@ -1,7 +1,8 @@
 ﻿import React, { createContext, useState, useEffect, useContext } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
-import { API_ENDPOINTS } from '../config/api';
+import { Platform } from 'react-native';
+import { API_ENDPOINTS } from '../config/api-simple';
 
 interface AuthContextData {
     token: string | null;
@@ -31,11 +32,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 
     const signIn = async (email, password) => {
-        try {
-                    const response = await axios.post(API_ENDPOINTS.AUTH.LOGIN, {
-            email,
-            password,
-        });
+        try {            
+            const response = await axios.post(API_ENDPOINTS.AUTH.LOGIN, {
+                email,
+                password,
+            });
 
             const { access_token: accessToken } = response.data;
 

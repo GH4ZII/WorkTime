@@ -8,13 +8,17 @@ import { useAuth } from '../context/AuthContext';
 import MyShiftsScreen from "../screens/MyShiftsScreen";
 import ChatScreen from "../screens/ChatScreen";
 import CoWorkerScreen from "../screens/CoWorkerScreen";
+import CustomDrawer from '../components/CustomDrawer';
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
 function AppDrawer() {
     return (
-        <Drawer.Navigator initialRouteName="Home">
+        <Drawer.Navigator 
+            initialRouteName="Home"
+            drawerContent={(props) => <CustomDrawer {...props} />}
+        >
             <Drawer.Screen
                 name="Home"
                 component={HomeScreen}
