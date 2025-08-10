@@ -187,12 +187,12 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
         fontWeight: 'bold',
-        color: '#2c3e50',
+        color: '#374151',
         marginBottom: 8,
     },
     subtitle: {
         fontSize: 16,
-        color: '#7f8c8d',
+        color: '#6b7280',
         textAlign: 'center',
     },
     formSection: {
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     formTitle: {
         fontSize: 24,
         fontWeight: '600',
-        color: '#2c3e50',
+        color: '#374151',
         marginBottom: 24,
         textAlign: 'center',
     },
@@ -222,18 +222,18 @@ const styles = StyleSheet.create({
     inputLabel: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#2c3e50',
+        color: '#374151',
         marginBottom: 8,
     },
     input: {
         height: 50,
         borderWidth: 1.5,
-        borderColor: '#e1e8ed',
+        borderColor: '#d1d5db',
         borderRadius: 12,
         paddingHorizontal: 16,
         fontSize: 16,
-        backgroundColor: '#f8f9fa',
-        color: '#2c3e50',
+        backgroundColor: '#f9fafb',
+        color: '#374151',
     },
     rememberMeContainer: {
         flexDirection: 'row',
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20,
         borderWidth: 2,
-        borderColor: '#3498db',
+        borderColor: '#667eea',
         borderRadius: 4,
         marginRight: 12,
         alignItems: 'center',
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     checkboxChecked: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
     },
     checkmark: {
         color: '#fff',
@@ -261,15 +261,15 @@ const styles = StyleSheet.create({
     },
     rememberMeText: {
         fontSize: 16,
-        color: '#2c3e50',
+        color: '#374151',
     },
     loginButton: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
         height: 54,
         borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#3498db',
+        shadowColor: '#667eea',
         shadowOffset: {
             width: 0,
             height: 4,
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: 14,
-        color: '#7f8c8d',
+        color: '#6b7280',
         textAlign: 'center',
     },
 });

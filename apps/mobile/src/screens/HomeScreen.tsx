@@ -153,13 +153,13 @@ const HomeScreen: React.FC = () => {
     const getStatusColor = (status: ShiftStatus) => {
         switch (status) {
             case ShiftStatus.APPROVED:
-                return "#27ae60";
+                return "#10b981"; // Green
             case ShiftStatus.PENDING:
-                return "#f39c12";
+                return "#f59e0b"; // Amber
             case ShiftStatus.REJECTED:
-                return "#e74c3c";
+                return "#ef4444"; // Red
             default:
-                return "#95a5a6";
+                return "#6b7280"; // Gray
         }
     };
 
@@ -280,17 +280,17 @@ const HomeScreen: React.FC = () => {
                     theme={{
                         backgroundColor: '#ffffff',
                         calendarBackground: '#ffffff',
-                        textSectionTitleColor: '#2c3e50',
-                        selectedDayBackgroundColor: '#3498db',
+                        textSectionTitleColor: '#374151',
+                        selectedDayBackgroundColor: '#667eea',
                         selectedDayTextColor: '#ffffff',
-                        todayTextColor: '#3498db',
-                        dayTextColor: '#2c3e50',
-                        textDisabledColor: '#bdc3c7',
-                        dotColor: '#3498db',
+                        todayTextColor: '#667eea',
+                        dayTextColor: '#374151',
+                        textDisabledColor: '#d1d5db',
+                        dotColor: '#667eea',
                         selectedDotColor: '#ffffff',
-                        arrowColor: '#3498db',
-                        monthTextColor: '#2c3e50',
-                        indicatorColor: '#3498db',
+                        arrowColor: '#667eea',
+                        monthTextColor: '#374151',
+                        indicatorColor: '#667eea',
                         textDayFontWeight: '400',
                         textMonthFontWeight: '600',
                         textDayHeaderFontWeight: '500',
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     header: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
         paddingTop: 50,
         paddingBottom: 20,
         paddingHorizontal: 20,
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     },
     headerSubtitle: {
         fontSize: 16,
-        color: '#ecf0f1',
+        color: 'rgba(255, 255, 255, 0.9)',
     },
     calendarContainer: {
         backgroundColor: '#ffffff',
@@ -382,13 +382,13 @@ const styles = StyleSheet.create({
     summaryTitle: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#2c3e50',
+        color: '#374151',
         marginBottom: 8,
     },
     summaryHours: {
         fontSize: 32,
         fontWeight: 'bold',
-        color: '#3498db',
+        color: '#667eea',
     },
     detailsContainer: {
         paddingHorizontal: 20,
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 16,
         fontSize: 16,
-        color: '#7f8c8d',
+        color: '#6b7280',
     },
     errorContainer: {
         alignItems: 'center',
@@ -413,13 +413,13 @@ const styles = StyleSheet.create({
     },
     errorText: {
         fontSize: 16,
-        color: '#e74c3c',
+        color: '#ef4444',
         textAlign: 'center',
         marginBottom: 20,
         paddingHorizontal: 20,
     },
     retryButton: {
-        backgroundColor: '#e74c3c',
+        backgroundColor: '#ef4444',
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 8,
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     },
     infoText: {
         fontSize: 16,
-        color: '#7f8c8d',
+        color: '#6b7280',
         textAlign: 'center',
         paddingHorizontal: 20,
     },
@@ -449,12 +449,12 @@ const styles = StyleSheet.create({
     shiftDate: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#2c3e50',
+        color: '#374151',
         marginBottom: 4,
     },
     shiftCount: {
         fontSize: 14,
-        color: '#7f8c8d',
+        color: '#6b7280',
         marginBottom: 16,
     },
     shiftCard: {
@@ -482,12 +482,12 @@ const styles = StyleSheet.create({
     shiftTime: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#2c3e50',
+        color: '#374151',
         marginBottom: 4,
     },
     shiftDuration: {
         fontSize: 14,
-        color: '#7f8c8d',
+        color: '#6b7280',
     },
     statusBadge: {
         paddingHorizontal: 12,

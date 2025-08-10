@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     header: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
         paddingTop: 50,
         paddingBottom: 20,
         paddingHorizontal: 20,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         borderRadius: 25,
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 16,

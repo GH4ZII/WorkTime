@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     header: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
         paddingTop: 50,
         paddingBottom: 20,
         paddingHorizontal: 20,
@@ -273,8 +273,8 @@ const styles = StyleSheet.create({
         borderColor: '#e1e8ed',
     },
     filterButtonActive: {
-        backgroundColor: '#3498db',
-        borderColor: '#3498db',
+        backgroundColor: '#667eea',
+        borderColor: '#667eea',
     },
     filterButtonText: {
         fontSize: 14,
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     shiftTime: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#3498db',
+        color: '#667eea',
         marginBottom: 4,
     },
     shiftDuration: {

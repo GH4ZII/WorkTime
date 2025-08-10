@@ -56,15 +56,15 @@ const ProfileScreen: React.FC = () => {
     const getRoleColor = (role: string) => {
         switch (role?.toLowerCase()) {
             case 'admin':
-                return '#e74c3c';
+                return '#ef4444'; // Red
             case 'manager':
-                return '#f39c12';
+                return '#f59e0b'; // Amber
             case 'supervisor':
-                return '#3498db';
+                return '#667eea'; // Theme blue
             case 'employee':
-                return '#27ae60';
+                return '#10b981'; // Green
             default:
-                return '#95a5a6';
+                return '#6b7280'; // Gray
         }
     };
 
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     header: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
         paddingTop: 50,
         paddingBottom: 30,
         paddingHorizontal: 20,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#2c3e50',
+        color: '#374151',
         marginBottom: 16,
     },
     infoRow: {
@@ -237,11 +237,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#ecf0f1',
+        borderBottomColor: '#f3f4f6',
     },
     infoLabel: {
         fontSize: 16,
-        color: '#7f8c8d',
+        color: '#6b7280',
         flex: 1,
     },
     infoValue: {

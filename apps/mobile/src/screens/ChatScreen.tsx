@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f9fa',
     },
     header: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
         paddingTop: 50,
         paddingBottom: 20,
         paddingHorizontal: 20,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     },
     headerSubtitle: {
         fontSize: 16,
-        color: '#ecf0f1',
+        color: 'rgba(255, 255, 255, 0.9)',
     },
     messagesContainer: {
         flex: 1,
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     myBubble: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
         borderBottomRightRadius: 4,
     },
     otherBubble: {
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     },
     senderName: {
         fontSize: 12,
-        color: '#7f8c8d',
+        color: '#6b7280',
         marginBottom: 4,
         fontWeight: '500',
     },
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
         color: '#ffffff',
     },
     otherMessageText: {
-        color: '#2c3e50',
+        color: '#374151',
     },
     messageTime: {
         fontSize: 11,
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.7)',
     },
     otherMessageTime: {
-        color: '#95a5a6',
+        color: '#9ca3af',
     },
     typingIndicator: {
         flexDirection: 'row',
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     },
     typingText: {
         fontSize: 14,
-        color: '#7f8c8d',
+        color: '#6b7280',
         fontStyle: 'italic',
         marginRight: 8,
     },
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
         width: 4,
         height: 4,
         borderRadius: 2,
-        backgroundColor: '#7f8c8d',
+        backgroundColor: '#6b7280',
         marginHorizontal: 1,
     },
     dot1: {
@@ -256,22 +256,22 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'flex-end',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#f9fafb',
         borderRadius: 24,
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderWidth: 1,
-        borderColor: '#e1e8ed',
+        borderColor: '#d1d5db',
     },
     textInput: {
         flex: 1,
         fontSize: 16,
-        color: '#2c3e50',
+        color: '#374151',
         maxHeight: 100,
         paddingVertical: 8,
     },
     sendButton: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#667eea',
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 20,
