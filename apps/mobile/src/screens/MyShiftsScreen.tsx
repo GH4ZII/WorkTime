@@ -2,6 +2,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { API_ENDPOINTS } from '../config/api-simple';
 import axios from 'axios';
+import ScreenHeader from '../components/ScreenHeader';
 
 const { width } = Dimensions.get('window');
 
@@ -156,13 +157,13 @@ const MyShiftsScreen: React.FC = () => {
     if (isLoading) {
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Mine Vakter</Text>
-                    <Text style={styles.headerSubtitle}>Oversikt over dine vakter</Text>
-                </View>
+                <ScreenHeader
+                    title="Mine Vakter"
+                    subtitle="Oversikt over dine planlagte vakter"
+                />
                 <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color="#3498db" />
-                    <Text style={styles.loadingText}>Laster dine vakter...</Text>
+                    <ActivityIndicator size="large" color="#667eea" />
+                    <Text style={styles.loadingText}>Laster vakter...</Text>
                 </View>
             </View>
         );
@@ -171,13 +172,12 @@ const MyShiftsScreen: React.FC = () => {
     if (error) {
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Mine Vakter</Text>
-                    <Text style={styles.headerSubtitle}>Oversikt over dine vakter</Text>
-                </View>
+                <ScreenHeader
+                    title="Mine Vakter"
+                    subtitle="Oversikt over dine planlagte vakter"
+                />
                 <View style={styles.centerContainer}>
-                    <Text style={styles.errorIcon}>⚠️</Text>
-                    <Text style={styles.errorText}>{error}</Text>
+                    <Text style={styles.errorText}>Feil ved lasting av vakter</Text>
                     <TouchableOpacity style={styles.retryButton} onPress={fetchMyShifts}>
                         <Text style={styles.retryButtonText}>Prøv igjen</Text>
                     </TouchableOpacity>
@@ -188,12 +188,10 @@ const MyShiftsScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Mine Vakter</Text>
-                <Text style={styles.headerSubtitle}>Oversikt over dine vakter</Text>
-            </View>
-
+            <ScreenHeader
+                title="Mine Vakter"
+                subtitle="Oversikt over dine planlagte vakter"
+            />
             {/* Filter Buttons */}
             <View style={styles.filterContainer}>
                 {renderFilterButton('all', 'Alle')}
@@ -237,24 +235,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8f9fa',
-    },
-    header: {
-        backgroundColor: '#667eea',
-        paddingTop: 50,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#ffffff',
-        marginBottom: 4,
-    },
-    headerSubtitle: {
-        fontSize: 16,
-        color: '#ecf0f1',
     },
     filterContainer: {
         flexDirection: 'row',

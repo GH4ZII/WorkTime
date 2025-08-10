@@ -1,5 +1,7 @@
-﻿import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions } from 'react-native';
+﻿import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import ScreenHeader from '../components/ScreenHeader';
 
 const { width } = Dimensions.get('window');
 
@@ -63,68 +65,38 @@ const ChatScreen: React.FC = () => {
     );
 
     return (
-        <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Chat</Text>
-                <Text style={styles.headerSubtitle}>Kommuniser med teamet</Text>
-            </View>
-
-            {/* Chat Messages */}
-            <ScrollView 
-                style={styles.messagesContainer}
-                contentContainerStyle={styles.messagesContent}
-                showsVerticalScrollIndicator={false}
-            >
-                {placeholderMessages.map(renderMessage)}
-                
-                {/* Typing Indicator */}
-                {isTyping && (
-                    <View style={[styles.messageContainer, styles.otherMessage]}>
-                        <View style={[styles.messageBubble, styles.otherBubble]}>
-                            <Text style={styles.senderName}>Anna Hansen</Text>
-                            <View style={styles.typingIndicator}>
-                                <Text style={styles.typingText}>skriver...</Text>
-                                <View style={styles.typingDots}>
-                                    <View style={[styles.dot, styles.dot1]} />
-                                    <View style={[styles.dot, styles.dot2]} />
-                                    <View style={[styles.dot, styles.dot3]} />
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                )}
-            </ScrollView>
-
-            {/* Message Input */}
-            <View style={styles.inputContainer}>
-                <View style={styles.inputWrapper}>
+        <KeyboardAvoidingView 
+            style={styles.container} 
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+            <ScreenHeader
+                title="Meldinger"
+                subtitle="Chat med dine kollegaer"
+            />
+            <View style={styles.chatContainer}>
+                <FlatList
+                    style={styles.scrollView}
+                    data={placeholderMessages}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={renderMessage}
+                    inverted
+                    showsVerticalScrollIndicator={false}
+                />
+                <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.textInput}
-                        placeholder="Skriv en melding..."
                         value={message}
                         onChangeText={setMessage}
-                        multiline
+                        placeholder="Skriv en melding..."
                         placeholderTextColor="#999"
+                        multiline
                     />
-                    <TouchableOpacity
-                        style={[styles.sendButton, !message.trim() && styles.sendButtonDisabled]}
-                        onPress={handleSendMessage}
-                        disabled={!message.trim()}
-                        activeOpacity={0.8}
-                    >
+                    <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
                         <Text style={styles.sendButtonText}>Send</Text>
                     </TouchableOpacity>
                 </View>
             </View>
-
-            {/* Development Notice */}
-            <View style={styles.devNotice}>
-                <Text style={styles.devNoticeIcon}>🚧</Text>
-                <Text style={styles.devNoticeText}>Chat-funksjonen er under utvikling</Text>
-                <Text style={styles.devNoticeSubtext}>Dette er en forhåndsvisning av designet</Text>
-            </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 };
 
@@ -133,23 +105,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f8f9fa',
     },
-    header: {
-        backgroundColor: '#667eea',
-        paddingTop: 50,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
+    scrollView: {
+        flex: 1,
     },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#ffffff',
-        marginBottom: 4,
-    },
-    headerSubtitle: {
-        fontSize: 16,
-        color: 'rgba(255, 255, 255, 0.9)',
+    chatContainer: {
+        flex: 1,
     },
     messagesContainer: {
         flex: 1,

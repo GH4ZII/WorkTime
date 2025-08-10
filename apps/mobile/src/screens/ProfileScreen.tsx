@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Dimensions } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import ScreenHeader from '../components/ScreenHeader';
 
 const { width } = Dimensions.get('window');
 
@@ -74,20 +75,14 @@ const ProfileScreen: React.FC = () => {
     };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            {/* Header Section */}
-            <View style={styles.header}>
-                <View style={styles.profileImageContainer}>
-                    <Text style={styles.profileImageText}>
-                        {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
-                    </Text>
-                </View>
-                <Text style={styles.headerTitle}>Min Profil</Text>
-                <Text style={styles.headerSubtitle}>Administrer din konto</Text>
-            </View>
-
-            {/* Profile Info Section */}
-            <View style={styles.profileSection}>
+        <View style={styles.container}>
+            <ScreenHeader 
+                title="Min Profil" 
+                subtitle="Administrer din konto og innstillinger"
+            />
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+                {/* Profile Info Section */}
+                <View style={styles.profileSection}>
                 <View style={styles.infoCard}>
                     <Text style={styles.sectionTitle}>Personlig informasjon</Text>
                     
@@ -162,7 +157,8 @@ const ProfileScreen: React.FC = () => {
                     </Text>
                 </TouchableOpacity>
             </View>
-        </ScrollView>
+            </ScrollView>
+        </View>
     );
 };
 
@@ -171,40 +167,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f8f9fa',
     },
-    header: {
-        backgroundColor: '#667eea',
-        paddingTop: 50,
-        paddingBottom: 30,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-    },
-    profileImageContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 16,
-        borderWidth: 3,
-        borderColor: 'rgba(255, 255, 255, 0.3)',
-    },
-    profileImageText: {
-        color: '#ffffff',
-        fontSize: 32,
-        fontWeight: 'bold',
-    },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#ffffff',
-        marginBottom: 4,
-    },
-    headerSubtitle: {
-        fontSize: 16,
-        color: '#ecf0f1',
+    scrollView: {
+        flex: 1,
     },
     profileSection: {
         paddingHorizontal: 20,

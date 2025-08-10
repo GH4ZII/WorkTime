@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Dimensions, Touc
 import { Calendar, LocaleConfig, DateData } from "react-native-calendars";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api-simple";
+import ScreenHeader from "../components/ScreenHeader";
 
 const { width } = Dimensions.get('window');
 
@@ -262,15 +263,14 @@ const HomeScreen: React.FC = () => {
     };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            {/* Header Section */}
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Kalender</Text>
-                <Text style={styles.headerSubtitle}>Oversikt over dine vakter</Text>
-            </View>
-
-            {/* Calendar Section */}
-            <View style={styles.calendarContainer}>
+        <View style={styles.container}>
+            <ScreenHeader 
+                title="Hjem" 
+                subtitle="Oversikt over dine vakter og arbeidstid"
+            />
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+                {/* Calendar Section */}
+                <View style={styles.calendarContainer}>
                 <Calendar
                     style={styles.calendar}
                     onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
@@ -317,7 +317,8 @@ const HomeScreen: React.FC = () => {
             <View style={styles.detailsContainer}>
                 {renderShiftDetails()}
             </View>
-        </ScrollView>
+            </ScrollView>
+        </View>
     );
 };
 
@@ -326,23 +327,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f8f9fa',
     },
-    header: {
-        backgroundColor: '#667eea',
-        paddingTop: 50,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#ffffff',
-        marginBottom: 4,
-    },
-    headerSubtitle: {
-        fontSize: 16,
-        color: 'rgba(255, 255, 255, 0.9)',
+    scrollView: {
+        flex: 1,
     },
     calendarContainer: {
         backgroundColor: '#ffffff',

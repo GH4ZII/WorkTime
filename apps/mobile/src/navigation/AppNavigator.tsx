@@ -16,7 +16,11 @@ const Stack = createNativeStackNavigator();
 function AppDrawer() {
     return (
         <Drawer.Navigator 
+            id={undefined}
             initialRouteName="Home"
+            screenOptions={{
+                headerShown: false
+            }}
             drawerContent={(props) => <CustomDrawer {...props} />}
         >
             <Drawer.Screen
@@ -62,7 +66,7 @@ export default function AppNavigator() {
     const { isAuthenticated } = useAuth();
 
     return (
-        <Stack.Navigator>
+        <Stack.Navigator id={undefined}>
             {isAuthenticated ? (
                 <Stack.Screen
                     name="App"
