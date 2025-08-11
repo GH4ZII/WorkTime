@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "mui-mcp": {
+      "command": "npx",
+      "args": ["-y", "@mui/mcp@latest"]
+    },
+    "react-bits-mcp": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://react-bits-mcp.davidhzdev.workers.dev/sse"]
+    }
+  }
+}
