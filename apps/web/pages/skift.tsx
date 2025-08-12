@@ -27,8 +27,12 @@ import {
     Divider,
     Tooltip,
     Paper,
-    Tabs,
-    Tab,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     Badge
 } from '@mui/material';
 import {
@@ -45,7 +49,10 @@ import {
     Cancel as CancelIcon,
     Today as TodayIcon,
     DateRange as DateRangeIcon,
-    Event as EventIcon
+    Event as EventIcon,
+    ChevronLeft as ChevronLeftIcon,
+    ChevronRight as ChevronRightIcon,
+    Refresh as RefreshIcon
 } from '@mui/icons-material';
 
 interface Employee {
@@ -74,18 +81,14 @@ interface ShiftPayload {
     createdBy: string
 }
 
-type TabType = 'today' | 'week' | 'month'
-
 const ShiftPage: NextPage = () => {
-    // Boolean - for å vise/skjule skjemaet
     const [showForm, setShowForm] = useState(false)
     const [showEditForm, setShowEditForm] = useState(false)
-
-    // Array - for å lagre ansatte fra API
     const [employees, setEmployees] = useState<Employee[]>([])
     const [shifts, setShifts] = useState<Shift[]>([])
+    const [currentWeek, setCurrentWeek] = useState(new Date())
+    const [selectedDate, setSelectedDate] = useState(new Date())
 
-    // Interface - for å lagre skjema-data
     const [form, setForm] = useState<ShiftPayload>({
         userId: '',
         date: '',
@@ -96,7 +99,6 @@ const ShiftPage: NextPage = () => {
         createdBy: 'admin',
     })
 
-    // State for redigering
     const [editingShift, setEditingShift] = useState<Shift | null>(null)
     const [editForm, setEditForm] = useState<ShiftPayload>({
         userId: '',
@@ -108,11 +110,6 @@ const ShiftPage: NextPage = () => {
         createdBy: 'admin',
     })
 
-    // Kalender state
-    const [activeTab, setActiveTab] = useState<TabType>('today')
-    const [selectedDate, setSelectedDate] = useState(new Date())
-
-    // String | null - for feilmeldinger
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
@@ -120,6 +117,11 @@ const ShiftPage: NextPage = () => {
     useEffect(() => {
         fetchEmployees()
         fetchShifts()
+        
+        // Sørg for at currentWeek starter på riktig uke
+        const today = new Date()
+        today.setHours(12, 0, 0, 0) // Sett til 12:00 for å unngå timezone-problemer
+        setCurrentWeek(today)
     }, [])
 
     const fetchEmployees = async () => {
@@ -243,88 +245,193 @@ const ShiftPage: NextPage = () => {
         setShowEditForm(true)
     }
 
-    // Filtrer skift basert på aktiv tab
-    const getFilteredShifts = () => {
-        const now = new Date()
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
-
-        return shifts.filter(shift => {
-            const shiftDate = new Date(shift.startTime)
+    // Hent ukedager for gjeldende uke - fikset timezone-problem
+    const getWeekDays = () => {
+        const days = []
+        
+        // Sørg for at vi starter på mandag
+        const startOfWeek = new Date(currentWeek)
+        const dayOfWeek = startOfWeek.getDay() // 0 = søndag, 1 = mandag, etc.
+        
+        // Beregn hvor mange dager tilbake til mandag
+        let daysToSubtract
+        if (dayOfWeek === 0) { // Søndag
+            daysToSubtract = 6
+        } else {
+            daysToSubtract = dayOfWeek - 1
+        }
+        
+        // Gå tilbake til mandag
+        startOfWeek.setDate(startOfWeek.getDate() - daysToSubtract)
+        
+        // Generer ukedager fra mandag til søndag
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek)
+            day.setDate(startOfWeek.getDate() + i)
             
-            switch (activeTab) {
-                case 'today':
-                    return shiftDate >= today && shiftDate < new Date(today.getTime() + 24 * 60 * 60 * 1000)
-                case 'week':
-                    return shiftDate >= weekAgo
-                case 'month':
-                    return shiftDate >= monthAgo
-                default:
-                    return true
-            }
-        }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+            // Sørg for at klokken er satt til 12:00 for å unngå timezone-problemer
+            day.setHours(12, 0, 0, 0)
+            
+            days.push(day)
+        }
+        
+        return days
     }
 
-    // Hjelpefunksjoner for formatering
-    const formatDateTime = (dateString: string) => {
-        const date = new Date(dateString)
-        return date.toLocaleString('nb-NO', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+    // Formater dato til norsk format
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString('nb-NO', {
+            day: '2-digit',
+            month: 'short'
         })
     }
 
+    // Formater ukedag
+    const formatWeekday = (date: Date) => {
+        return date.toLocaleDateString('nb-NO', {
+            weekday: 'short'
+        }).toUpperCase()
+    }
+
+    // Hent skift for spesifikk ansatt og dato
+    const getShiftForEmployeeAndDate = (employeeId: string, date: Date) => {
+        // Normaliser datoen til start av dagen for sammenligning
+        const normalizedDate = new Date(date)
+        normalizedDate.setHours(0, 0, 0, 0)
+        
+        return shifts.find(shift => {
+            const shiftDate = new Date(shift.startTime)
+            const normalizedShiftDate = new Date(shiftDate)
+            normalizedShiftDate.setHours(0, 0, 0, 0)
+            
+            return shift.userId === employeeId && normalizedShiftDate.getTime() === normalizedDate.getTime()
+        })
+    }
+
+    // Hent alle skift for en spesifikk dato, sortert etter starttid
+    const getShiftsForDate = (date: Date) => {
+        const dateStr = date.toISOString().split('T')[0]
+        return shifts
+            .filter(shift => {
+                const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+                return shiftDate === dateStr
+            })
+            .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+    }
+
+    // Hent alle unike starttider for en dato (for å lage rader)
+    const getUniqueStartTimes = (date: Date) => {
+        const shiftsForDate = getShiftsForDate(date)
+        const startTimes = shiftsForDate.map(shift => {
+            const startTime = new Date(shift.startTime)
+            return {
+                time: startTime,
+                timeString: startTime.toTimeString().slice(0, 5), // HH:MM format
+                timestamp: startTime.getTime()
+            }
+        })
+        
+        // Fjern duplikater og sorter
+        const uniqueTimes = startTimes.filter((time, index, self) => 
+            index === self.findIndex(t => t.timeString === time.timeString)
+        ).sort((a, b) => a.timestamp - b.timestamp)
+        
+        return uniqueTimes
+    }
+
+    // Hent skift for spesifikk ansatt, dato og starttid
+    const getShiftForEmployeeDateAndTime = (employeeId: string, date: Date, startTime: string) => {
+        const dateStr = date.toISOString().split('T')[0]
+        return shifts.find(shift => {
+            const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+            const shiftStartTime = new Date(shift.startTime).toTimeString().slice(0, 5)
+            return shift.userId === employeeId && shiftDate === dateStr && shiftStartTime === startTime
+        })
+    }
+
+    // Hent alle ansatte som har skift på en spesifikk dato og starttid
+    const getEmployeesWithShiftAtTime = (date: Date, startTime: string) => {
+        const dateStr = date.toISOString().split('T')[0]
+        return shifts
+            .filter(shift => {
+                const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+                const shiftStartTime = new Date(shift.startTime).toTimeString().slice(0, 5)
+                return shiftDate === dateStr && shiftStartTime === startTime
+            })
+            .map(shift => shift.userId)
+    }
+
+    // Formater tid
     const formatTime = (dateString: string) => {
         const date = new Date(dateString)
         return date.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })
     }
 
+    // Beregn varighet
     const getDuration = (startTime: string, endTime: string) => {
         const start = new Date(startTime)
         const end = new Date(endTime)
         const diffMs = end.getTime() - start.getTime()
         const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-        const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
-        return `${diffHours}t ${diffMinutes}m`
+        return `${diffHours} hrs.`
     }
 
-    const getEmployeeName = (userId: string) => {
-        const employee = employees.find(emp => emp.id === userId)
-        return employee?.name || 'Ukjent'
+    // Naviger til forrige uke
+    const goToPreviousWeek = () => {
+        const newWeek = new Date(currentWeek)
+        newWeek.setDate(currentWeek.getDate() - 7)
+        setCurrentWeek(newWeek)
     }
 
-    const getTabIcon = (tab: TabType) => {
-        switch (tab) {
-            case 'today':
-                return <TodayIcon />
-            case 'week':
-                return <DateRangeIcon />
-            case 'month':
-                return <EventIcon />
-            default:
-                return <TodayIcon />
-        }
+    // Naviger til neste uke
+    const goToNextWeek = () => {
+        const newWeek = new Date(currentWeek)
+        newWeek.setDate(currentWeek.getDate() + 7)
+        setCurrentWeek(newWeek)
     }
 
-    const getTabLabel = (tab: TabType) => {
-        switch (tab) {
-            case 'today':
-                return 'I dag'
-            case 'week':
-                return 'Siste uke'
-            case 'month':
-                return 'Siste måned'
-            default:
-                return 'I dag'
-        }
+    // Gå til dagens uke
+    const goToToday = () => {
+        setCurrentWeek(new Date())
     }
 
-    const filteredShifts = getFilteredShifts()
+    // Formater uke for visning
+    const formatWeekRange = () => {
+        const days = getWeekDays()
+        const start = days[0]
+        const end = days[6]
+        return `${start.getDate()} ${start.toLocaleDateString('nb-NO', { month: 'short' })} - ${end.getDate()} ${end.toLocaleDateString('nb-NO', { month: 'short' })}`
+    }
+
+    // Oppdater handleAddShiftClick for å håndtere timezone riktig
+    const handleAddShiftClick = (employeeId: string, date: Date) => {
+        // Bruk en enkel metode: kopier datoen uten å endre timezone
+        const year = date.getFullYear()
+        const month = date.getMonth() + 1
+        const day = date.getDate()
+        
+        // Formater til YYYY-MM-DD
+        const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+        
+        // Finn ansatt basert på ID
+        const employee = employees.find(emp => emp.id === employeeId)
+        
+        // Oppdater skjema med ansatt og dato
+        setForm({
+            userId: employeeId,
+            date: formattedDate,
+            startTime: '',
+            endTime: '',
+            location: '',
+            notes: '',
+            createdBy: 'admin',
+        })
+        
+        // Vis skjemaet
+        setShowForm(true)
+    }
+
+    const weekDays = getWeekDays()
 
     if (loading) {
         return (
@@ -355,7 +462,7 @@ const ShiftPage: NextPage = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
                     <Box>
                         <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
-                            Skift Administrasjon
+                            Shift Board
                         </Typography>
                         <Typography variant="body1" color="text.secondary">
                             Administrer skift og arbeidstider
@@ -380,11 +487,181 @@ const ShiftPage: NextPage = () => {
                             transition: 'all 0.3s ease',
                         }}
                     >
-                        Opprett nytt skift
+                        +Add Employee
                     </Button>
                 </Box>
 
-                {/* Skjema for nytt skift */}
+                {/* Shift Board */}
+                <Card elevation={2}>
+                    <CardContent sx={{ p: 0 }}>
+                        {/* Date Navigation */}
+                        <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between',
+                            p: 3,
+                            borderBottom: '1px solid #e0e0e0'
+                        }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <IconButton onClick={goToPreviousWeek}>
+                                    <ChevronLeftIcon />
+                                </IconButton>
+                                <Typography variant="h6" fontWeight="bold">
+                                    {formatWeekRange()}
+                                </Typography>
+                                <IconButton onClick={goToNextWeek}>
+                                    <ChevronRightIcon />
+                                </IconButton>
+                            </Box>
+                            
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <IconButton onClick={goToToday}>
+                                    <CalendarIcon />
+                                </IconButton>
+                                <IconButton onClick={fetchShifts}>
+                                    <RefreshIcon />
+                                </IconButton>
+                            </Box>
+                        </Box>
+
+                        {/* Dynamic Shift Board Table */}
+                        <TableContainer>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{ 
+                                            fontWeight: 'bold', 
+                                            minWidth: 200,
+                                            backgroundColor: '#f8f9fa',
+                                            borderRight: '1px solid #e0e0e0'
+                                        }}>
+                                            Employee Name
+                                        </TableCell>
+                                        {weekDays.map((day, index) => (
+                                            <TableCell 
+                                                key={index}
+                                                align="center"
+                                                sx={{ 
+                                                    fontWeight: 'bold',
+                                                    minWidth: 120,
+                                                    backgroundColor: '#f8f9fa',
+                                                    borderRight: index < 6 ? '1px solid #e0e0e0' : 'none'
+                                                }}
+                                            >
+                                                <Box>
+                                                    <Typography variant="body2" fontWeight="bold">
+                                                        {day.getDate()} {formatWeekday(day)}
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        {day.toLocaleDateString('nb-NO', { month: 'short' })}
+                                                    </Typography>
+                                                </Box>
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {employees.map((employee) => (
+                                        <TableRow key={employee.id} hover>
+                                            <TableCell sx={{ 
+                                                borderRight: '1px solid #e0e0e0',
+                                                backgroundColor: '#fafafa'
+                                            }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                    <Avatar sx={{ 
+                                                        bgcolor: 'primary.main',
+                                                        width: 32,
+                                                        height: 32,
+                                                        fontSize: '0.875rem'
+                                                    }}>
+                                                        {employee.name.split(' ').map(n => n[0]).join('')}
+                                                    </Avatar>
+                                                    <Typography variant="body2" fontWeight="medium">
+                                                        {employee.name}
+                                                    </Typography>
+                                                </Box>
+                                            </TableCell>
+                                            {weekDays.map((day, dayIndex) => {
+                                                const shift = getShiftForEmployeeAndDate(employee.id, day)
+                                                return (
+                                                    <TableCell 
+                                                        key={dayIndex}
+                                                        align="center"
+                                                        sx={{ 
+                                                            borderRight: dayIndex < 6 ? '1px solid #e0e0e0' : 'none',
+                                                            minHeight: 80,
+                                                            position: 'relative'
+                                                        }}
+                                                    >
+                                                        {shift ? (
+                                                            <Box sx={{
+                                                                backgroundColor: '#e3f2fd',
+                                                                borderRadius: 1,
+                                                                p: 1,
+                                                                border: '1px solid #bbdefb'
+                                                            }}>
+                                                                <Typography variant="body2" fontWeight="medium">
+                                                                    {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
+                                                                </Typography>
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    {getDuration(shift.startTime, shift.endTime)}
+                                                                </Typography>
+                                                                <Box sx={{ display: 'flex', gap: 0.5, mt: 1, justifyContent: 'center' }}>
+                                                                    <Tooltip title="Rediger">
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            onClick={() => startEdit(shift)}
+                                                                            sx={{ 
+                                                                                color: 'primary.main',
+                                                                                width: 20,
+                                                                                height: 20
+                                                                            }}
+                                                                        >
+                                                                            <EditIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                    <Tooltip title="Slett">
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            onClick={() => handleDelete(shift.id)}
+                                                                            sx={{ 
+                                                                                color: 'error.main',
+                                                                                width: 20,
+                                                                                height: 20
+                                                                            }}
+                                                                        >
+                                                                            <DeleteIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                </Box>
+                                                            </Box>
+                                                        ) : (
+                                                            <Button
+                                                                variant="outlined"
+                                                                size="small"
+                                                                startIcon={<AddIcon />}
+                                                                onClick={() => handleAddShiftClick(employee.id, day)}
+                                                                sx={{
+                                                                    minWidth: 'auto',
+                                                                    width: 32,
+                                                                    height: 32,
+                                                                    borderRadius: '50%',
+                                                                    p: 0
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </TableCell>
+                                                )
+                                            })}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </CardContent>
+                </Card>
+
+                {/* Skjema for nytt skift - oppdatert for å vise forhåndsutfylt data */}
                 <Dialog 
                     open={showForm} 
                     onClose={() => setShowForm(false)}
@@ -641,151 +918,6 @@ const ShiftPage: NextPage = () => {
                         </DialogActions>
                     </form>
                 </Dialog>
-
-                {/* Kalender med tabs */}
-                <Card elevation={2}>
-                    <CardContent sx={{ p: 0 }}>
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                            <Tabs 
-                                value={activeTab} 
-                                onChange={(_, newValue) => setActiveTab(newValue)}
-                                variant="fullWidth"
-                            >
-                                {(['today', 'week', 'month'] as TabType[]).map((tab) => (
-                                    <Tab
-                                        key={tab}
-                                        value={tab}
-                                        label={
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                {getTabIcon(tab)}
-                                                {getTabLabel(tab)}
-                                                <Badge 
-                                                    badgeContent={tab === 'today' ? filteredShifts.length : undefined} 
-                                                    color="primary"
-                                                />
-                                            </Box>
-                                        }
-                                        sx={{ py: 2 }}
-                                    />
-                                ))}
-                            </Tabs>
-                        </Box>
-
-                        <Box sx={{ p: 3 }}>
-                            {filteredShifts.length === 0 ? (
-                                <Box sx={{ textAlign: 'center', py: 4 }}>
-                                    <ScheduleIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                                    <Typography variant="h6" color="text.secondary">
-                                        Ingen skift funnet
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Ingen skift funnet for valgt periode
-                                    </Typography>
-                                </Box>
-                            ) : (
-                                <Grid container spacing={3}>
-                                    {filteredShifts.map(shift => (
-                                        <Grid item xs={12} sm={6} lg={4} key={shift.id}>
-                                            <Card 
-                                                elevation={1}
-                                                sx={{
-                                                    height: '100%',
-                                                    transition: 'all 0.3s ease',
-                                                    '&:hover': {
-                                                        transform: 'translateY(-2px)',
-                                                        boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                                                    }
-                                                }}
-                                            >
-                                                <CardContent>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                        <Avatar 
-                                                            sx={{ 
-                                                                bgcolor: 'primary.main', 
-                                                                mr: 2,
-                                                                width: 40,
-                                                                height: 40
-                                                            }}
-                                                        >
-                                                            {getEmployeeName(shift.userId).charAt(0)}
-                                                        </Avatar>
-                                                        <Box sx={{ flexGrow: 1 }}>
-                                                            <Typography variant="h6" fontWeight="bold">
-                                                                {getEmployeeName(shift.userId)}
-                                                            </Typography>
-                                                            <Chip
-                                                                label={getDuration(shift.startTime, shift.endTime)}
-                                                                color="primary"
-                                                                size="small"
-                                                                variant="outlined"
-                                                            />
-                                                        </Box>
-                                                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                            <Tooltip title="Rediger">
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => startEdit(shift)}
-                                                                    sx={{ color: 'primary.main' }}
-                                                                >
-                                                                    <EditIcon />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                            <Tooltip title="Slett">
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => handleDelete(shift.id)}
-                                                                    sx={{ color: 'error.main' }}
-                                                                >
-                                                                    <DeleteIcon />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        </Box>
-                                                    </Box>
-
-                                                    <Divider sx={{ my: 2 }} />
-
-                                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                            <CalendarIcon fontSize="small" color="action" />
-                                                            <Typography variant="body2" color="text.secondary">
-                                                                {formatDateTime(shift.startTime)}
-                                                            </Typography>
-                                                        </Box>
-                                                        
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                            <TimeIcon fontSize="small" color="action" />
-                                                            <Typography variant="body2" color="text.secondary">
-                                                                {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
-                                                            </Typography>
-                                                        </Box>
-                                                        
-                                                        {shift.location && (
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                <LocationIcon fontSize="small" color="action" />
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    {shift.location}
-                                                                </Typography>
-                                                            </Box>
-                                                        )}
-                                                        
-                                                        {shift.notes && (
-                                                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                                                                <NotesIcon fontSize="small" color="action" sx={{ mt: 0.5 }} />
-                                                                <Typography variant="body2" color="text.secondary">
-                                                                    {shift.notes}
-                                                                </Typography>
-                                                            </Box>
-                                                        )}
-                                                    </Box>
-                                                </CardContent>
-                                            </Card>
-                                        </Grid>
-                                    ))}
-                                </Grid>
-                            )}
-                        </Box>
-                    </CardContent>
-                </Card>
             </Box>
         </Layout>
     )

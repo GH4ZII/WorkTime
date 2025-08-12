@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect } from 'react'
-import {NextPage} from 'next'
-import { Layout } from '../components/Layout'
+﻿// pages/fravaersforesporsel.tsx
+import React, { useState, useEffect } from 'react'
+import type { NextPage } from 'next'
 import axios from 'axios'
+import { Layout } from '../components/Layout'
 import {
     Box,
     Card,
@@ -10,186 +11,177 @@ import {
     Button,
     Chip,
     Avatar,
-    IconButton,
-    Alert,
-    CircularProgress,
     Grid,
     Divider,
-    Tooltip,
-    Paper
+    Alert,
+    CircularProgress,
+    IconButton,
+    Tooltip
 } from '@mui/material';
 import {
     Event as EventIcon,
     Check as CheckIcon,
     Close as CloseIcon,
-    Person as PersonIcon,
-    BeachAccess as VacationIcon,
-    LocalHospital as SickIcon,
-    Help as OtherIcon,
     CalendarToday as CalendarIcon,
-    AccessTime as TimeIcon
+    AccessTime as TimeIcon,
+    CheckCircle as CheckCircleIcon,
+    Cancel as CancelIcon
 } from '@mui/icons-material';
 
 interface TimeOffRequest {
-    id: string;
-    userId: string;
-    fromDate: string;
-    toDate: string;
-    type: 'VACATION' | 'SICK' | 'OTHER';
-    reason?: string;
-    status?: 'PENDING' | 'APPROVED' | 'REJECTED';
-    createdAt?: string;
-    updatedAt?: string;
-    user?: User;
+    id: string
+    userId: string
+    fromDate: string
+    toDate: string
+    type: 'VACATION' | 'SICK' | 'OTHER'
+    reason?: string
+    status: 'PENDING' | 'APPROVED' | 'REJECTED'
+    createdAt: string
+    updatedAt?: string
 }
 
-interface User {
-    id: string;
-    name: string;
+interface Employee {
+    id: string
+    name: string
 }
 
-const VacancyPage: NextPage = () => {
-    const [timeOffRequests, setTimeOffRequests] = useState<TimeOffRequest[]>([]);
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+const FravaersforesporselPage: NextPage = () => {
+    const [timeOffRequests, setTimeOffRequests] = useState<TimeOffRequest[]>([])
+    const [employees, setEmployees] = useState<Employee[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [success, setSuccess] = useState<string | null>(null)
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        fetchTimeOffRequests()
+        fetchEmployees()
+    }, [])
 
-    const fetchData = async () => {
+    const fetchTimeOffRequests = async () => {
         try {
-            setLoading(true);
-            const [requestsResponse, usersResponse] = await Promise.all([
-                axios.get<TimeOffRequest[]>('http://localhost:3001/time-off-requests', { withCredentials: true }),
-                axios.get<User[]>('http://localhost:3001/users', { withCredentials: true })
-            ]);
-
-            setTimeOffRequests(requestsResponse.data);
-            setUsers(usersResponse.data);
+            const response = await axios.get('http://localhost:3001/time-off-requests', { withCredentials: true })
+            setTimeOffRequests(response.data)
         } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const getUserName = (userId: string) => {
-        const user = users.find(u => u.id === userId);
-        return user?.name || 'Ukjent bruker';
-    };
-
-    const formatFromDate = (date: string) => {
-        return new Date(date).toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    };
-
-    const formatToDate = (date: string) => {
-        return new Date(date).toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    };
-
-    const getRequestTitle = (request: TimeOffRequest) => {
-        const userName = getUserName(request.userId);
-        const type = request.type.charAt(0).toUpperCase() + request.type.slice(1);
-        return `${userName} ønsker ${type} fra ${formatFromDate(request.fromDate)} til ${formatToDate(request.toDate)}`;
-    };
-
-    const getRequestDescription = (request: TimeOffRequest) => {
-        const userName = getUserName(request.userId);
-        const type = request.type.charAt(0).toUpperCase() + request.type.slice(1);
-        return `${userName} ønsker ${type} fra ${formatFromDate(request.fromDate)} til ${formatToDate(request.toDate)}`;
-    };
-
-    const handleApprove = async (requestId: string) => {
-        try {
-            await axios.post(`http://localhost:3001/time-off-requests/${requestId}/approve`, {}, { withCredentials: true });
-            fetchData();
-        } catch (err: any) {
-            setError(err.message);
-        }
-    };
-
-    const handleReject = async (requestId: string) => {
-        try {
-            await axios.post(`http://localhost:3001/time-off-requests/${requestId}/reject`, {}, { withCredentials: true });
-            fetchData();
-        } catch (err: any) {
-            setError(err.message);
+            setError('Kunne ikke hente fraværsforespørsler')
         }
     }
 
-    const getStatusDisplay = (status?: string) => {
+    const fetchEmployees = async () => {
+        try {
+            const response = await axios.get('http://localhost:3001/users', { withCredentials: true })
+            setEmployees(response.data)
+        } catch (err: any) {
+            setError('Kunne ikke hente ansatte')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleApprove = async (requestId: string) => {
+        try {
+            await axios.patch(`http://localhost:3001/time-off-requests/${requestId}/approve`, {}, { withCredentials: true })
+            setSuccess('Forespørsel godkjent!')
+            fetchTimeOffRequests()
+            setTimeout(() => setSuccess(null), 3000)
+        } catch (err: any) {
+            setError('Kunne ikke godkjenne forespørsel')
+        }
+    }
+
+    const handleReject = async (requestId: string) => {
+        try {
+            await axios.patch(`http://localhost:3001/time-off-requests/${requestId}/reject`, {}, { withCredentials: true })
+            setSuccess('Forespørsel avvist!')
+            fetchTimeOffRequests()
+            setTimeout(() => setSuccess(null), 3000)
+        } catch (err: any) {
+            setError('Kunne ikke avvise forespørsel')
+        }
+    }
+
+    // Filtrer forespørsler etter status
+    const pendingRequests = timeOffRequests.filter(req => req.status === 'PENDING')
+    const approvedRequests = timeOffRequests.filter(req => req.status === 'APPROVED')
+    const rejectedRequests = timeOffRequests.filter(req => req.status === 'REJECTED')
+
+    // Hjelpefunksjoner
+    const getUserName = (userId: string) => {
+        const employee = employees.find(emp => emp.id === userId)
+        return employee?.name || 'Ukjent'
+    }
+
+    const getRequestTypeLabel = (type: string) => {
+        switch (type) {
+            case 'VACATION': return 'Ferie'
+            case 'SICK': return 'Syk'
+            case 'OTHER': return 'Annet'
+            default: return type
+        }
+    }
+
+    const getRequestTypeColor = (type: string) => {
+        switch (type) {
+            case 'VACATION': return 'success'
+            case 'SICK': return 'error'
+            case 'OTHER': return 'warning'
+            default: return 'default'
+        }
+    }
+
+    const getRequestTypeIcon = (type: string) => {
+        switch (type) {
+            case 'VACATION': return <EventIcon />
+            case 'SICK': return <EventIcon />
+            case 'OTHER': return <EventIcon />
+            default: return <EventIcon />
+        }
+    }
+
+    const getStatusDisplay = (status: string) => {
         switch (status) {
-            case 'PENDING':
-                return 'Venter';
-            case 'APPROVED':
-                return 'Godkjent';
-            case 'REJECTED':
-                return 'Avvist';
-            default:
-                return 'Venter';
+            case 'PENDING': return 'Venter'
+            case 'APPROVED': return 'Godkjent'
+            case 'REJECTED': return 'Avvist'
+            default: return status
         }
-    };
+    }
 
-    const getStatusColor = (status?: string) => {
+    const getStatusColor = (status: string) => {
         switch (status) {
-            case 'PENDING':
-                return 'warning';
-            case 'APPROVED':
-                return 'success';
-            case 'REJECTED':
-                return 'error';
-            default:
-                return 'default';
+            case 'PENDING': return 'warning'
+            case 'APPROVED': return 'success'
+            case 'REJECTED': return 'error'
+            default: return 'default'
         }
-    };
-
-    const getTypeIcon = (type: string) => {
-        switch (type) {
-            case 'VACATION':
-                return <VacationIcon />;
-            case 'SICK':
-                return <SickIcon />;
-            case 'OTHER':
-                return <OtherIcon />;
-            default:
-                return <EventIcon />;
-        }
-    };
-
-    const getTypeColor = (type: string) => {
-        switch (type) {
-            case 'VACATION':
-                return 'success';
-            case 'SICK':
-                return 'error';
-            case 'OTHER':
-                return 'warning';
-            default:
-                return 'default';
-        }
-    };
-
-    const getTypeLabel = (type: string) => {
-        switch (type) {
-            case 'VACATION':
-                return 'Ferie';
-            case 'SICK':
-                return 'Syk';
-            case 'OTHER':
-                return 'Annet';
-            default:
-                return type;
-        }
-    };
+    }
 
     const calculateDuration = (fromDate: string, toDate: string) => {
-        const start = new Date(fromDate);
-        const end = new Date(toDate);
-        const diffTime = Math.abs(end.getTime() - start.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        return diffDays;
-    };
+        const from = new Date(fromDate)
+        const to = new Date(toDate)
+        const diffTime = Math.abs(to.getTime() - from.getTime())
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
+        return diffDays
+    }
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString)
+        return date.toLocaleDateString('nb-NO', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        })
+    }
+
+    const formatDateTime = (dateString: string) => {
+        const date = new Date(dateString)
+        return date.toLocaleDateString('nb-NO', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    }
 
     if (loading) {
         return (
@@ -210,6 +202,12 @@ const VacancyPage: NextPage = () => {
                     </Alert>
                 )}
 
+                {success && (
+                    <Alert severity="success" sx={{ mb: 3 }}>
+                        {success}
+                    </Alert>
+                )}
+
                 {/* Header */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
                     <EventIcon sx={{ mr: 2, color: 'primary.main', fontSize: 32 }} />
@@ -223,145 +221,325 @@ const VacancyPage: NextPage = () => {
                     </Box>
                 </Box>
 
-                {timeOffRequests.length === 0 ? (
-                    <Card elevation={2}>
-                        <CardContent>
+                {/* Ventende forespørsler */}
+                <Card elevation={2} sx={{ mb: 3 }}>
+                    <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <EventIcon sx={{ mr: 1, color: 'warning.main' }} />
+                            <Typography variant="h5" component="h2" fontWeight="bold">
+                                Ventende forespørsler ({pendingRequests.length})
+                            </Typography>
+                        </Box>
+                        
+                        {pendingRequests.length === 0 ? (
                             <Box sx={{ textAlign: 'center', py: 4 }}>
-                                <EventIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                                 <Typography variant="h6" color="text.secondary">
-                                    Ingen forespørsler funnet
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    Det er ingen aktive fraværsforespørsler for øyeblikket
+                                    Ingen ventende forespørsler
                                 </Typography>
                             </Box>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <Grid container spacing={3}>
-                        {timeOffRequests.map(request => {
-                            const duration = calculateDuration(request.fromDate, request.toDate);
-                            
-                            return (
-                                <Grid item xs={12} md={6} lg={4} key={request.id}>
-                                    <Card 
-                                        elevation={2}
-                                        sx={{
-                                            height: '100%',
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                                            }
-                                        }}
-                                    >
-                                        <CardContent>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                <Avatar 
-                                                    sx={{ 
-                                                        bgcolor: 'primary.main', 
-                                                        mr: 2,
-                                                        width: 48,
-                                                        height: 48
-                                                    }}
-                                                >
-                                                    {getUserName(request.userId).charAt(0)}
-                                                </Avatar>
-                                                <Box sx={{ flexGrow: 1 }}>
-                                                    <Typography variant="h6" fontWeight="bold">
-                                                        {getUserName(request.userId)}
-                                                    </Typography>
-                                                    <Chip
-                                                        icon={getTypeIcon(request.type)}
-                                                        label={getTypeLabel(request.type)}
-                                                        color={getTypeColor(request.type) as any}
-                                                        size="small"
-                                                        sx={{ mt: 0.5 }}
-                                                    />
-                                                </Box>
-                                                <Chip
-                                                    label={getStatusDisplay(request.status)}
-                                                    color={getStatusColor(request.status) as any}
-                                                    variant={request.status === 'PENDING' ? 'filled' : 'outlined'}
-                                                    size="small"
-                                                />
-                                            </Box>
+                        ) : (
+                            <Grid container spacing={3}>
+                                {pendingRequests.map((request) => {
+                                    const duration = calculateDuration(request.fromDate, request.toDate);
+                                    
+                                    return (
+                                        <Grid item xs={12} md={6} lg={4} key={request.id}>
+                                            <Card 
+                                                elevation={2}
+                                                sx={{
+                                                    height: '100%',
+                                                    transition: 'all 0.3s ease',
+                                                    '&:hover': {
+                                                        transform: 'translateY(-2px)',
+                                                        boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                                                    }
+                                                }}
+                                            >
+                                                <CardContent>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                        <Avatar 
+                                                            sx={{ 
+                                                                bgcolor: 'primary.main', 
+                                                                mr: 2,
+                                                                width: 48,
+                                                                height: 48
+                                                            }}
+                                                        >
+                                                            {getUserName(request.userId).charAt(0)}
+                                                        </Avatar>
+                                                        <Box sx={{ flexGrow: 1 }}>
+                                                            <Typography variant="h6" fontWeight="bold">
+                                                                {getUserName(request.userId)}
+                                                            </Typography>
+                                                            <Chip
+                                                                icon={getRequestTypeIcon(request.type)}
+                                                                label={getRequestTypeLabel(request.type)}
+                                                                color={getRequestTypeColor(request.type) as any}
+                                                                size="small"
+                                                                sx={{ mt: 0.5 }}
+                                                            />
+                                                        </Box>
+                                                        <Chip
+                                                            label={getStatusDisplay(request.status)}
+                                                            color={getStatusColor(request.status) as any}
+                                                            variant={request.status === 'PENDING' ? 'filled' : 'outlined'}
+                                                            size="small"
+                                                        />
+                                                    </Box>
 
-                                            <Divider sx={{ my: 2 }} />
+                                                    <Divider sx={{ my: 2 }} />
 
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <CalendarIcon fontSize="small" color="action" />
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        Fra: {formatFromDate(request.fromDate)}
+                                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <CalendarIcon fontSize="small" color="action" />
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Fra: {formatDate(request.fromDate)}
+                                                            </Typography>
+                                                        </Box>
+                                                        
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <CalendarIcon fontSize="small" color="action" />
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Til: {formatDate(request.toDate)}
+                                                            </Typography>
+                                                        </Box>
+                                                        
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <TimeIcon fontSize="small" color="action" />
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                Varighet: {duration} dag{duration !== 1 ? 'er' : ''}
+                                                            </Typography>
+                                                        </Box>
+
+                                                        {request.reason && (
+                                                            <Box sx={{ mt: 1 }}>
+                                                                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                                                    "{request.reason}"
+                                                                </Typography>
+                                                            </Box>
+                                                        )}
+                                                    </Box>
+
+                                                    {request.status === 'PENDING' && (
+                                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                                            <Button
+                                                                variant="outlined"
+                                                                color="error"
+                                                                size="small"
+                                                                startIcon={<CloseIcon />}
+                                                                onClick={() => handleReject(request.id)}
+                                                                sx={{ flex: 1 }}
+                                                            >
+                                                                Avvis
+                                                            </Button>
+                                                            <Button
+                                                                variant="contained"
+                                                                color="success"
+                                                                size="small"
+                                                                startIcon={<CheckIcon />}
+                                                                onClick={() => handleApprove(request.id)}
+                                                                sx={{ 
+                                                                    flex: 1,
+                                                                    background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                                                                    '&:hover': {
+                                                                        background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
+                                                                    }
+                                                                }}
+                                                            >
+                                                                Godkjenn
+                                                            </Button>
+                                                        </Box>
+                                                    )}
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    );
+                                })}
+                            </Grid>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Arkiv - Godkjente forespørsler */}
+                <Card elevation={2} sx={{ mb: 3 }}>
+                    <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <CheckCircleIcon sx={{ mr: 1, color: 'success.main' }} />
+                            <Typography variant="h5" component="h2" fontWeight="bold">
+                                Godkjente forespørsler ({approvedRequests.length})
+                            </Typography>
+                        </Box>
+                        
+                        {approvedRequests.length === 0 ? (
+                            <Box sx={{ textAlign: 'center', py: 4 }}>
+                                <Typography variant="h6" color="text.secondary">
+                                    Ingen godkjente forespørsler
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Grid container spacing={3}>
+                                {approvedRequests.map((request) => (
+                                    <Grid item xs={12} md={6} lg={4} key={request.id}>
+                                        <Card 
+                                            elevation={1}
+                                            sx={{
+                                                height: '100%',
+                                                border: '2px solid',
+                                                borderColor: 'success.main',
+                                                backgroundColor: '#f8fff8'
+                                            }}
+                                        >
+                                            <CardContent>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                    <CheckCircleIcon sx={{ color: 'success.main', mr: 1 }} />
+                                                    <Typography variant="h6" fontWeight="bold" color="success.main">
+                                                        Godkjent
                                                     </Typography>
                                                 </Box>
                                                 
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <CalendarIcon fontSize="small" color="action" />
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        Til: {formatToDate(request.toDate)}
-                                                    </Typography>
+                                                {/* Ansatt info */}
+                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                    <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
+                                                        {getUserName(request.userId).charAt(0)}
+                                                    </Avatar>
+                                                    <Box>
+                                                        <Typography variant="h6" fontWeight="bold">
+                                                            {getUserName(request.userId)}
+                                                        </Typography>
+                                                        <Chip
+                                                            label={getRequestTypeLabel(request.type)}
+                                                            color={getRequestTypeColor(request.type) as any}
+                                                            size="small"
+                                                        />
+                                                    </Box>
                                                 </Box>
-                                                
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <TimeIcon fontSize="small" color="action" />
+
+                                                {/* Datoer */}
+                                                <Box sx={{ mb: 2 }}>
                                                     <Typography variant="body2" color="text.secondary">
-                                                        Varighet: {duration} dag{duration !== 1 ? 'er' : ''}
+                                                        <strong>Fra:</strong> {formatDate(request.fromDate)}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        <strong>Til:</strong> {formatDate(request.toDate)}
                                                     </Typography>
                                                 </Box>
 
+                                                {/* Grunn */}
                                                 {request.reason && (
-                                                    <Box sx={{ mt: 1 }}>
-                                                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                                                            "{request.reason}"
+                                                    <Box sx={{ mt: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            <strong>Grunn:</strong> {request.reason}
                                                         </Typography>
                                                     </Box>
                                                 )}
-                                            </Box>
 
-                                            {request.status === 'PENDING' && (
-                                                <Box sx={{ display: 'flex', gap: 1 }}>
-                                                    <Button
-                                                        variant="outlined"
-                                                        color="error"
-                                                        size="small"
-                                                        startIcon={<CloseIcon />}
-                                                        onClick={() => handleReject(request.id)}
-                                                        sx={{ flex: 1 }}
-                                                    >
-                                                        Avvis
-                                                    </Button>
-                                                    <Button
-                                                        variant="contained"
-                                                        color="success"
-                                                        size="small"
-                                                        startIcon={<CheckIcon />}
-                                                        onClick={() => handleApprove(request.id)}
-                                                        sx={{ 
-                                                            flex: 1,
-                                                            background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
-                                                            '&:hover': {
-                                                                background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
-                                                            }
-                                                        }}
-                                                    >
-                                                        Godkjenn
-                                                    </Button>
+                                                {/* Godkjent dato */}
+                                                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                                                    <Typography variant="caption" color="success.main">
+                                                        Godkjent: {formatDateTime(request.updatedAt || request.createdAt)}
+                                                    </Typography>
                                                 </Box>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            );
-                        })}
-                    </Grid>
-                )}
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Arkiv - Avviste forespørsler */}
+                <Card elevation={2} sx={{ mb: 3 }}>
+                    <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <CancelIcon sx={{ mr: 1, color: 'error.main' }} />
+                            <Typography variant="h5" component="h2" fontWeight="bold">
+                                Avviste forespørsler ({rejectedRequests.length})
+                            </Typography>
+                        </Box>
+                        
+                        {rejectedRequests.length === 0 ? (
+                            <Box sx={{ textAlign: 'center', py: 4 }}>
+                                <Typography variant="h6" color="text.secondary">
+                                    Ingen avviste forespørsler
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Grid container spacing={3}>
+                                {rejectedRequests.map((request) => (
+                                    <Grid item xs={12} md={6} lg={4} key={request.id}>
+                                        <Card 
+                                            elevation={1}
+                                            sx={{
+                                                height: '100%',
+                                                border: '2px solid',
+                                                borderColor: 'error.main',
+                                                backgroundColor: '#fff8f8'
+                                            }}
+                                        >
+                                            <CardContent>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                    <CancelIcon sx={{ color: 'error.main', mr: 1 }} />
+                                                    <Typography variant="h6" fontWeight="bold" color="error.main">
+                                                        Avvist
+                                                    </Typography>
+                                                </Box>
+                                                
+                                                {/* Ansatt info */}
+                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                    <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
+                                                        {getUserName(request.userId).charAt(0)}
+                                                    </Avatar>
+                                                    <Box>
+                                                        <Typography variant="h6" fontWeight="bold">
+                                                            {getUserName(request.userId)}
+                                                        </Typography>
+                                                        <Chip
+                                                            label={getRequestTypeLabel(request.type)}
+                                                            color={getRequestTypeColor(request.type) as any}
+                                                            size="small"
+                                                        />
+                                                    </Box>
+                                                </Box>
+
+                                                {/* Datoer */}
+                                                <Box sx={{ mb: 2 }}>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        <strong>Fra:</strong> {formatDate(request.fromDate)}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        <strong>Til:</strong> {formatDate(request.toDate)}
+                                                    </Typography>
+                                                </Box>
+
+                                                {/* Grunn */}
+                                                {request.reason && (
+                                                    <Box sx={{ mt: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            <strong>Grunn:</strong> {request.reason}
+                                                        </Typography>
+                                                    </Box>
+                                                )}
+
+                                                {/* Avvist dato */}
+                                                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                                                    <Typography variant="caption" color="error.main">
+                                                        Avvist: {formatDateTime(request.updatedAt || request.createdAt)}
+                                                    </Typography>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        )}
+                    </CardContent>
+                </Card>
             </Box>
         </Layout>
     );
 }
 
-export default VacancyPage;
+export default FravaersforesporselPage;
 
 

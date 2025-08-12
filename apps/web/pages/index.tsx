@@ -41,6 +41,7 @@ interface TimeOffRequest {
     fromDate: string;
     toDate: string;
     type: 'VACATION' | 'SICK' | 'OTHER';
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
 interface Shift {
@@ -55,6 +56,7 @@ interface SwapRequest {
     swapType: string;
     swapWithId: string;
     toShiftId: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
 interface Employee {
@@ -125,8 +127,13 @@ const HomePage: NextPage = () => {
     } = useData();
 
     const totalEmployees = employees.length;
-    const totalRequests = timeOffRequests.length + swapRequests.length;
-    const pendingRequests = timeOffRequests.filter(req => req.type === 'VACATION').length;
+    
+    // Filtrer kun på ventende forespørsler
+    const pendingTimeOffRequests = timeOffRequests.filter(req => req.status === 'PENDING');
+    const pendingSwapRequests = swapRequests.filter(req => req.status === 'PENDING');
+    
+    const totalRequests = pendingTimeOffRequests.length + pendingSwapRequests.length;
+    const pendingRequests = pendingTimeOffRequests.filter(req => req.type === 'VACATION').length;
 
     // Oppslagskart
     const shiftDateById = React.useMemo(() => {
@@ -287,14 +294,14 @@ const HomePage: NextPage = () => {
                             </Card>
                         </Box>
 
-                        {/* Bytteforespørsler */}
+                        {/* Bytteforespørsler - kun ventende */}
                         <Box>
                             <Card elevation={2} sx={{ height: '100%' }}>
                                 <CardContent>
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                                         <SwapIcon sx={{ mr: 1, color: 'primary.main' }} />
                                         <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Bytteforespørsler
+                                            Bytteforespørsler (Venter)
                                         </Typography>
                                     </Box>
                                     <TableContainer component={Paper} elevation={0}>
@@ -307,8 +314,8 @@ const HomePage: NextPage = () => {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {swapRequests.length > 0 ? (
-                                                    swapRequests.map(sr => {
+                                                {pendingSwapRequests.length > 0 ? (
+                                                    pendingSwapRequests.map(sr => {
                                                         const requester = employees.find(e => e.id === sr.requestedById)?.name;
                                                         const swapWith = employees.find(e => e.id === sr.swapWithId)?.name;
                                                         const dateFrom = shiftDateById[sr.fromShiftId];
@@ -343,7 +350,7 @@ const HomePage: NextPage = () => {
                                                     <TableRow>
                                                         <TableCell colSpan={3} align="center">
                                                             <Typography color="text.secondary">
-                                                                Ingen bytteforespørsler
+                                                                Ingen ventende bytteforespørsler
                                                             </Typography>
                                                         </TableCell>
                                                     </TableRow>
@@ -354,16 +361,15 @@ const HomePage: NextPage = () => {
                                 </CardContent>
                             </Card>
                         </Box>
-                    </Box>
 
-                    {/* Fraværsforespørsler */}
-                    <Box sx={{ mt: 3 }}>
+                        {/* Fraværsforespørsler - kun ventende */}
+                        <Box sx={{ mt: 3 }}>
                             <Card elevation={2}>
                                 <CardContent>
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                                         <EventIcon sx={{ mr: 1, color: 'primary.main' }} />
                                         <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Fraværsforespørsler
+                                            Fraværsforespørsler (Venter)
                                         </Typography>
                                     </Box>
                                     <TableContainer component={Paper} elevation={0}>
@@ -378,8 +384,8 @@ const HomePage: NextPage = () => {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {timeOffRequests.length > 0 ? (
-                                                    timeOffRequests.map(sr => {
+                                                {pendingTimeOffRequests.length > 0 ? (
+                                                    pendingTimeOffRequests.map(sr => {
                                                         const requester = employees.find(e => e.id === sr.userId)?.name;
 
                                                         return (
@@ -420,7 +426,7 @@ const HomePage: NextPage = () => {
                                                     <TableRow>
                                                         <TableCell colSpan={5} align="center">
                                                             <Typography color="text.secondary">
-                                                                Ingen fraværsforespørsler
+                                                                Ingen ventende fraværsforespørsler
                                                             </Typography>
                                                         </TableCell>
                                                     </TableRow>
@@ -432,6 +438,7 @@ const HomePage: NextPage = () => {
                             </Card>
                         </Box>
                     </Box>
+                </Box>
             </Layout>
         </>
     );
