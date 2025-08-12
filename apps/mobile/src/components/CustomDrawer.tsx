@@ -49,6 +49,12 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
       icon: 'people-outline',
       route: 'Medarbeidere',
     },
+    {
+      name: 'Forespørsel',
+      title: 'Forespørsel',
+      icon: 'time-outline',
+      route: 'Forespørsel',
+    },
   ];
 
   const handleNavigation = (routeName: string) => {

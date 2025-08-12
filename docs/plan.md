@@ -4,9 +4,9 @@
 
 1. ✅ M1 – Database & API (FERDIG)
 2. ✅ M2 – Design & Prototyping (FERDIG)
-3. 🚧 M3 – Mobilapp for Ansatte
-4. ⏳ M4 – Webportal for Admin
-5. ⏳ M5 – Sanntid & Chat
+3. ✅ M3 – Mobilapp for Ansatte (FERDIG)
+4. ✅ M4 – Webportal for Admin (FERDIG)
+5. ✅ M5 – Sanntid & Chat (FERDIG)
 6. ⏳ M6 – Testing, Dokumentasjon og Deployment
 
 ---

@@ -17,6 +17,16 @@ export class ShiftSwapReqService {
                 );
             }
         }
+        
+        // For GIVE_AWAY må swapWithId også oppgis
+        if (dto.type === SwapRequestType.GIVE_AWAY) {
+            if (!dto.swapWithId) {
+                throw new BadRequestException(
+                    'Ved GIVE_AWAY må swapWithId oppgis (hvem vakten skal gis til).',
+                );
+            }
+        }
+
         const data: any = {
             requestedById: dto.userId,
             fromShiftId: dto.fromShiftId,
@@ -24,9 +34,14 @@ export class ShiftSwapReqService {
             reason: dto.reason ?? null,
         };
 
-        if (dto.type === SwapRequestType.SWAP) {
+        // Lagre swapWithId for både SWAP og GIVE_AWAY
+        if (dto.swapWithId) {
             data.swapWithId = dto.swapWithId;
-            data.toShiftId  = dto.toShiftId;
+        }
+
+        // Bare lagre toShiftId for SWAP
+        if (dto.type === SwapRequestType.SWAP && dto.toShiftId) {
+            data.toShiftId = dto.toShiftId;
         }
 
         return this.prisma.shiftSwapRequest.create({ data });

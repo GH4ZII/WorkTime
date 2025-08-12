@@ -4,67 +4,96 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import { API_ENDPOINTS } from '../config/api-simple';
 
+interface User {
+    id: string;
+    name: string;
+    email: string;
+    // Legg til andre brukerfelter du trenger
+}
+
 interface AuthContextData {
     token: string | null;
+    user: User | null;
     isAuthenticated: boolean;
-    signIn: (email, password) => Promise<void>;
+    signIn: (email: string, password: string) => Promise<void>;
     signOut: () => void;
 }
 
-// Opprett Contexten
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [token, setToken] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
 
-    // Denne kjører når appen starter for å sjekke om vi har et lagret token
     useEffect(() => {
-        async function loadToken() {
-            const storedToken = await SecureStore.getItemAsync('userToken');
-            if (storedToken) {
+        async function loadStoredData() {
+            const [storedToken, storedUser] = await Promise.all([
+                SecureStore.getItemAsync('userToken'),
+                SecureStore.getItemAsync('userData')
+            ]);
+            
+            if (storedToken && storedUser) {
                 setToken(storedToken);
-                // Sett axios til å alltid sende med tokenet
+                setUser(JSON.parse(storedUser));
                 axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
             }
         }
-        loadToken();
+        loadStoredData();
     }, []);
 
-
-    const signIn = async (email, password) => {
+    const signIn = async (email: string, password: string) => {
         try {            
             const response = await axios.post(API_ENDPOINTS.AUTH.LOGIN, {
                 email,
                 password,
             });
 
-            const { access_token: accessToken } = response.data;
+            const { access_token: accessToken, user: userData } = response.data;
+
+            // Sjekk om userData eksisterer og har riktig struktur
+            if (!userData || !userData.id) {
+                console.error('Uventet respons fra login API:', response.data);
+                throw new Error('Uventet respons fra server');
+            }
 
             setToken(accessToken);
+            setUser(userData);
             axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-            await SecureStore.setItemAsync('userToken', accessToken);
+            // Lagre både token og brukerdata
+            await Promise.all([
+                SecureStore.setItemAsync('userToken', accessToken),
+                SecureStore.setItemAsync('userData', JSON.stringify(userData))
+            ]);
         } catch (error) {
             console.error('Feil ved innlogging:', error);
+            throw error;
         }
     };
 
     const signOut = async () => {
         setToken(null);
+        setUser(null);
         delete axios.defaults.headers.common['Authorization'];
-        await SecureStore.deleteItemAsync('userToken');
+        await Promise.all([
+            SecureStore.deleteItemAsync('userToken'),
+            SecureStore.deleteItemAsync('userData')
+        ]);
     };
 
-    const isAuthenticated = !!token;
+    const isAuthenticated = !!token && !!user;
 
     return (
-        <AuthContext.Provider value={{ token, isAuthenticated, signIn, signOut }}>
-    {children}
-    </AuthContext.Provider>
-);
+        <AuthContext.Provider value={{ token, user, isAuthenticated, signIn, signOut }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
 export function useAuth() {
     const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
     return context;
 }

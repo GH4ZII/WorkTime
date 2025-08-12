@@ -37,6 +37,8 @@
     "@emotion/styled": "^11.14.1",
     "@fontsource/roboto": "^5.2.6",
     "@mui/material": "^7.2.0",
+    "@react-native-community/datetimepicker": "^8.4.4",
+    "@react-native-picker/picker": "^2.11.1",
     "@react-navigation/drawer": "^7.5.3",
     "@react-navigation/native": "^7.1.14",
     "@types/react": "^19.1.8",

@@ -9,6 +9,7 @@ import MyShiftsScreen from "../screens/MyShiftsScreen";
 import ChatScreen from "../screens/ChatScreen";
 import CoWorkerScreen from "../screens/CoWorkerScreen";
 import CustomDrawer from '../components/CustomDrawer';
+import RequestScreen from '../screens/RequestScreen';
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -56,6 +57,13 @@ function AppDrawer() {
                 component={CoWorkerScreen}
                 options={{
                     title: 'Medarbeidere',
+                }}
+            />
+            <Drawer.Screen
+                name="Forespørsel"
+                component={RequestScreen}
+                options={{
+                    title: 'Forespørsel',
                 }}
             />
         </Drawer.Navigator>

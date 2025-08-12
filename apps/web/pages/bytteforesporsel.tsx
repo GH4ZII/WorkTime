@@ -89,9 +89,13 @@ const ShiftSwapPage: NextPage = () => {
         }
     };
 
-    const getUserName = (userId: string) => {
+    const getUserName = (userId: string) => {        
         const user = users.find(u => u.id === userId);
-        return user?.name || 'Ukjent bruker';
+        if (!user) {
+            return 'Ukjent bruker';
+        }
+        
+        return user.name;
     };
 
     const getShiftInfo = (shiftId: string) => {
@@ -336,53 +340,77 @@ const ShiftSwapPage: NextPage = () => {
                                                     </Box>
                                                 )}
 
-                                                {/* Til skift */}
-                                                {request.swapType === 'SWAP' && toShiftInfo && (
+                                                {/* Til skift - Vis for både SWAP og GIVE_AWAY */}
+                                                {(request.swapType === 'SWAP' && toShiftInfo) || request.swapType === 'GIVE_AWAY' ? (
                                                     <Card 
                                                         elevation={1}
                                                         sx={{ 
                                                             flex: 1,
-                                                            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)'
+                                                            background: request.swapType === 'GIVE_AWAY' 
+                                                                ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' 
+                                                                : 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)'
                                                         }}
                                                     >
                                                         <CardContent>
                                                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                                <Avatar sx={{ mr: 1, bgcolor: 'secondary.main', width: 32, height: 32 }}>
-                                                                    {toShiftInfo.userName.charAt(0)}
+                                                                <Avatar sx={{ mr: 1, bgcolor: request.swapType === 'GIVE_AWAY' ? 'success.main' : 'secondary.main', width: 32, height: 32 }}>
+                                                                    {request.swapType === 'GIVE_AWAY' 
+                                                                        ? getUserName(request.swapWithId)?.charAt(0) || '?'
+                                                                        : toShiftInfo?.userName.charAt(0) || '?'
+                                                                    }
                                                                 </Avatar>
                                                                 <Typography variant="h6" fontWeight="bold">
-                                                                    Til skift
+                                                                    {request.swapType === 'GIVE_AWAY' ? 'Gir vakt til' : 'Til skift'}
                                                                 </Typography>
                                                             </Box>
-                                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                    <PersonIcon fontSize="small" color="action" />
-                                                                    <Typography variant="body2" color="text.secondary">
-                                                                        {toShiftInfo.userName}
-                                                                    </Typography>
+                                                            
+                                                            {request.swapType === 'GIVE_AWAY' ? (
+                                                                // For GIVE_AWAY - vis hvem vakten skal gis til
+                                                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                        <PersonIcon fontSize="small" color="action" />
+                                                                        <Typography variant="body2" color="text.secondary">
+                                                                            {getUserName(request.swapWithId) || 'Ingen mottaker valgt'}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                                                        Vakt gis bort uten bytte
+                                                                    </Typography>                                  
                                                                 </Box>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                    <CalendarIcon fontSize="small" color="action" />
-                                                                    <Typography variant="body2" color="text.secondary">
-                                                                        {toShiftInfo.startTime}
-                                                                    </Typography>
-                                                                </Box>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                    <TimeIcon fontSize="small" color="action" />
-                                                                    <Typography variant="body2" color="text.secondary">
-                                                                        {toShiftInfo.startTime.split(',')[1]} - {toShiftInfo.endTime}
-                                                                    </Typography>
-                                                                </Box>
-                                                                <Chip
-                                                                    label={toShiftInfo.duration}
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    color="secondary"
-                                                                />
-                                                            </Box>
+                                                            ) : (
+                                                                // For SWAP - vis skiftet som byttes til
+                                                                toShiftInfo && (
+                                                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <PersonIcon fontSize="small" color="action" />
+                                                                            <Typography variant="body2" color="text.secondary">
+                                                                                {toShiftInfo.userName}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <CalendarIcon fontSize="small" color="action" />
+                                                                            <Typography variant="body2" color="text.secondary">
+                                                                                {toShiftInfo.startTime}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <TimeIcon fontSize="small" color="action" />
+                                                                            <Typography variant="body2" color="text.secondary">
+                                                                                {toShiftInfo.startTime.split(',')[1]} - {toShiftInfo.endTime}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                        <Chip
+                                                                            label={toShiftInfo.duration}
+                                                                            size="small"
+                                                                            variant="outlined"
+                                                                            color="secondary"
+                                                                        />
+                                                                    </Box>
+                                                                )
+                                                            )}
                                                         </CardContent>
                                                     </Card>
-                                                )}
+                                                ) : null}
                                             </Box>
 
                                             {request.status === 'PENDING' && (
