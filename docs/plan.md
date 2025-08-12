@@ -29,9 +29,9 @@
 
 ### 3.3 Forespørsler ( Gjør det senere når Admin Dashboard er oppe )
 
-- [ ] Fraværsforespørsel: datointervall, type, beskrivelse
-- [ ] Bytteforespørsel: velg eget skift → velg kollega/skift
-- [ ] Se historikk og status for begge forespørselstyper
+- [x] Fraværsforespørsel: datointervall, type, beskrivelse
+- [x] Bytteforespørsel: velg eget skift → velg kollega/skift
+- [z] Se historikk og status for begge forespørselstyper
 
 ### 3.4 Arbeidstimer
 
@@ -44,10 +44,10 @@
 
 ### 3.6 Chat & Kollegaliste
 
-- [ ] Liste over kollegaer (søkbar)
-- [ ] Se kollegaprofil (navn, e-post, telefon)
-- [ ] Direktemelding og gruppechat
-- [ ] Chat i sanntid
+- [x] Liste over kollegaer (søkbar)
+- [x] Se kollegaprofil (navn, e-post, telefon)
+- [x] Direktemelding og gruppechat
+- [x] Chat i sanntid
 
 ---
 
@@ -86,7 +86,7 @@
 ### 5.1 Sanntid (WebSocket)
 
 - [x] Socket.io i NestJS backend
-- [ ] Emit & lytte til events (skift, forespørsler)
+- [x] Emit & lytte til events (skift, forespørsler)
 
 ### 5.2 Mobilapp
 

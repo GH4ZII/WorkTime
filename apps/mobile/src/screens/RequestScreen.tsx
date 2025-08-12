@@ -37,9 +37,34 @@ interface User {
   email: string;
 }
 
+interface ShiftSwapRequest {
+  id: string;
+  fromShiftId: string;
+  type: 'GIVE_AWAY' | 'SWAP';
+  swapWithId?: string;
+  toShiftId?: string;
+  reason?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  fromShift?: Shift;
+  toShift?: Shift;
+  requestedById: string; // Added for filtering
+}
+
+interface TimeOffRequest {
+  id: string;
+  fromDate: string;
+  toDate: string;
+  type: 'VACATION' | 'SICK' | 'OTHER';
+  reason?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  userId: string; // Added for filtering
+}
+
 const RequestScreen: React.FC = () => {
   const { user: currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'swap' | 'timeoff'>('swap');
+  const [activeTab, setActiveTab] = useState<'swap' | 'timeoff' | 'status'>('swap');
   const [isLoading, setIsLoading] = useState(false);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -60,9 +85,19 @@ const RequestScreen: React.FC = () => {
   const [showFromDatePicker, setShowFromDatePicker] = useState(false);
   const [showToDatePicker, setShowToDatePicker] = useState(false);
 
+  const [mySwapRequests, setMySwapRequests] = useState<ShiftSwapRequest[]>([]);
+  const [myTimeOffRequests, setMyTimeOffRequests] = useState<TimeOffRequest[]>([]);
+  const [isLoadingMyRequests, setIsLoadingMyRequests] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'status') {
+      fetchMyRequests();
+    }
+  }, [activeTab, currentUser]);
 
   const fetchData = async () => {
     try {
@@ -79,6 +114,37 @@ const RequestScreen: React.FC = () => {
       Alert.alert('Feil', 'Kunne ikke hente data fra server');
     } finally {
       setIsLoadingData(false);
+    }
+  };
+
+  const fetchMyRequests = async () => {
+    if (!currentUser) return;
+    
+    try {
+      setIsLoadingMyRequests(true);
+      
+      const [swapResponse, timeOffResponse] = await Promise.all([
+        axios.get(API_ENDPOINTS.SHIFT_SWAP_REQUESTS),
+        axios.get(API_ENDPOINTS.TIME_OFF_REQUESTS)
+      ]);
+      
+      // Filtrer kun brukerens egne forespørsler
+      const mySwaps = swapResponse.data.filter((req: ShiftSwapRequest) => {
+        
+        // Sjekk om brukeren er den som ba om byttet
+        return req.requestedById === currentUser.id;
+      });
+      
+      const myTimeOffs = timeOffResponse.data.filter((req: TimeOffRequest) => {
+        return req.userId === currentUser.id;
+      });
+      
+      setMySwapRequests(mySwaps);
+      setMyTimeOffRequests(myTimeOffs);
+    } catch (error) {
+      console.error('Error fetching my requests:', error);
+    } finally {
+      setIsLoadingMyRequests(false);
     }
   };
 
@@ -205,6 +271,43 @@ const RequestScreen: React.FC = () => {
     const endTime = new Date(shift.endTime);
     
     return `${date.toLocaleDateString('nb-NO')} ${startTime.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}-${endTime.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return '#27ae60';
+      case 'PENDING':
+        return '#f39c12';
+      case 'REJECTED':
+        return '#e74c3c';
+      default:
+        return '#95a5a6';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return 'Godkjent';
+      case 'PENDING':
+        return 'Venter';
+      case 'REJECTED':
+        return 'Avvist';
+      default:
+        return status;
+    }
+  };
+
+  const formatRequestDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('nb-NO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const renderSwapRequest = () => (
@@ -425,6 +528,131 @@ const RequestScreen: React.FC = () => {
     </View>
   );
 
+  const renderStatusSection = () => (
+    <View style={styles.formContainer}>
+      <Text style={styles.sectionTitle}>Status på mine forespørsler</Text>
+      
+      {isLoadingMyRequests ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#667eea" />
+          <Text style={styles.loadingText}>Laster forespørsler...</Text>
+        </View>
+      ) : (
+        <>
+          {/* Skiftbytte forespørsler */}
+          <View style={styles.statusSection}>
+            <Text style={styles.statusSectionTitle}>
+              Skiftbytte ({mySwapRequests.length})
+            </Text>
+            {mySwapRequests.length === 0 ? (
+              <Text style={styles.noRequestsText}>Ingen skiftbytte forespørsler</Text>
+            ) : (
+              mySwapRequests.map((request) => (
+                <View key={request.id} style={styles.requestCard}>
+                  <View style={styles.requestHeader}>
+                    <View style={styles.requestTypeContainer}>
+                      <Ionicons 
+                        name={request.type === 'GIVE_AWAY' ? 'gift-outline' : 'swap-horizontal-outline'} 
+                        size={20} 
+                        color="#667eea" 
+                      />
+                      <Text style={styles.requestType}>
+                        {request.type === 'GIVE_AWAY' ? 'Gi bort vakt' : 'Bytte vakt'}
+                      </Text>
+                    </View>
+                    <View style={[
+                      styles.statusBadge, 
+                      { backgroundColor: getStatusColor(request.status) }
+                    ]}>
+                      <Text style={styles.statusBadgeText}>
+                        {getStatusText(request.status)}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <Text style={styles.requestDate}>
+                    Opprettet: {formatRequestDate(request.createdAt)}
+                  </Text>
+                  
+                  {request.reason && (
+                    <Text style={styles.requestReason}>
+                      Årsak: {request.reason}
+                    </Text>
+                  )}
+                  
+                  {request.status === 'REJECTED' && (
+                    <Text style={styles.rejectedText}>
+                      Forespørselen ble avvist av admin
+                    </Text>
+                  )}
+                </View>
+              ))
+            )}
+          </View>
+
+          {/* Fridager forespørsler */}
+          <View style={styles.statusSection}>
+            <Text style={styles.statusSectionTitle}>
+              Fridager ({myTimeOffRequests.length})
+            </Text>
+            {myTimeOffRequests.length === 0 ? (
+              <Text style={styles.noRequestsText}>Ingen fridager forespørsler</Text>
+            ) : (
+              myTimeOffRequests.map((request) => (
+                <View key={request.id} style={styles.requestCard}>
+                  <View style={styles.requestHeader}>
+                    <View style={styles.requestTypeContainer}>
+                      <Ionicons 
+                        name={
+                          request.type === 'VACATION' ? 'beach-outline' : 
+                          request.type === 'SICK' ? 'medical-outline' : 
+                          'help-outline'
+                        } 
+                        size={20} 
+                        color="#667eea" 
+                      />
+                      <Text style={styles.requestType}>
+                        {request.type === 'VACATION' ? 'Ferie' : 
+                         request.type === 'SICK' ? 'Syk' : 'Annet'}
+                      </Text>
+                    </View>
+                    <View style={[
+                      styles.statusBadge, 
+                      { backgroundColor: getStatusColor(request.status) }
+                    ]}>
+                      <Text style={styles.statusBadgeText}>
+                        {getStatusText(request.status)}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <Text style={styles.requestDate}>
+                    Fra: {new Date(request.fromDate).toLocaleDateString('nb-NO')}
+                  </Text>
+                  <Text style={styles.requestDate}>
+                    Til: {new Date(request.toDate).toLocaleDateString('nb-NO')}
+                  </Text>
+                  
+                  {request.reason && (
+                    <Text style={styles.requestReason}>
+                      Årsak: {request.reason}
+                    </Text>
+                  )}
+                  
+                  {request.status === 'REJECTED' && (
+                    <Text style={styles.rejectedText}>
+                      Forespørselen ble avvist av admin
+                    </Text>
+                  )}
+                </View>
+              ))
+            )}
+          </View>
+        </>
+      )}
+    </View>
+  );
+
   if (isLoadingData) {
     return (
       <View style={styles.container}>
@@ -470,10 +698,26 @@ const RequestScreen: React.FC = () => {
             Fridager
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'status' && styles.activeTab]}
+          onPress={() => setActiveTab('status')}
+        >
+          <Ionicons 
+            name="list-outline" 
+            size={20} 
+            color={activeTab === 'status' ? '#667eea' : '#666'} 
+          />
+          <Text style={[styles.tabText, activeTab === 'status' && styles.activeTabText]}>
+            Status
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {activeTab === 'swap' ? renderSwapRequest() : renderTimeOffRequest()}
+        {activeTab === 'swap' ? renderSwapRequest() : 
+         activeTab === 'timeoff' ? renderTimeOffRequest() : 
+         renderStatusSection()}
       </ScrollView>
 
       {/* Date Pickers */}
@@ -644,6 +888,76 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  statusSection: {
+    marginBottom: 24,
+  },
+  statusSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e8ed',
+  },
+  requestCard: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#667eea',
+  },
+  requestHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  requestTypeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  requestType: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2c3e50',
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  statusBadgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  requestDate: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    marginBottom: 4,
+  },
+  requestReason: {
+    fontSize: 14,
+    color: '#2c3e50',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
+  rejectedText: {
+    fontSize: 14,
+    color: '#e74c3c',
+    marginTop: 8,
+    fontWeight: '500',
+  },
+  noRequestsText: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    paddingVertical: 20,
   },
 });
 

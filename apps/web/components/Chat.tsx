@@ -16,9 +16,10 @@ interface Message {
 interface ChatProps {
   roomId: string;
   currentUserId: string;
+  currentUserName?: string; // Legg til brukernavn
 }
 
-const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
+const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -115,11 +116,30 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
     
     try {
       console.log('Sending message:', { roomId, message: newMessage, senderId: currentUserId });
-      sendMessage(roomId, newMessage, currentUserId);
+      
+      // Opprett en ny melding lokalt umiddelbart
+      const newMessageObj: Message = {
+        id: Date.now().toString(), // Midlertidig ID
+        content: newMessage.trim(),
+        senderId: currentUserId,
+        sender: {
+          id: currentUserId,
+          name: currentUserName || 'Du', // Bruk faktisk brukernavn
+        },
+        sentAt: new Date().toISOString(),
+      };
+      
+      // Legg til meldingen lokalt umiddelbart
+      setMessages(prev => [...prev, newMessageObj]);
+      
+      // Send meldingen via WebSocket
+      sendMessage(roomId, newMessage.trim(), currentUserId);
+      
+      // Rydd opp
       setNewMessage('');
       setIsTyping(false);
       socket?.emit('typing', { roomId, userId: currentUserId, isTyping: false });
-      setError(null); // Clear any previous errors
+      setError(null);
     } catch (error) {
       console.error('Error sending message:', error);
       setError('Kunne ikke sende melding');
@@ -140,14 +160,33 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // Endre useEffect til å respektere autoScroll
+  // useEffect(() => {
+  //   if (autoScroll) {
+  //     scrollToBottom();
+  //   }
+  // }, [messages, autoScroll]);
 
-  useEffect(scrollToBottom, [messages]);
+  // Legg til en funksjon for å toggle auto-scroll
+  // const toggleAutoScroll = () => {
+  //   setAutoScroll(!autoScroll);
+  // };
 
   return (
     <div style={styles.chatContainer}>
+      {/* Legg til en toggle-knapp for auto-scroll */}
+      <div style={styles.autoScrollToggle}>
+        <button
+          onClick={() => {}} // Removed toggleAutoScroll as auto-scroll is off
+          style={{
+            ...styles.toggleButton,
+            backgroundColor: '#bdc3c7' // Changed color to gray
+          }}
+        >
+          Auto-scroll: Av
+        </button>
+      </div>
+
       <div style={styles.messagesContainer}>
         {isLoading && (
           <div style={styles.loadingMessage}>
@@ -193,7 +232,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId }) => {
             {typingUsers.join(', ')} skriver...
           </div>
         )}
-        <div ref={messagesEndRef} />
+        {/* <div ref={messagesEndRef} /> */}
       </div>
       
       <div style={styles.inputContainer}>
@@ -222,7 +261,7 @@ const styles: Record<string, React.CSSProperties> = {
   chatContainer: {
     display: 'flex',
     flexDirection: 'column',
-    height: '600px',
+    height: '100%', // Endret fra '600px' til '100%' for å fylle tilgjengelig plass
     border: '1px solid #e0e0e0',
     borderRadius: '8px',
   },
@@ -231,6 +270,7 @@ const styles: Record<string, React.CSSProperties> = {
     overflowY: 'auto',
     padding: '16px',
     backgroundColor: '#f8f9fa',
+    minHeight: 0, // Legg til denne for å sikre at flexbox fungerer riktig
   },
   message: {
     marginBottom: '12px',
@@ -273,6 +313,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '16px',
     borderTop: '1px solid #e0e0e0',
     backgroundColor: 'white',
+    flexShrink: 0, // Legg til denne for å forhindre at input-feltet krymper
   },
   messageInput: {
     flex: 1,
@@ -318,6 +359,26 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '20px',
     color: '#666',
     fontStyle: 'italic',
+  },
+  autoScrollToggle: {
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    padding: '8px 16px',
+    backgroundColor: '#f8f9fa',
+    borderBottom: '1px solid #e1e8ed',
+    textAlign: 'center',
+  },
+  
+  toggleButton: {
+    padding: '6px 12px',
+    borderRadius: '16px',
+    border: 'none',
+    color: 'white',
+    fontSize: '12px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
   },
 };
 

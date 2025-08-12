@@ -9,7 +9,7 @@ export const API_ENDPOINTS = {
     USERS: 'http://10.129.48.163:3001/users',
     WORKLOG: 'http://10.129.48.163:3001/worklog',
     NOTIFICATIONS: 'http://10.129.48.163:3001/notifications',
-    CHAT: 'http://10.129.48.163:3001/chat',
+    CHAT: 'http://10.129.48.163:3001/chatrooms', // Endret fra 'chat' til 'chatrooms'
     SHIFT_SWAP_REQUESTS: 'http://10.129.48.163:3001/shift-swap-requests',
     TIME_OFF_REQUESTS: 'http://10.129.48.163:3001/time-off-requests',
 };
