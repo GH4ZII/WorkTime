@@ -98,12 +98,12 @@ model ShiftSwapRequest {
   id            String        @id @default(uuid())
   requestedBy   User          @relation("RequestedBy", fields: [requestedById], references: [id], onDelete: Cascade)
   requestedById String
-  fromShift     Shift         @relation("SwapFrom", fields: [fromShiftId], references: [id])
+  fromShift     Shift         @relation("SwapFrom", fields: [fromShiftId], references: [id], onDelete: Cascade)
   fromShiftId   String
   swapType      SwapRequestType @default(SWAP)
   swapWith      User?          @relation("SwapWith", fields: [swapWithId], references: [id], onDelete: Cascade)
   swapWithId    String?
-  toShift       Shift?         @relation("SwapTo", fields: [toShiftId], references: [id])
+  toShift       Shift?         @relation("SwapTo", fields: [toShiftId], references: [id], onDelete: Cascade)
   toShiftId     String?
   reason        String?
   status        RequestStatus @default(PENDING)
@@ -115,7 +115,7 @@ model WorkLog {
   id        String   @id @default(uuid())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  shift     Shift    @relation(fields: [shiftId], references: [id])
+  shift     Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
   shiftId   String
   startTime DateTime
   endTime   DateTime
