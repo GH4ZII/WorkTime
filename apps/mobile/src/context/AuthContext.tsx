@@ -8,7 +8,7 @@ interface User {
     id: string;
     name: string;
     email: string;
-    // Legg til andre brukerfelter du trenger
+    role?: string; // Legg til andre brukerfelter du trenger
 }
 
 interface AuthContextData {
@@ -17,6 +17,7 @@ interface AuthContextData {
     isAuthenticated: boolean;
     signIn: (email: string, password: string) => Promise<void>;
     signOut: () => void;
+    changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -81,10 +82,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ]);
     };
 
+    const changePassword = async (currentPassword: string, newPassword: string) => {
+        try {
+            const response = await axios.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, {
+                currentPassword,
+                newPassword,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 200) {
+                console.log('Passord endret vellykket');
+            }
+        } catch (error) {
+            console.error('Feil ved endring av passord:', error);
+            throw error;
+        }
+    };
+
     const isAuthenticated = !!token && !!user;
 
     return (
-        <AuthContext.Provider value={{ token, user, isAuthenticated, signIn, signOut }}>
+        <AuthContext.Provider value={{ token, user, isAuthenticated, signIn, signOut, changePassword }}>
             {children}
         </AuthContext.Provider>
     );

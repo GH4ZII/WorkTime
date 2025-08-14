@@ -47,6 +47,19 @@ let AuthService = class AuthService {
             }
         };
     }
+    async changePassword(userId, currentPassword, newPassword) {
+        const user = await this.usersService.findOne(userId);
+        if (!user) {
+            throw new Error('Bruker ikke funnet');
+        }
+        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+        if (!isCurrentPasswordValid) {
+            throw new Error('Nåværende passord er feil');
+        }
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+        await this.usersService.updatePassword(userId, newPasswordHash);
+        return true;
+    }
     verifyToken(token) {
         return this.jwtService.verify(token);
     }

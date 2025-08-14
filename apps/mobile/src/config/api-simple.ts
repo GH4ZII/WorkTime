@@ -4,6 +4,7 @@
 export const API_ENDPOINTS = {
     AUTH: {
         LOGIN: 'http://10.129.48.163:3001/auth/login',
+        CHANGE_PASSWORD: 'http://10.129.48.163:3001/auth/change-password',
     },
     SHIFTS: 'http://10.129.48.163:3001/shifts',
     USERS: 'http://10.129.48.163:3001/users',

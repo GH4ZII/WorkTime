@@ -1,6 +1,6 @@
 ﻿// src/screens/ProfileScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Dimensions, TextInput, Modal } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import ScreenHeader from '../components/ScreenHeader';
@@ -8,35 +8,69 @@ import ScreenHeader from '../components/ScreenHeader';
 const { width } = Dimensions.get('window');
 
 const ProfileScreen: React.FC = () => {
-    const { signOut, user } = useAuth();
+    const { user, changePassword } = useAuth();
     const navigation = useNavigation();
-    const [isLoading, setIsLoading] = useState(false);
+    
+    // State for change password modal
+    const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-    const handleSignOut = async () => {
-        Alert.alert(
-            'Logg ut',
-            'Er du sikker på at du vil logge ut?',
-            [
+    const handleChangePassword = async () => {
+        // Validering
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            Alert.alert('Feil', 'Alle feltene må fylles ut');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            Alert.alert('Feil', 'Nytt passord og bekreft passord må være like');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            Alert.alert('Feil', 'Nytt passord må være minst 6 tegn langt');
+            return;
+        }
+
+        setIsChangingPassword(true);
+        try {
+            await changePassword(currentPassword, newPassword);
+            Alert.alert('Suksess', 'Passordet ditt har blitt endret', [
                 {
-                    text: 'Avbryt',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Logg ut',
-                    style: 'destructive',
-                    onPress: async () => {
-                        setIsLoading(true);
-                        try {
-                            await signOut();
-                        } catch (error) {
-                            Alert.alert('Feil', 'Kunne ikke logge ut');
-                        } finally {
-                            setIsLoading(false);
-                        }
-                    },
-                },
-            ]
-        );
+                    text: 'OK',
+                    onPress: () => {
+                        setIsChangePasswordModalVisible(false);
+                        setCurrentPassword('');
+                        setNewPassword('');
+                        setConfirmPassword('');
+                    }
+                }
+            ]);
+        } catch (error: any) {
+            let errorMessage = 'Kunne ikke endre passord';
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            Alert.alert('Feil', errorMessage);
+        } finally {
+            setIsChangingPassword(false);
+        }
+    };
+
+    const openChangePasswordModal = () => {
+        setIsChangePasswordModalVisible(true);
+    };
+
+    const closeChangePasswordModal = () => {
+        setIsChangePasswordModalVisible(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
     };
 
     const getRoleIcon = (role: string) => {
@@ -86,9 +120,11 @@ const ProfileScreen: React.FC = () => {
                 <View style={styles.infoCard}>
                     <Text style={styles.sectionTitle}>Personlig informasjon</Text>
                     
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>👤 Navn</Text>
-                        <Text style={styles.infoValue}>{user?.name || 'Ikke satt'}</Text>
+                    <View style={styles.avatarSection}>
+                        <View style={styles.avatar}>
+                            <Text style={styles.avatarText}>{user?.name?.charAt(0)?.toUpperCase() || '?'}</Text>
+                        </View>
+                        <Text style={styles.avatarName}>{user?.name || 'Ukjent bruker'}</Text>
                     </View>
                     
                     <View style={styles.infoRow}>
@@ -105,19 +141,31 @@ const ProfileScreen: React.FC = () => {
                             </View>
                         </View>
                     </View>
+
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>📱 Telefon</Text>
+                        <Text style={styles.infoValue}>{user?.phone || 'Ikke satt'}</Text>
+                    </View>
+
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>📅 Ansettelsesdato</Text>
+                        <Text style={styles.infoValue}>
+                            {user?.hireDate ? new Date(user.hireDate).toLocaleDateString('nb-NO') : 'Ikke satt'}
+                        </Text>
+                    </View>
                 </View>
 
                 {/* Account Actions Section */}
                 <View style={styles.actionsCard}>
                     <Text style={styles.sectionTitle}>Kontoinnstillinger</Text>
                     
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity style={styles.actionButton} onPress={openChangePasswordModal}>
                         <Text style={styles.actionIcon}>🔒</Text>
                         <Text style={styles.actionText}>Endre passord</Text>
                         <Text style={styles.actionArrow}>›</Text>
                     </TouchableOpacity>
                     
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity style={styles.actionButton} onPress={() => Alert.alert('Info', 'Funksjonalitet kommer snart')}>
                         <Text style={styles.actionIcon}>⚙️</Text>
                         <Text style={styles.actionText}>Innstillinger</Text>
                         <Text style={styles.actionArrow}>›</Text>
@@ -126,6 +174,12 @@ const ProfileScreen: React.FC = () => {
                     <TouchableOpacity style={styles.actionButton}>
                         <Text style={styles.actionIcon}>📱</Text>
                         <Text style={styles.actionText}>Varsler</Text>
+                        <Text style={styles.actionArrow}>›</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('EditProfile')}>
+                        <Text style={styles.actionIcon}>✏️</Text>
+                        <Text style={styles.actionText}>Rediger profil</Text>
                         <Text style={styles.actionArrow}>›</Text>
                     </TouchableOpacity>
                 </View>
@@ -144,20 +198,75 @@ const ProfileScreen: React.FC = () => {
                         <Text style={styles.infoValue}>WorkTime Team</Text>
                     </View>
                 </View>
-
-                {/* Sign Out Button */}
-                <TouchableOpacity
-                    style={[styles.signOutButton, isLoading && styles.signOutButtonDisabled]}
-                    onPress={handleSignOut}
-                    disabled={isLoading}
-                    activeOpacity={0.8}
-                >
-                    <Text style={styles.signOutButtonText}>
-                        {isLoading ? 'Logger ut...' : 'Logg ut'}
-                    </Text>
-                </TouchableOpacity>
             </View>
             </ScrollView>
+
+            {/* Change Password Modal */}
+            <Modal
+                visible={isChangePasswordModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={closeChangePasswordModal}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Endre passord</Text>
+                        
+                        <TextInput
+                            style={styles.passwordInput}
+                            placeholder="Nåværende passord"
+                            secureTextEntry={true}
+                            value={currentPassword}
+                            onChangeText={setCurrentPassword}
+                            placeholderTextColor="#9ca3af"
+                        />
+                        
+                        <TextInput
+                            style={styles.passwordInput}
+                            placeholder="Nytt passord"
+                            secureTextEntry={true}
+                            value={newPassword}
+                            onChangeText={setNewPassword}
+                            placeholderTextColor="#9ca3af"
+                        />
+                        
+                        <TextInput
+                            style={styles.passwordInput}
+                            placeholder="Bekreft nytt passord"
+                            secureTextEntry={true}
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            placeholderTextColor="#9ca3af"
+                        />
+                        
+                        <View style={styles.passwordStrength}>
+                            <Text style={styles.strengthText}>
+                                Styrke: {newPassword.length < 6 ? 'Svak' : newPassword.length < 10 ? 'Middels' : 'Sterk'}
+                            </Text>
+                        </View>
+
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity 
+                                style={[styles.modalButton, styles.cancelButton]} 
+                                onPress={closeChangePasswordModal}
+                                disabled={isChangingPassword}
+                            >
+                                <Text style={styles.cancelButtonText}>Avbryt</Text>
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity 
+                                style={[styles.modalButton, styles.confirmButton]} 
+                                onPress={handleChangePassword}
+                                disabled={isChangingPassword}
+                            >
+                                <Text style={styles.confirmButtonText}>
+                                    {isChangingPassword ? 'Endrer...' : 'Endre passord'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -214,6 +323,29 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         flex: 1,
         textAlign: 'right',
+    },
+    avatarSection: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    avatar: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#667eea',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    avatarName: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#374151',
+    },
+    avatarText: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#ffffff',
     },
     roleContainer: {
         flexDirection: 'row',
@@ -289,29 +421,84 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 4,
     },
-    signOutButton: {
-        backgroundColor: '#e74c3c',
-        paddingVertical: 16,
-        borderRadius: 12,
+    // Modal styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#e74c3c',
+    },
+    modalContent: {
+        backgroundColor: '#ffffff',
+        borderRadius: 16,
+        padding: 24,
+        width: width * 0.9,
+        maxWidth: 400,
+        shadowColor: '#000',
         shadowOffset: {
             width: 0,
             height: 4,
         },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+        elevation: 8,
     },
-    signOutButtonDisabled: {
-        backgroundColor: '#bdc3c7',
-        shadowOpacity: 0,
-        elevation: 0,
-    },
-    signOutButtonText: {
-        color: '#ffffff',
-        fontSize: 18,
+    modalTitle: {
+        fontSize: 20,
         fontWeight: '600',
+        color: '#1f2937',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    passwordInput: {
+        borderWidth: 1,
+        borderColor: '#d1d5db',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        fontSize: 16,
+        backgroundColor: '#ffffff',
+        color: '#1f2937',
+    },
+    passwordStrength: {
+        marginBottom: 16,
+        padding: 8,
+        backgroundColor: '#f3f4f6',
+        borderRadius: 6,
+    },
+    strengthText: {
+        fontSize: 14,
+        color: '#6b7280',
+        textAlign: 'center',
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 12,
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    cancelButton: {
+        backgroundColor: '#f3f4f6',
+        borderWidth: 1,
+        borderColor: '#d1d5db',
+    },
+    confirmButton: {
+        backgroundColor: '#667eea',
+    },
+    cancelButtonText: {
+        color: '#374151',
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    confirmButtonText: {
+        color: '#ffffff',
+        fontSize: 16,
+        fontWeight: '500',
     },
 });
 

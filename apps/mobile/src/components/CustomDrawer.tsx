@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -18,6 +19,8 @@ interface CustomDrawerProps {
 }
 
 const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
+  const { signOut } = useAuth();
+
   const menuItems = [
     {
       name: 'Home',
@@ -63,6 +66,10 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
 
   const getActiveRouteIndex = () => {
     return props.state.index;
+  };
+
+  const handleLogout = () => {
+    signOut();
   };
 
   return (
@@ -121,10 +128,7 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
         <View style={styles.footer}>
           <TouchableOpacity
             style={styles.logoutButton}
-            onPress={() => {
-              // Handle logout logic here
-              console.log('Logout pressed');
-            }}
+            onPress={handleLogout}
             activeOpacity={0.7}
           >
             <Ionicons name="log-out-outline" size={20} color="white" />

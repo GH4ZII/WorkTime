@@ -1,4 +1,5 @@
 import { AuthService } from './auth.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
@@ -12,4 +13,7 @@ export declare class AuthController {
         };
     }>;
     getProfile(req: any): Promise<any>;
+    changePassword(req: any, changePasswordDto: ChangePasswordDto): Promise<{
+        message: string;
+    }>;
 }

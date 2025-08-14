@@ -70,4 +70,14 @@ export class UsersService {
             where: { email },
         });
     }
+
+    // 7) Oppdater passord
+    async updatePassword(id: string, newPasswordHash: string) {
+        return this.prisma.user.update({
+            where: { id },
+            data: {
+                passwordHash: newPasswordHash,
+            },
+        });
+    }
 }

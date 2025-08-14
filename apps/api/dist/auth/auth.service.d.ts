@@ -14,5 +14,6 @@ export declare class AuthService {
             role: any;
         };
     }>;
+    changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean>;
     verifyToken(token: string): any;
 }
