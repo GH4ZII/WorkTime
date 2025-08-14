@@ -95,9 +95,6 @@ export class ChatGPTService {
     return !!apiKey && !!this.openai;
   }
 
-  /**
-   * Ekte OpenAI API-kall
-   */
   private async callOpenAI(prompt: string, options: ChatGPTOptions): Promise<ChatGPTResponse> {
     try {
       this.logger.log('Starter OpenAI API-kall...');
