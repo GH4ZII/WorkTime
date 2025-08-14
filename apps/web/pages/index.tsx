@@ -199,25 +199,25 @@ const HomePage: NextPage = () => {
                             title="Totalt ansatte"
                             value={totalEmployees}
                             icon={<PeopleIcon sx={{ color: 'white' }} />}
-                            color="#1976d2"
+                            color="#667eea"
                         />
                         <StatCard
                             title="Aktive skift"
                             value={shifts.length}
                             icon={<ScheduleIcon sx={{ color: 'white' }} />}
-                            color="#2e7d32"
+                            color="#764ba2"
                         />
                         <StatCard
                             title="Ventende forespørsler"
                             value={totalRequests}
                             icon={<NotificationsIcon sx={{ color: 'white' }} />}
-                            color="#ed6c02"
+                            color="#f093fb"
                         />
                         <StatCard
                             title="Ferieforespørsler"
                             value={pendingRequests}
                             icon={<EventIcon sx={{ color: 'white' }} />}
-                            color="#9c27b0"
+                            color="#4facfe"
                         />
                     </Box>
 

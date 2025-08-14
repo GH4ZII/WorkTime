@@ -94,7 +94,6 @@ const HomeScreen: React.FC = () => {
       return [];
     }
     const userShifts = shifts.filter(shift => shift.userId === user.id);
-    console.log('Filtered shifts for user:', userShifts);
     return userShifts;
   };
 
@@ -223,22 +222,9 @@ const HomeScreen: React.FC = () => {
   };
 
   const datesWithShifts = getDatesWithShifts();
-  console.log('Dates with shifts:', datesWithShifts);
-  console.log('Current user ID:', user?.id);
-  console.log('User shifts:', getUserShifts());
   const shiftsForSelectedDate = getShiftsForSelectedDate();
   const coworkersForSelectedDate = getCoworkersForSelectedDate();
   const totalWorkHours = getTotalWorkHours();
-
-  // Legg til debugging
-  console.log('=== DEBUG INFO ===');
-  console.log('Current user:', user);
-  console.log('Current user ID:', user?.id);
-  console.log('Current user token:', token ? 'Exists' : 'Missing');
-  console.log('All shifts:', shifts);
-  console.log('User shifts:', getUserShifts());
-  console.log('Dates with shifts:', getDatesWithShifts());
-  console.log('==================');
 
   // Hvis brukeren ikke er logget inn, vis en melding
   if (!user || !token) {

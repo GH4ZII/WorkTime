@@ -62,7 +62,7 @@ const Login: React.FC = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -82,7 +82,7 @@ const Login: React.FC = () => {
                 >
                     <Box
                         sx={{
-                            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             padding: 4,
                             textAlign: 'center',
                             color: 'white',
@@ -121,10 +121,10 @@ const Login: React.FC = () => {
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: 2,
                                         '&:hover fieldset': {
-                                            borderColor: '#1976d2',
+                                            borderColor: '#667eea',
                                         },
                                         '&.Mui-focused fieldset': {
-                                            borderColor: '#1976d2',
+                                            borderColor: '#667eea',
                                         },
                                     },
                                 }}
@@ -163,10 +163,10 @@ const Login: React.FC = () => {
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: 2,
                                         '&:hover fieldset': {
-                                            borderColor: '#1976d2',
+                                            borderColor: '#667eea',
                                         },
                                         '&.Mui-focused fieldset': {
-                                            borderColor: '#1976d2',
+                                            borderColor: '#667eea',
                                         },
                                     },
                                 }}
@@ -197,14 +197,14 @@ const Login: React.FC = () => {
                                     borderRadius: 2,
                                     fontSize: '1.1rem',
                                     fontWeight: 'bold',
-                                    background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                     '&:hover': {
-                                        background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
+                                        background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
                                         transform: 'translateY(-1px)',
-                                        boxShadow: '0 8px 25px rgba(25, 118, 210, 0.3)',
+                                        boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
                                     },
                                     '&:disabled': {
-                                        background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                         opacity: 0.7,
                                     },
                                     transition: 'all 0.3s ease',

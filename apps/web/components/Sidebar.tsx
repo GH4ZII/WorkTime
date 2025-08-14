@@ -94,7 +94,7 @@ export const Sidebar: React.FC = () => {
                 '& .MuiDrawer-paper': {
                     width: 280,
                     boxSizing: 'border-box',
-                    background: 'linear-gradient(180deg, #1e293b 0%, #334155 100%)',
+                    background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)',
                     borderRight: '1px solid rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(10px)',
                     position: 'relative', // Add this to fix positioning
@@ -105,7 +105,7 @@ export const Sidebar: React.FC = () => {
                 display: 'flex', 
                 flexDirection: 'column', 
                 height: '100%',
-                background: 'linear-gradient(180deg, #1e293b 0%, #334155 100%)'
+                background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)'
             }}>
                 {/* Logo Section */}
                 <Box sx={{ 
@@ -119,7 +119,7 @@ export const Sidebar: React.FC = () => {
                                 bgcolor: 'primary.main',
                                 width: 48,
                                 height: 48,
-                                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                             }}
                         >
                             <WorkIcon />
@@ -177,21 +177,21 @@ export const Sidebar: React.FC = () => {
                                             px: 2,
                                             transition: 'all 0.3s ease',
                                             background: isActive(item.href) 
-                                                ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(29, 78, 216, 0.2) 100%)'
+                                                ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)'
                                                 : 'transparent',
                                             border: isActive(item.href) 
-                                                ? '1px solid rgba(59, 130, 246, 0.3)'
+                                                ? '1px solid rgba(102, 126, 234, 0.3)'
                                                 : '1px solid transparent',
                                             '&:hover': {
                                                 background: isActive(item.href)
-                                                    ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(29, 78, 216, 0.3) 100%)'
+                                                    ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%)'
                                                     : 'rgba(255, 255, 255, 0.05)',
                                                 transform: 'translateX(4px)',
                                             },
                                             '&.Mui-selected': {
-                                                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(29, 78, 216, 0.2) 100%)',
+                                                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)',
                                                 '&:hover': {
-                                                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(29, 78, 216, 0.3) 100%)',
+                                                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%)',
                                                 }
                                             }
                                         }}
@@ -200,7 +200,7 @@ export const Sidebar: React.FC = () => {
                                             sx={{ 
                                                 minWidth: 40,
                                                 color: isActive(item.href) 
-                                                    ? '#3b82f6' 
+                                                    ? '#667eea' 
                                                     : 'rgba(255, 255, 255, 0.8)'
                                             }}
                                         >
@@ -227,7 +227,7 @@ export const Sidebar: React.FC = () => {
                                                 sx={{
                                                     width: 4,
                                                     height: 20,
-                                                    bgcolor: '#3b82f6',
+                                                    bgcolor: '#667eea',
                                                     borderRadius: 2,
                                                     ml: 1
                                                 }}

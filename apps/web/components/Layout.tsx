@@ -10,7 +10,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             sx={{ 
                 flexGrow: 1,
                 ml: 0, // Remove margin since Drawer handles positioning
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#f8f9ff',
                 minHeight: '100vh',
                 overflow: 'auto'
             }}

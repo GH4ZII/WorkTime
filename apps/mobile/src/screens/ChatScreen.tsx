@@ -121,13 +121,11 @@ const ChatScreen: React.FC = () => {
     newSocket.on('connect', () => {
       setIsConnected(true);
       setUsePolling(false);
-      console.log('Mobile: Connected to chat server');
     });
 
     newSocket.on('disconnect', () => {
       setIsConnected(false);
       setUsePolling(true);
-      console.log('Mobile: Disconnected from chat server, using polling');
     });
 
     newSocket.on('connect_error', (error) => {
@@ -138,11 +136,9 @@ const ChatScreen: React.FC = () => {
 
     // Håndter nye meldinger fra andre brukere
     newSocket.on('newMessage', (message: Message) => {
-      console.log('Mobile: Received new message:', message);
       
       // Sjekk om meldingen allerede er behandlet
       if (processedMessageIds.has(message.id)) {
-        console.log('Mobile: Message already processed, skipping:', message.id);
         return;
       }
       
@@ -151,7 +147,6 @@ const ChatScreen: React.FC = () => {
           message.roomId === selectedRoom.id && 
           message.senderId !== currentUser?.id) {
         
-        console.log('Mobile: Adding message to current room');
         
         // Legg til meldingen i state
         setMessages(prev => [...prev, message]);
@@ -159,13 +154,11 @@ const ChatScreen: React.FC = () => {
         // Marker meldingen som behandlet
         setProcessedMessageIds(prev => new Set([...prev, message.id]));
       } else {
-        console.log('Mobile: Message not added - conditions not met');
       }
     });
 
     // Håndter bekreftelse på egen melding
     newSocket.on('messageSent', (message: Message) => {
-      console.log('Mobile: Message sent confirmation:', message);
       // Oppdater meldingen med riktig ID fra server
       setMessages(prev => prev.map(msg => 
         msg.id === message.id ? message : msg
@@ -232,7 +225,6 @@ const ChatScreen: React.FC = () => {
 
   const handleSendMessage = () => {
     if (!message.trim() || !selectedRoom || !socket) {
-      console.log('Mobile: Cannot send message - missing data');
       return;
     }
 
@@ -255,7 +247,6 @@ const ChatScreen: React.FC = () => {
         sentAt: new Date().toISOString(),
       };
 
-      console.log('Mobile: About to add message locally. Current messages count:', messages.length);
 
       // Sjekk om meldingen allerede eksisterer
       const messageExists = messages.some(msg => 
@@ -265,14 +256,12 @@ const ChatScreen: React.FC = () => {
       );
 
       if (messageExists) {
-        console.log('Mobile: Similar message already exists, not adding');
         return;
       }
 
       // Legg til meldingen lokalt umiddelbart
       setMessages(prev => {
         const newMessages = [...prev, newMessageObj];
-        console.log('Mobile: Message added locally. New count:', newMessages.length);
         return newMessages;
       });
       
@@ -288,18 +277,11 @@ const ChatScreen: React.FC = () => {
         },
       });
 
-      console.log('Mobile: Message sent via WebSocket');
     } catch (error) {
       console.error('Mobile: Error sending message:', error);
       Alert.alert('Feil', 'Kunne ikke sende melding');
     }
   };
-
-  // Legg til en useEffect for å overvåke messages state
-  useEffect(() => {
-    console.log('Mobile: Messages state updated. Count:', messages.length);
-    console.log('Mobile: Latest message:', messages[messages.length - 1]);
-  }, [messages]);
 
   const createNewChat = async () => {
     if (selectedUsers.length === 0) {

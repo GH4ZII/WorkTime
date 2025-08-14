@@ -478,11 +478,11 @@ const ShiftPage: NextPage = () => {
                             borderRadius: 2,
                             fontSize: '1rem',
                             fontWeight: 'bold',
-                            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             '&:hover': {
-                                background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
+                                background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
                                 transform: 'translateY(-1px)',
-                                boxShadow: '0 8px 25px rgba(25, 118, 210, 0.3)',
+                                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
                             },
                             transition: 'all 0.3s ease',
                         }}
@@ -778,9 +778,9 @@ const ShiftPage: NextPage = () => {
                                 variant="contained"
                                 startIcon={<SaveIcon />}
                                 sx={{
-                                    background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                     '&:hover': {
-                                        background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
+                                        background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
                                     }
                                 }}
                             >
@@ -907,9 +907,9 @@ const ShiftPage: NextPage = () => {
                                 variant="contained"
                                 startIcon={<SaveIcon />}
                                 sx={{
-                                    background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                     '&:hover': {
-                                        background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
+                                        background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
                                     }
                                 }}
                             >
