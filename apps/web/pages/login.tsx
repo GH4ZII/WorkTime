@@ -31,6 +31,29 @@ const Login: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
+    // Sjekk for feilmelding fra URL
+    React.useEffect(() => {
+        const { error: urlError } = router.query;
+        if (urlError === 'unauthorized') {
+            setError('Kun administratorer har tilgang til web-appen. Vennligst bruk mobil-appen i stedet.');
+        }
+    }, [router.query]);
+
+    // Funksjon for å dekode JWT token og sjekke rolle
+    const decodeTokenAndCheckRole = (token: string): boolean => {
+        try {
+            // JWT tokens har format: header.payload.signature
+            const payload = token.split('.')[1];
+            const decodedPayload = JSON.parse(atob(payload));
+            
+            // Sjekk om brukeren er administrator
+            return decodedPayload.role?.toLowerCase() === 'admin';
+        } catch (error) {
+            console.error('Feil ved dekoding av token:', error);
+            return false;
+        }
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -42,8 +65,17 @@ const Login: React.FC = () => {
                 password,
             });
 
+            const { access_token, user } = response.data;
+
+            // Sjekk om brukeren er administrator
+            if (!decodeTokenAndCheckRole(access_token)) {
+                setError('Kun administratorer har tilgang til web-appen. Vennligst bruk mobil-appen i stedet.');
+                setLoading(false);
+                return;
+            }
+
             // TODO: For produksjon bør vi sette httpOnly-flagget via en API-rute
-            document.cookie = `auth_token=${response.data.access_token}; path=/;`;
+            document.cookie = `auth_token=${access_token}; path=/;`;
 
             router.push('/'); // Omdiriger til forsiden etter innlogging
         } catch (err) {

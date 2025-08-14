@@ -1,6 +1,21 @@
 ﻿import { NextResponse} from "next/server";
 import type { NextRequest } from "next/server";
 
+// Funksjon for å dekode JWT token og sjekke rolle
+function decodeTokenAndCheckRole(token: string): boolean {
+    try {
+        // JWT tokens har format: header.payload.signature
+        const payload = token.split('.')[1];
+        const decodedPayload = JSON.parse(atob(payload));
+        
+        // Sjekk om brukeren er administrator
+        return decodedPayload.role?.toLowerCase() === 'admin';
+    } catch (error) {
+        console.error('Feil ved dekoding av token:', error);
+        return false;
+    }
+}
+
 export function middleware(req: NextRequest) {
     // Hent token fra cookies
     const token = req.cookies.get('auth_token')?.value;
@@ -16,7 +31,14 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
-    // Hvis token finnes, fortsett til den forespurte siden
+    // Sjekk om brukeren er administrator
+    if (!decodeTokenAndCheckRole(token)) {
+        // Hvis ikke administrator, omdiriger til login med feilmelding
+        const loginUrl = new URL('/login?error=unauthorized', req.url);
+        return NextResponse.redirect(loginUrl);
+    }
+
+    // Hvis token finnes og brukeren er administrator, fortsett til den forespurte siden
     return NextResponse.next();
 }
 
