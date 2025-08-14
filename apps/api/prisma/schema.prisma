@@ -43,12 +43,14 @@ enum TimeOffType {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  email        String   @unique
-  phone        String?
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  phone       String?
   passwordHash String
-  role         Role     @default(EMPLOYEE)
+  role        String   @default("EMPLOYEE")
+  // ← Kun stillingsprosent, ikke maks timer
+  positionPercentage Int @default(100)
   hireDate     DateTime @default(now())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

@@ -6,20 +6,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ShiftsModule = void 0;
+exports.ResponseParser = void 0;
 const common_1 = require("@nestjs/common");
-const shifts_controller_1 = require("./shifts.controller");
-const shifts_service_1 = require("./shifts.service");
-const prisma_service_1 = require("../prisma.service");
-let ShiftsModule = class ShiftsModule {
+let ResponseParser = class ResponseParser {
+    parseResponse() {
+        return { message: 'Placeholder response' };
+    }
 };
-exports.ShiftsModule = ShiftsModule;
-exports.ShiftsModule = ShiftsModule = __decorate([
-    (0, common_1.Module)({
-        imports: [],
-        controllers: [shifts_controller_1.ShiftsController],
-        providers: [shifts_service_1.ShiftsService, prisma_service_1.PrismaService],
-        exports: [shifts_service_1.ShiftsService],
-    })
-], ShiftsModule);
-//# sourceMappingURL=shifts.module.js.map
+exports.ResponseParser = ResponseParser;
+exports.ResponseParser = ResponseParser = __decorate([
+    (0, common_1.Injectable)()
+], ResponseParser);
+//# sourceMappingURL=response-parser.js.map

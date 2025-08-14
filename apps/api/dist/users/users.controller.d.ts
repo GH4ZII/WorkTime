@@ -9,7 +9,8 @@ export declare class UsersController {
         name: string;
         email: string;
         phone: string | null;
-        role: import(".prisma/client").$Enums.Role;
+        role: string;
+        positionPercentage: number;
         hireDate: Date;
     }[]>;
     findOne(id: string): Promise<{
@@ -18,7 +19,8 @@ export declare class UsersController {
         email: string;
         phone: string | null;
         passwordHash: string;
-        role: import(".prisma/client").$Enums.Role;
+        role: string;
+        positionPercentage: number;
         hireDate: Date;
         createdAt: Date;
         updatedAt: Date;
@@ -29,7 +31,8 @@ export declare class UsersController {
         email: string;
         phone: string | null;
         passwordHash: string;
-        role: import(".prisma/client").$Enums.Role;
+        role: string;
+        positionPercentage: number;
         hireDate: Date;
         createdAt: Date;
         updatedAt: Date;
@@ -40,7 +43,8 @@ export declare class UsersController {
         email: string;
         phone: string | null;
         passwordHash: string;
-        role: import(".prisma/client").$Enums.Role;
+        role: string;
+        positionPercentage: number;
         hireDate: Date;
         createdAt: Date;
         updatedAt: Date;
@@ -51,7 +55,8 @@ export declare class UsersController {
         email: string;
         phone: string | null;
         passwordHash: string;
-        role: import(".prisma/client").$Enums.Role;
+        role: string;
+        positionPercentage: number;
         hireDate: Date;
         createdAt: Date;
         updatedAt: Date;

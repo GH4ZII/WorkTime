@@ -155,6 +155,21 @@ const ProfileScreen: React.FC = () => {
                     </View>
                 </View>
 
+                {/* Arbeidsinformasjon Section */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Arbeidsinformasjon</Text>
+                    
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Stillingsprosent:</Text>
+                        <Text style={styles.infoValue}>{user?.positionPercentage || 100}%</Text>
+                    </View>
+                    
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Maks timer per uke:</Text>
+                        <Text style={styles.infoValue}>{user?.maxHoursPerWeek || 40}t</Text>
+                    </View>
+                </View>
+
                 {/* Account Actions Section */}
                 <View style={styles.actionsCard}>
                     <Text style={styles.sectionTitle}>Kontoinnstillinger</Text>
@@ -198,7 +213,6 @@ const ProfileScreen: React.FC = () => {
                         <Text style={styles.infoValue}>WorkTime Team</Text>
                     </View>
                 </View>
-            </View>
             </ScrollView>
 
             {/* Change Password Modal */}

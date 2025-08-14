@@ -48,6 +48,8 @@ interface Employee {
     role?: string;
     phone?: string;
     hireDate?: string;
+    // ← Kun stillingsprosent, ikke maks timer
+    positionPercentage?: number;
 }
 
 interface CreateEmployeeDto {
@@ -57,6 +59,8 @@ interface CreateEmployeeDto {
     role?: string;
     phone?: string;
     hireDate?: string;
+    // ← Kun stillingsprosent, ikke maks timer
+    positionPercentage?: number;
 }
 
 const CoWorkerPage: NextPage = () => {
@@ -85,6 +89,8 @@ const CoWorkerPage: NextPage = () => {
         role: '',
         phone: '',
         hireDate: '',
+        // ← Kun stillingsprosent, ikke maks timer
+        positionPercentage: 100
     });
 
     useEffect(() => {
@@ -137,7 +143,7 @@ const CoWorkerPage: NextPage = () => {
             setSuccess('Ansatt oppdatert!');
             setShowEditForm(false);
             setEditingEmployee(null);
-            setEditForm({ name: '', email: '', password: '', role: '', phone: '', hireDate: '' });
+            setEditForm({ name: '', email: '', password: '', role: '', phone: '', hireDate: '', positionPercentage: 100 });
             refreshEmployees();
             
             setTimeout(() => setSuccess(null), 3000);
@@ -174,6 +180,7 @@ const CoWorkerPage: NextPage = () => {
             role: employee.role || '',
             phone: employee.phone || '',
             hireDate: employee.hireDate || '',
+            positionPercentage: employee.positionPercentage || 100
         });
         setShowEditForm(true);
     };
@@ -354,6 +361,60 @@ const CoWorkerPage: NextPage = () => {
                                         InputLabelProps={{ shrink: true }}
                                     />
                                 </Grid>
+                                {/* ← Ny: Stillingsprosent velger med flere alternativer */}
+                                <Grid item xs={12} md={6}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Stillingsprosent *</InputLabel>
+                                        <Select
+                                            name="positionPercentage"
+                                            value={form.positionPercentage}
+                                            onChange={handleChange}
+                                            label="Stillingsprosent"
+                                            required
+                                        >
+                                            <MenuItem value={100}>100% - Full stilling (40t/uke)</MenuItem>
+                                            <MenuItem value={95}>95% - 95% stilling (38t/uke)</MenuItem>
+                                            <MenuItem value={90}>90% - 90% stilling (36t/uke)</MenuItem>
+                                            <MenuItem value={85}>85% - 85% stilling (34t/uke)</MenuItem>
+                                            <MenuItem value={80}>80% - 80% stilling (32t/uke)</MenuItem>
+                                            <MenuItem value={75}>75% - 75% stilling (30t/uke)</MenuItem>
+                                            <MenuItem value={70}>70% - 70% stilling (28t/uke)</MenuItem>
+                                            <MenuItem value={65}>65% - 65% stilling (26t/uke)</MenuItem>
+                                            <MenuItem value={60}>60% - 60% stilling (24t/uke)</MenuItem>
+                                            <MenuItem value={55}>55% - 55% stilling (22t/uke)</MenuItem>
+                                            <MenuItem value={50}>50% - 50% stilling (20t/uke)</MenuItem>
+                                            <MenuItem value={45}>45% - 45% stilling (18t/uke)</MenuItem>
+                                            <MenuItem value={40}>40% - 40% stilling (16t/uke)</MenuItem>
+                                            <MenuItem value={35}>35% - 35% stilling (14t/uke)</MenuItem>
+                                            <MenuItem value={30}>30% - 30% stilling (12t/uke)</MenuItem>
+                                            <MenuItem value={25}>25% - 25% stilling (10t/uke)</MenuItem>
+                                            <MenuItem value={20}>20% - 20% stilling (8t/uke)</MenuItem>
+                                            <MenuItem value={15}>15% - 15% stilling (6t/uke)</MenuItem>
+                                            <MenuItem value={10}>10% - 10% stilling (4t/uke)</MenuItem>
+                                            <MenuItem value={5}>5% - 5% stilling (2t/uke)</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+
+                                {/* ← Ny: Maks timer per uke (automatisk beregnet) */}
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Maks timer per uke"
+                                        name="maxHoursPerWeek"
+                                        type="number"
+                                        value={form.maxHoursPerWeek}
+                                        onChange={handleChange}
+                                        InputProps={{
+                                            inputProps: { min: 0, max: 40 },
+                                            readOnly: true,
+                                        }}
+                                        variant="outlined"
+                                    />
+                                    <small className="form-text text-muted">
+                                        Automatisk beregnet basert på stillingsprosent
+                                    </small>
+                                </Grid>
                             </Grid>
                         </DialogContent>
                         <DialogActions sx={{ p: 3, pt: 1 }}>
@@ -471,6 +532,40 @@ const CoWorkerPage: NextPage = () => {
                                         variant="outlined"
                                         InputLabelProps={{ shrink: true }}
                                     />
+                                </Grid>
+                                
+                                {/* ← Ny: Kun stillingsprosent felt */}
+                                <Grid item xs={12} md={6}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Stillingsprosent</InputLabel>
+                                        <Select
+                                            name="positionPercentage"
+                                            value={editForm.positionPercentage || 100}
+                                            onChange={handleEditChange}
+                                            label="Stillingsprosent"
+                                        >
+                                            <MenuItem value={100}>100% - Full stilling</MenuItem>
+                                            <MenuItem value={95}>95% - 95% stilling</MenuItem>
+                                            <MenuItem value={90}>90% - 90% stilling</MenuItem>
+                                            <MenuItem value={85}>85% - 85% stilling</MenuItem>
+                                            <MenuItem value={80}>80% - 80% stilling</MenuItem>
+                                            <MenuItem value={75}>75% - 75% stilling</MenuItem>
+                                            <MenuItem value={70}>70% - 70% stilling</MenuItem>
+                                            <MenuItem value={65}>65% - 65% stilling</MenuItem>
+                                            <MenuItem value={60}>60% - 60% stilling</MenuItem>
+                                            <MenuItem value={55}>55% - 55% stilling</MenuItem>
+                                            <MenuItem value={50}>50% - 50% stilling</MenuItem>
+                                            <MenuItem value={45}>45% - 45% stilling</MenuItem>
+                                            <MenuItem value={40}>40% - 40% stilling</MenuItem>
+                                            <MenuItem value={35}>35% - 35% stilling</MenuItem>
+                                            <MenuItem value={30}>30% - 30% stilling</MenuItem>
+                                            <MenuItem value={25}>25% - 25% stilling</MenuItem>
+                                            <MenuItem value={20}>20% - 20% stilling</MenuItem>
+                                            <MenuItem value={15}>15% - 15% stilling</MenuItem>
+                                            <MenuItem value={10}>10% - 10% stilling</MenuItem>
+                                            <MenuItem value={5}>5% - 5% stilling</MenuItem>
+                                        </Select>
+                                    </FormControl>
                                 </Grid>
                             </Grid>
                         </DialogContent>

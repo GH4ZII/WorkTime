@@ -16,8 +16,10 @@ let TimeOffReqModule = class TimeOffReqModule {
 exports.TimeOffReqModule = TimeOffReqModule;
 exports.TimeOffReqModule = TimeOffReqModule = __decorate([
     (0, common_1.Module)({
+        imports: [],
         controllers: [timeOffReq_controller_1.TimeOffReqController],
         providers: [timeOffReq_service_1.TimeOffReqService, prisma_service_1.PrismaService],
+        exports: [timeOffReq_service_1.TimeOffReqService],
     })
 ], TimeOffReqModule);
 //# sourceMappingURL=timeOffReq.module.js.map

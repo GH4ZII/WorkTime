@@ -1,8 +1,10 @@
 ﻿export class CreateUserDto {
-    name: string;
-    email: string;
-    phone?: string;
-    password: string;
-    role: 'USER' | 'ADMIN'; // Brukerens rolle, enten 'USER' eller 'ADMIN'
-    hireDate?: string;
+  name: string;
+  email: string;
+  password: string;
+  role?: string;
+  phone?: string;
+  hireDate?: string;
+  // ← Kun stillingsprosent, ikke maks timer
+  positionPercentage?: number;
 }

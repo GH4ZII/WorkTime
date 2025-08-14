@@ -52,7 +52,8 @@ import {
     Event as EventIcon,
     ChevronLeft as ChevronLeftIcon,
     ChevronRight as ChevronRightIcon,
-    Refresh as RefreshIcon
+    Refresh as RefreshIcon,
+    SmartToy as AiIcon
 } from '@mui/icons-material';
 
 interface Employee {
@@ -81,7 +82,7 @@ interface ShiftPayload {
     createdBy: string
 }
 
-const ShiftPage: NextPage = () => {
+const SkiftPage: NextPage = () => {
     const [showForm, setShowForm] = useState(false)
     const [showEditForm, setShowEditForm] = useState(false)
     const [employees, setEmployees] = useState<Employee[]>([])
@@ -113,6 +114,131 @@ const ShiftPage: NextPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
+
+    // ← Ny: AI Scheduler state
+    const [showAiScheduler, setShowAiScheduler] = useState(false);
+    const [aiGeneratedSchedule, setAiGeneratedSchedule] = useState<any>(null);
+    const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState(new Date());
+
+    // ← Ny: Hent AI-genererte skift
+    const handleAiGenerateSchedule = async () => {
+        setIsGeneratingSchedule(true);
+        try {
+            const response = await axios.post('http://localhost:3001/ai/generate-monthly-schedule', {
+                month: selectedMonth.toISOString(),
+            });
+            
+            if (response.data.success) {
+                setAiGeneratedSchedule(response.data);
+                // ← Viktig: Ikke overskriv eksisterende skift enda
+                console.log('AI-skift generert:', response.data.shifts.length, 'skift');
+                setShowAiScheduler(true); // ← Vis AI-delen
+            } else {
+                console.error('AI-generering feilet:', response.data.message);
+                alert(`AI-generering feilet: ${response.data.message}`);
+            }
+        } catch (error) {
+            console.error('Feil ved AI-generering:', error);
+            alert('Feil ved AI-generering. Sjekk konsollen for detaljer.');
+        } finally {
+            setIsGeneratingSchedule(false);
+        }
+    };
+
+    // ← Ny: Godkjenn AI-plan
+    const handleApproveAiSchedule = async () => {
+        if (!aiGeneratedSchedule) return;
+        
+        try {
+            const response = await axios.post('http://localhost:3001/ai/apply-schedule', {
+                shifts: aiGeneratedSchedule.shifts,
+                month: selectedMonth.toISOString().slice(0, 7),
+                approved: true
+            });
+            
+            if (response.data.success) {
+                alert('AI-skiftplan godkjent og lagret!');
+                setAiGeneratedSchedule(null);
+                fetchShifts(); // ← Hent oppdaterte skift
+            }
+        } catch (error) {
+            console.error('Feil ved godkjenning:', error);
+            alert('Feil ved lagring av AI-skiftplan');
+        }
+    };
+
+    // ← Ny: Forkast AI-plan
+    const handleRejectAiSchedule = () => {
+        setAiGeneratedSchedule(null);
+        setShowAiScheduler(false);
+        alert('AI-skiftplan forkastet.');
+    };
+
+    // ← Ny: Måned velger
+    const handleMonthChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newMonth = new Date(event.target.value);
+        setSelectedMonth(newMonth);
+    };
+
+    // ← Ny: Hent skift for spesifikk måned
+    const fetchShiftsByMonth = async (month: Date) => {
+        try {
+            const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
+            const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+            
+            const response = await axios.get(`http://localhost:3001/shifts?startDate=${startOfMonth.toISOString()}&endDate=${endOfMonth.toISOString()}`);
+            setShifts(response.data);
+        } catch (error) {
+            console.error('Feil ved henting av månedlige skift:', error);
+        }
+    };
+
+    // ← Ny: Sjekk om en ansatt har AI-skift på en dato
+    const hasAiShiftOnDate = (employeeId: string, date: Date) => {
+        if (!aiGeneratedSchedule || !aiGeneratedSchedule.shifts) return false
+        
+        const dateStr = date.toISOString().split('T')[0]
+        return aiGeneratedSchedule.shifts.some((shift: any) => {
+            return shift.employeeId === employeeId && shift.date === dateStr
+        })
+    }
+
+    // ← getWeekDays funksjonen må være definert FØRST
+    const getWeekDays = () => {
+        const days = []
+        
+        // Sørg for at vi starter på mandag
+        const startOfWeek = new Date(currentWeek)
+        const dayOfWeek = startOfWeek.getDay() // 0 = søndag, 1 = mandag, etc.
+        
+        // Beregn hvor mange dager tilbake til mandag
+        let daysToSubtract
+        if (dayOfWeek === 0) { // Søndag
+            daysToSubtract = 6
+        } else {
+            daysToSubtract = dayOfWeek - 1
+        }
+        
+        // Gå tilbake til mandag
+        startOfWeek.setDate(startOfWeek.getDate() - daysToSubtract)
+        
+        // Generer ukedager fra mandag til søndag
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek)
+            day.setDate(startOfWeek.getDate() + i)
+            
+            // Sørg for at klokken er satt til 12:00 for å unngå timezone-problemer
+            day.setHours(12, 0, 0, 0)
+            
+            days.push(day)
+        }
+        
+        return days
+    }
+
+    // ← NÅ kan du deklarere weekDays
+    const weekDays = getWeekDays()
 
     useEffect(() => {
         fetchEmployees()
@@ -246,37 +372,37 @@ const ShiftPage: NextPage = () => {
     }
 
     // Hent ukedager for gjeldende uke - fikset timezone-problem
-    const getWeekDays = () => {
-        const days = []
+    // const getWeekDays = () => {
+    //     const days = []
         
-        // Sørg for at vi starter på mandag
-        const startOfWeek = new Date(currentWeek)
-        const dayOfWeek = startOfWeek.getDay() // 0 = søndag, 1 = mandag, etc.
+    //     // Sørg for at vi starter på mandag
+    //     const startOfWeek = new Date(currentWeek)
+    //     const dayOfWeek = startOfWeek.getDay() // 0 = søndag, 1 = mandag, etc.
         
-        // Beregn hvor mange dager tilbake til mandag
-        let daysToSubtract
-        if (dayOfWeek === 0) { // Søndag
-            daysToSubtract = 6
-        } else {
-            daysToSubtract = dayOfWeek - 1
-        }
+    //     // Beregn hvor mange dager tilbake til mandag
+    //     let daysToSubtract
+    //     if (dayOfWeek === 0) { // Søndag
+    //         daysToSubtract = 6
+    //     } else {
+    //         daysToSubtract = dayOfWeek - 1
+    //     }
         
-        // Gå tilbake til mandag
-        startOfWeek.setDate(startOfWeek.getDate() - daysToSubtract)
+    //     // Gå tilbake til mandag
+    //     startOfWeek.setDate(startOfWeek.getDate() - daysToSubtract)
         
-        // Generer ukedager fra mandag til søndag
-        for (let i = 0; i < 7; i++) {
-            const day = new Date(startOfWeek)
-            day.setDate(startOfWeek.getDate() + i)
+    //     // Generer ukedager fra mandag til søndag
+    //     for (let i = 0; i < 7; i++) {
+    //         const day = new Date(startOfWeek)
+    //         day.setDate(startOfWeek.getDate() + i)
             
-            // Sørg for at klokken er satt til 12:00 for å unngå timezone-problemer
-            day.setHours(12, 0, 0, 0)
+    //         // Sørg for at klokken er satt til 12:00 for å unngå timezone-problemer
+    //         day.setHours(12, 0, 0, 0)
             
-            days.push(day)
-        }
-        
-        return days
-    }
+    //         days.push(day)
+    //     }
+            
+    //     return days
+    // }
 
     // Formater dato til norsk format
     const formatDate = (date: Date) => {
@@ -308,15 +434,41 @@ const ShiftPage: NextPage = () => {
         })
     }
 
-    // Hent alle skift for en spesifikk dato, sortert etter starttid
+    // ← Oppdater getShiftsForDate for å inkludere AI-skift
     const getShiftsForDate = (date: Date) => {
         const dateStr = date.toISOString().split('T')[0]
-        return shifts
-            .filter(shift => {
-                const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
-                return shiftDate === dateStr
-            })
-            .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+        
+        // ← Hent eksisterende skift fra databasen
+        const existingShifts = shifts.filter(shift => {
+            const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+            return shiftDate === dateStr
+        })
+        
+        // ← Hent AI-genererte skift for samme dato
+        let aiShifts: any[] = []
+        if (aiGeneratedSchedule && aiGeneratedSchedule.shifts) {
+            aiShifts = aiGeneratedSchedule.shifts.filter((shift: any) => {
+                return shift.date === dateStr
+            }).map((aiShift: any) => ({
+                // ← Konverter AI-skift til samme format som eksisterende skift
+                id: `ai-${aiShift.employeeId}-${aiShift.date}`,
+                userId: aiShift.employeeId,
+                startTime: `${aiShift.date}T${aiShift.startTime}:00`,
+                endTime: `${aiShift.date}T${aiShift.endTime}:00`,
+                location: 'AI-generert',
+                notes: `AI: ${aiShift.shiftType}`,
+                createdBy: 'AI',
+                user: { id: aiShift.employeeId, name: aiShift.employeeName }
+            }))
+        }
+        
+        // ← Kombiner og sorter alle skift
+        const allShifts = [...existingShifts, ...aiShifts]
+        return allShifts.sort((a, b) => {
+            const aTime = new Date(a.startTime).getTime()
+            const bTime = new Date(b.startTime).getTime()
+            return aTime - bTime
+        })
     }
 
     // Hent alle unike starttider for en dato (for å lage rader)
@@ -339,14 +491,41 @@ const ShiftPage: NextPage = () => {
         return uniqueTimes
     }
 
-    // Hent skift for spesifikk ansatt, dato og starttid
+    // ← Oppdater getShiftForEmployeeDateAndTime for å inkludere AI-skift
     const getShiftForEmployeeDateAndTime = (employeeId: string, date: Date, startTime: string) => {
         const dateStr = date.toISOString().split('T')[0]
-        return shifts.find(shift => {
+        
+        // ← Sjekk eksisterende skift
+        const existingShift = shifts.find(shift => {
             const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
             const shiftStartTime = new Date(shift.startTime).toTimeString().slice(0, 5)
             return shift.userId === employeeId && shiftDate === dateStr && shiftStartTime === startTime
         })
+        
+        if (existingShift) return existingShift
+        
+        // ← Sjekk AI-genererte skift
+        if (aiGeneratedSchedule && aiGeneratedSchedule.shifts) {
+            const aiShift = aiGeneratedSchedule.shifts.find((shift: any) => {
+                return shift.employeeId === employeeId && shift.date === dateStr && shift.startTime === startTime
+            })
+            
+            if (aiShift) {
+                // ← Konverter AI-skift til samme format
+                return {
+                    id: `ai-${aiShift.employeeId}-${aiShift.date}`,
+                    userId: aiShift.employeeId,
+                    startTime: `${aiShift.date}T${aiShift.startTime}:00`,
+                    endTime: `${aiShift.date}T${aiShift.endTime}:00`,
+                    location: 'AI-generert',
+                    notes: `AI: ${aiShift.shiftType}`,
+                    createdBy: 'AI',
+                    user: { id: aiShift.employeeId, name: aiShift.employeeName }
+                }
+            }
+        }
+        
+        return null
     }
 
     // Hent alle ansatte som har skift på en spesifikk dato og starttid
@@ -431,7 +610,31 @@ const ShiftPage: NextPage = () => {
         setShowForm(true)
     }
 
-    const weekDays = getWeekDays()
+    // ← Ny: AI Scheduler funksjoner
+    const handleAiScheduleApproval = async (approved: boolean) => {
+        if (approved && aiGeneratedSchedule) {
+            try {
+                // Konverter AI-skiftplan til faktiske skift i databasen
+                await axios.post('http://localhost:3001/ai/apply-schedule', {
+                    scheduleId: aiGeneratedSchedule.id,
+                    approved: true
+                });
+                
+                // Oppdater skift-visningen
+                fetchShifts(); // Changed from refreshShifts to fetchShifts
+                setShowAiScheduler(false);
+                setAiGeneratedSchedule(null);
+                
+                // Vis suksessmelding
+                setSuccess('AI-skiftplan ble godkjent og lagt til!');
+            } catch (error) {
+                console.error('Feil ved godkjenning av AI-skiftplan:', error);
+            }
+        } else {
+            setShowAiScheduler(false);
+            setAiGeneratedSchedule(null);
+        }
+    };
 
     if (loading) {
         return (
@@ -537,15 +740,15 @@ const ShiftPage: NextPage = () => {
                                         }}>
                                             Employee Name
                                         </TableCell>
-                                        {weekDays.map((day, index) => (
+                                        {weekDays.map((day, dayIndex) => (
                                             <TableCell 
-                                                key={index}
+                                                key={dayIndex}
                                                 align="center"
                                                 sx={{ 
                                                     fontWeight: 'bold',
                                                     minWidth: 120,
                                                     backgroundColor: '#f8f9fa',
-                                                    borderRight: index < 6 ? '1px solid #e0e0e0' : 'none'
+                                                    borderRight: dayIndex < 6 ? '1px solid #e0e0e0' : 'none'
                                                 }}
                                             >
                                                 <Box>
@@ -595,47 +798,116 @@ const ShiftPage: NextPage = () => {
                                                     >
                                                         {shift ? (
                                                             <Box sx={{
-                                                                backgroundColor: '#e3f2fd',
+                                                                backgroundColor: shift.createdBy === 'AI' ? '#fff3e0' : '#e3f2fd',
                                                                 borderRadius: 1,
                                                                 p: 1,
-                                                                border: '1px solid #bbdefb'
+                                                                border: shift.createdBy === 'AI' ? '2px dashed #ff9800' : '1px solid #bbdefb',
+                                                                position: 'relative'
                                                             }}>
-                                                                <Typography variant="body2" fontWeight="medium">
+                                                                {shift.createdBy === 'AI' && (
+                                                                    <Box sx={{
+                                                                        position: 'absolute',
+                                                                        top: -8,
+                                                                        right: -8,
+                                                                        backgroundColor: '#ff9800',
+                                                                        color: 'white',
+                                                                        borderRadius: '50%',
+                                                                        width: 20,
+                                                                        height: 20,
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        fontSize: '0.7rem',
+                                                                        fontWeight: 'bold'
+                                                                    }}>
+                                                                        AI
+                                                                    </Box>
+                                                                )}
+                                                                <Typography variant="body2" fontWeight="medium" color={shift.createdBy === 'AI' ? '#e65100' : 'inherit'}>
                                                                     {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
                                                                 </Typography>
                                                                 <Typography variant="caption" color="text.secondary">
                                                                     {getDuration(shift.startTime, shift.endTime)}
                                                                 </Typography>
+                                                                {shift.createdBy === 'AI' && (
+                                                                    <Typography variant="caption" color="#ff9800" sx={{ display: 'block', mt: 0.5 }}>
+                                                                        AI-generert
+                                                                    </Typography>
+                                                                )}
                                                                 <Box sx={{ display: 'flex', gap: 0.5, mt: 1, justifyContent: 'center' }}>
-                                                                    <Tooltip title="Rediger">
-                                                                        <IconButton
-                                                                            size="small"
-                                                                            onClick={() => startEdit(shift)}
-                                                                            sx={{ 
-                                                                                color: 'primary.main',
-                                                                                width: 20,
-                                                                                height: 20
-                                                                            }}
-                                                                        >
-                                                                            <EditIcon fontSize="small" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                    <Tooltip title="Slett">
-                                                                        <IconButton
-                                                                            size="small"
-                                                                            onClick={() => handleDelete(shift.id)}
-                                                                            sx={{ 
-                                                                                color: 'error.main',
-                                                                                width: 20,
-                                                                                height: 20
-                                                                            }}
-                                                                        >
-                                                                            <DeleteIcon fontSize="small" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
+                                                                    {shift.createdBy !== 'AI' ? (
+                                                                        // ← Vis rediger/slett knapper kun for eksisterende skift
+                                                                        <>
+                                                                            <Tooltip title="Rediger">
+                                                                                <IconButton
+                                                                                    size="small"
+                                                                                    onClick={() => startEdit(shift)}
+                                                                                    sx={{ 
+                                                                                        color: 'primary.main',
+                                                                                        width: 20,
+                                                                                        height: 20
+                                                                                    }}
+                                                                                >
+                                                                                    <EditIcon fontSize="small" />
+                                                                                </IconButton>
+                                                                            </Tooltip>
+                                                                            <Tooltip title="Slett">
+                                                                                <IconButton
+                                                                                    size="small"
+                                                                                    onClick={() => handleDelete(shift.id)}
+                                                                                    sx={{ 
+                                                                                        color: 'error.main',
+                                                                                        width: 20,
+                                                                                        height: 20
+                                                                                    }}
+                                                                                >
+                                                                                    <DeleteIcon fontSize="small" />
+                                                                                </IconButton>
+                                                                            </Tooltip>
+                                                                        </>
+                                                                    ) : (
+                                                                        // ← Vis AI-badge for AI-genererte skift
+                                                                        <Typography variant="caption" color="#ff9800" sx={{ fontSize: '0.7rem' }}>
+                                                                            🤖 AI
+                                                                        </Typography>
+                                                                    )}
                                                                 </Box>
                                                             </Box>
+                                                        ) : hasAiShiftOnDate(employee.id, day) ? (
+                                                            // ← Vis AI-skift som "Ventende godkjenning"
+                                                            <Box sx={{
+                                                                backgroundColor: '#fff3e0',
+                                                                borderRadius: 1,
+                                                                p: 1,
+                                                                border: '2px dashed #ff9800',
+                                                                position: 'relative'
+                                                            }}>
+                                                                <Box sx={{
+                                                                    position: 'absolute',
+                                                                    top: -8,
+                                                                    right: -8,
+                                                                    backgroundColor: '#ff9800',
+                                                                    color: 'white',
+                                                                    borderRadius: '50%',
+                                                                    width: 20,
+                                                                    height: 20,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    fontSize: '0.7rem',
+                                                                    fontWeight: 'bold'
+                                                                }}>
+                                                                    AI
+                                                                </Box>
+                                                                <Typography variant="body2" fontWeight="medium" color="#e65100">
+                                                                    AI-generert skift
+                                                                </Typography>
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    Ventende godkjenning
+                                                                </Typography>
+                                                            </Box>
                                                         ) : (
+                                                            // ← Vanlig "Legg til skift" knapp
                                                             <Button
                                                                 variant="outlined"
                                                                 size="small"
@@ -918,9 +1190,156 @@ const ShiftPage: NextPage = () => {
                         </DialogActions>
                     </form>
                 </Dialog>
+
+                {/* ← Ny: AI Scheduler Header */}
+                <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    mb: 3,
+                    p: 2,
+                    bgcolor: 'background.paper',
+                    borderRadius: 2,
+                    boxShadow: 1
+                }}>
+                    <Typography variant="h4" fontWeight="bold" color="primary">
+                        🤖 AI Skiftplanlegging
+                    </Typography>
+                    
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        {/* ← Månedsvelger */}
+                        <TextField
+                            type="month"
+                            value={selectedMonth.toISOString().slice(0, 7)}
+                            onChange={handleMonthChange}
+                            size="small"
+                            sx={{ minWidth: 150 }}
+                        />
+                        
+                        {/* ← AI Generer Knapp */}
+                        <Button
+                            variant="contained"
+                            startIcon={<AiIcon />}
+                            onClick={handleAiGenerateSchedule}
+                            disabled={isGeneratingSchedule}
+                            sx={{
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
+                                },
+                                px: 3,
+                                py: 1.5
+                            }}
+                        >
+                            {isGeneratingSchedule ? (
+                                <>
+                                    <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                                    Genererer...
+                                </>
+                            ) : (
+                                '🚀 Generer AI-skiftplan'
+                            )}
+                        </Button>
+                    </Box>
+                </Box>
+
+                {/* ← Oppdater AI Generert Skiftplan Visning */}
+                {aiGeneratedSchedule && (
+                    <Box sx={{ 
+                        mb: 3, 
+                        p: 3, 
+                        bgcolor: 'background.paper', 
+                        borderRadius: 2,
+                        border: '2px solid #4caf50',
+                        boxShadow: 3
+                    }}>
+                        <Typography variant="h5" sx={{ mb: 2, color: 'success.main' }}>
+                            🤖 AI-generert Skiftplan for {aiGeneratedSchedule.month}
+                        </Typography>
+                        
+                        <Box sx={{ mb: 3 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                Genererte Skift ({aiGeneratedSchedule.shifts?.length || 0})
+                            </Typography>
+                            
+                            {aiGeneratedSchedule.shifts && aiGeneratedSchedule.shifts.length > 0 ? (
+                                <Box sx={{ 
+                                    maxHeight: 400, 
+                                    overflow: 'auto',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: 1
+                                }}>
+                                    <Box sx={{ 
+                                        display: 'grid', 
+                                        gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
+                                        bgcolor: 'grey.100',
+                                        p: 1,
+                                        fontWeight: 'bold'
+                                    }}>
+                                        <Box>Ansatt</Box>
+                                        <Box>Dato</Box>
+                                        <Box>Tid</Box>
+                                        <Box>Skift-type</Box>
+                                        <Box>Timer</Box>
+                                    </Box>
+                                    
+                                    {aiGeneratedSchedule.shifts.map((shift: any, index: number) => (
+                                        <Box key={index} sx={{ 
+                                            display: 'grid', 
+                                            gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
+                                            p: 1,
+                                            borderBottom: '1px solid #e0e0e0',
+                                            '&:hover': { bgcolor: 'grey.50' }
+                                        }}>
+                                            <Box>{shift.employeeName}</Box>
+                                            <Box>{shift.date}</Box>
+                                            <Box>{shift.startTime} - {shift.endTime}</Box>
+                                            <Box>{shift.shiftType}</Box>
+                                            <Box>{shift.hours}t</Box>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            ) : (
+                                <Typography color="text.secondary">
+                                    Ingen skift generert ennå. Prøv å generere på nytt.
+                                </Typography>
+                            )}
+                        </Box>
+
+                        {/* ← Godkjenning/Forkast Knapper */}
+                        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                size="large"
+                                onClick={handleRejectAiSchedule}
+                                sx={{ px: 4, py: 1.5 }}
+                            >
+                                ❌ Forkast AI-plan
+                            </Button>
+                            
+                            <Button
+                                variant="contained"
+                                color="success"
+                                size="large"
+                                onClick={handleApproveAiSchedule}
+                                sx={{ 
+                                    px: 4, 
+                                    py: 1.5,
+                                    background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #45a049 0%, #3d8b40 100%)',
+                                    }
+                                }}
+                            >
+                                ✅ Godkjenn og Bruk AI-plan
+                            </Button>
+                        </Box>
+                    </Box>
+                )}
             </Box>
         </Layout>
     )
 }
 
-export default ShiftPage
+export default SkiftPage

@@ -19,15 +19,15 @@ let UsersService = class UsersService {
         this.prisma = prisma;
     }
     async create(data) {
-        const hash = await bcrypt.hash(data.password, 10);
         return this.prisma.user.create({
             data: {
                 name: data.name,
                 email: data.email,
+                passwordHash: await bcrypt.hash(data.password, 10),
                 phone: data.phone,
-                passwordHash: hash,
                 role: data.role,
                 hireDate: data.hireDate ? new Date(data.hireDate) : new Date(),
+                positionPercentage: data.positionPercentage || 100,
             },
         });
     }
@@ -40,10 +40,11 @@ let UsersService = class UsersService {
                 phone: true,
                 role: true,
                 hireDate: true,
+                positionPercentage: true,
             },
             orderBy: {
-                createdAt: 'desc',
-            }
+                name: 'asc',
+            },
         });
     }
     async findOne(id) {
@@ -51,12 +52,12 @@ let UsersService = class UsersService {
     }
     async update(id, data) {
         const updateData = { ...data };
-        if (updateData.role) {
-            updateData.role = { set: updateData.role };
+        if (updateData.hireDate) {
+            updateData.hireDate = new Date(updateData.hireDate).toISOString();
         }
         return this.prisma.user.update({
             where: { id },
-            data: updateData,
+            data: updateData
         });
     }
     async remove(id) {

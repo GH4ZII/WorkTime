@@ -4,10 +4,11 @@ exports.CreateUserDto = void 0;
 class CreateUserDto {
     name;
     email;
-    phone;
     password;
     role;
+    phone;
     hireDate;
+    positionPercentage;
 }
 exports.CreateUserDto = CreateUserDto;
 //# sourceMappingURL=create-user.dto.js.map

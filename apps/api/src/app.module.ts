@@ -9,10 +9,20 @@ import { WorklogModule} from "./worklog/worklog.module";
 import { NotificationModule} from "./notifications/notification.module";
 import { AuthModule } from "./auth/auth.module";
 import { ChatModule } from "./chat/chat.module";
+import { AiModule } from "./ai/ai.module";
 
 @Module({
-  imports: [ShiftsModule, UsersModule, TimeOffReqModule, ShiftSwapReqModule, WorklogModule,
-  NotificationModule, AuthModule, ChatModule],
+  imports: [
+    ShiftsModule, 
+    UsersModule, 
+    TimeOffReqModule, 
+    ShiftSwapReqModule, 
+    WorklogModule,
+    NotificationModule, 
+    AuthModule, 
+    ChatModule,
+    AiModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

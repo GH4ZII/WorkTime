@@ -18,13 +18,23 @@ const worklog_module_1 = require("./worklog/worklog.module");
 const notification_module_1 = require("./notifications/notification.module");
 const auth_module_1 = require("./auth/auth.module");
 const chat_module_1 = require("./chat/chat.module");
+const ai_module_1 = require("./ai/ai.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [shifts_module_1.ShiftsModule, users_module_1.UsersModule, timeOffReq_module_1.TimeOffReqModule, shiftSwapReq_module_1.ShiftSwapReqModule, worklog_module_1.WorklogModule,
-            notification_module_1.NotificationModule, auth_module_1.AuthModule, chat_module_1.ChatModule],
+        imports: [
+            shifts_module_1.ShiftsModule,
+            users_module_1.UsersModule,
+            timeOffReq_module_1.TimeOffReqModule,
+            shiftSwapReq_module_1.ShiftSwapReqModule,
+            worklog_module_1.WorklogModule,
+            notification_module_1.NotificationModule,
+            auth_module_1.AuthModule,
+            chat_module_1.ChatModule,
+            ai_module_1.AiModule,
+        ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })

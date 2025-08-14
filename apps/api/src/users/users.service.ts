@@ -10,15 +10,16 @@ export class UsersService {
 
     // 1) Lage ny bruker
     async create(data: CreateUserDto) {
-        const hash = await bcrypt.hash(data.password, 10);
         return this.prisma.user.create({
             data: {
                 name: data.name,
                 email: data.email,
+                passwordHash: await bcrypt.hash(data.password, 10),
                 phone: data.phone,
-                passwordHash: hash, // Hash passordet før lagring
-                role: data.role as Role, // Brukerens rolle
+                role: data.role as Role,
                 hireDate: data.hireDate ? new Date(data.hireDate) : new Date(),
+                // ← Kun stillingsprosent, ikke maks timer
+                positionPercentage: data.positionPercentage || 100,
             },
         });
     }
@@ -33,10 +34,12 @@ export class UsersService {
                 phone: true,
                 role: true,
                 hireDate: true,
+                // ← Kun stillingsprosent, ikke maks timer
+                positionPercentage: true,
             },
             orderBy: {
-                createdAt: 'desc',
-            }
+                name: 'asc',
+            },
         });
     }
 
@@ -48,15 +51,17 @@ export class UsersService {
     // 4) Endre en bruker
     async update(id: string, data: UpdateUserDto) {
         const updateData: any = { ...data };
-
-        // Hvis role er satt, pakk det i { set: ... }
-        if (updateData.role) {
-            updateData.role = { set: updateData.role as Role };
+        
+        // ← Fikse hireDate format
+        if (updateData.hireDate) {
+            // Konverter til ISO-8601 format
+            updateData.hireDate = new Date(updateData.hireDate).toISOString();
         }
-
+        
+        // ← Fjernet automatisk beregning av maks timer
         return this.prisma.user.update({
             where: { id },
-            data: updateData,
+            data: updateData
         });
     }
 
