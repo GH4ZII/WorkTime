@@ -44,6 +44,7 @@ const HomeScreen: React.FC = () => {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCoworkersList, setShowCoworkersList] = useState(false);
 
   useEffect(() => {
     // Sjekk om brukeren er logget inn før vi henter data
@@ -178,13 +179,29 @@ const HomeScreen: React.FC = () => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     
+    // Start på mandag forrige uke hvis måneden ikke starter på mandag
     const startDate = new Date(firstDay);
-    startDate.setDate(firstDay.getDate() - firstDay.getDay());
+    const firstDayOfWeek = firstDay.getDay();
+    
+    // Beregn hvor mange dager tilbake vi må gå for å starte på mandag
+    // getDay() returnerer: 0=Søndag, 1=Mandag, 2=Tirsdag, 3=Onsdag, 4=Torsdag, 5=Fredag, 6=Lørdag
+    // Vi vil starte på mandag, så vi må gå tilbake til mandag forrige uke
+    let daysToSubtract;
+    if (firstDayOfWeek === 0) { // Søndag
+      daysToSubtract = 6; // Gå 6 dager tilbake til mandag forrige uke
+    } else if (firstDayOfWeek === 1) { // Mandag
+      daysToSubtract = 0; // Start på mandag samme uke
+    } else {
+      daysToSubtract = firstDayOfWeek - 1; // Gå tilbake til mandag samme uke
+    }
+    
+    startDate.setDate(firstDay.getDate() - daysToSubtract);
     
     const days = [];
     const currentDate = new Date(startDate);
     
-    while (currentDate <= lastDay || days.length < 42) {
+    // Fyll opp med 42 dager (6 uker) for å sikre at vi har nok dager
+    while (days.length < 42) {
       days.push({
         date: new Date(currentDate),
         isCurrentMonth: currentDate.getMonth() === month,
@@ -254,133 +271,132 @@ const HomeScreen: React.FC = () => {
       <ScreenHeader title="Hjem" subtitle="Oversikt over dine vakter og arbeidstid" />
       
       <ScrollView style={styles.content}>
-        {/* Kalender */}
+        {/* Samlet seksjon med arbeidssummer og kalender */}
         <View style={styles.calendarCard}>
           <View style={styles.calendarContent}>
-            <View style={styles.calendarHeader}>
-              <TouchableOpacity onPress={goToPreviousMonth}>
-                <Ionicons name="chevron-back" size={24} color="#1976d2" />
-              </TouchableOpacity>
-              <Text style={styles.monthYear}>{formatMonthYear(selectedDate)}</Text>
-              <TouchableOpacity onPress={goToNextMonth}>
-                <Ionicons name="chevron-forward" size={24} color="#1976d2" />
-              </TouchableOpacity>
+            {/* Månedlig arbeidssummer øverst */}
+            <View style={styles.summarySection}>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryTitle}>Arbeid</Text>
+                <Text style={styles.summaryHours}>{totalWorkHours.toFixed(1)} timer</Text>
+              </View>
             </View>
-            
-            {/* Ukedager */}
-            <View style={styles.weekDays}>
-              {['Søn', 'Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør'].map(day => (
-                <Text key={day} style={styles.weekDay}>{day}</Text>
-              ))}
-            </View>
-            
-            {/* Kalender-dager */}
-            <View style={styles.calendarGrid}>
-              {getCalendarDays().map((day, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.calendarDay,
-                    day.isCurrentMonth && styles.currentMonthDay,
-                    day.date && selectedDate && 
-                    day.date.toDateString() === selectedDate.toDateString() && 
-                    styles.selectedDay
-                  ]}
-                  onPress={() => day.date && setSelectedDate(day.date)}
-                  disabled={!day.date}
-                >
-                  {day.date && (
-                    <View style={styles.dayContainer}>
-                      <Text style={[
-                        styles.dayNumber,
-                        day.isCurrentMonth && styles.currentMonthDayNumber,
-                        day.date && selectedDate && 
-                        day.date.toDateString() === selectedDate.toDateString() && 
-                        styles.selectedDayNumber
-                      ]}>
-                        {day.date.getDate()}
-                      </Text>
-                      {/* Vis kun 1 prikk per dag hvis brukeren har skift */}
-                      {day.date && datesWithShifts.includes(day.date.toISOString().split('T')[0]) && (
-                        <View style={styles.shiftDot}>
-                          <Text style={{ color: 'white', fontSize: 8 }}>•</Text>
-                        </View>
-                      )}
-                    </View>
-                  )}
+
+            {/* Kalender */}
+            <View style={styles.calendarSection}>
+              <View style={styles.calendarHeader}>
+                <TouchableOpacity onPress={goToPreviousMonth}>
+                  <Ionicons name="chevron-back" size={24} color="#1976d2" />
                 </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Månedlig arbeidssummer */}
-        <View style={styles.summaryCard}>
-          <View style={styles.cardContent}>
-            <Text style={styles.summaryTitle}>Arbeid denne måneden</Text>
-            <Text style={styles.summaryHours}>{totalWorkHours.toFixed(1)} timer</Text>
-          </View>
-        </View>
-
-        {/* Vakter for valgt dato */}
-        {selectedDate && (
-          <View style={styles.shiftsCard}>
-            <View style={styles.cardContent}>
-              <Text style={styles.shiftsTitle}>
-                Vakter {formatDate(selectedDate)}
-              </Text>
-              <Text style={styles.shiftsCount}>
-                {shiftsForSelectedDate.length} vakt{shiftsForSelectedDate.length !== 1 ? 'er' : ''}
-              </Text>
+                <Text style={styles.monthYear}>{formatMonthYear(selectedDate)}</Text>
+                <TouchableOpacity onPress={goToNextMonth}>
+                  <Ionicons name="chevron-forward" size={24} color="#1976d2" />
+                </TouchableOpacity>
+              </View>
               
-              {shiftsForSelectedDate.map((shift, index) => (
-                <View key={shift.id} style={styles.shiftItem}>
-                  <View style={styles.shiftInfo}>
-                    <Text style={styles.shiftTime}>
-                      {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
-                    </Text>
-                    <Text style={styles.shiftDuration}>
-                      {getDuration(shift.startTime, shift.endTime)} timer
-                    </Text>
-                    <Text style={styles.shiftEmployee}>
-                      Ansatt: {getUserName(shift.userId)}
-                    </Text>
-                  </View>
-                  <View style={styles.shiftStatus}>
-                    <Text style={styles.statusText}>VENTER</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Medarbeidere for valgt dato */}
-        {selectedDate && coworkersForSelectedDate.length > 0 && (
-          <View style={styles.coworkersCard}>
-            <View style={styles.cardContent}>
-              <Text style={styles.coworkersTitle}>
-                Medarbeidere {formatDate(selectedDate)}
-              </Text>
+              {/* Ukedager */}
+              <View style={styles.weekDays}>
+                {['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'].map(day => (
+                  <Text key={day} style={styles.weekDay}>{day}</Text>
+                ))}
+              </View>
               
-              {coworkersForSelectedDate.map((coworker, index) => (
-                <View key={index} style={styles.coworkerItem}>
-                  <View style={styles.coworkerInfo}>
-                    <Text style={styles.coworkerName}>{coworker.name}</Text>
-                    <Text style={styles.coworkerTime}>
-                      {formatTime(coworker.startTime)} - {formatTime(coworker.endTime)}
-                    </Text>
-                    {coworker.location && (
-                      <Text style={styles.coworkerLocation}>
-                        {coworker.location}
-                      </Text>
+              {/* Kalender-dager */}
+              <View style={styles.calendarGrid}>
+                {getCalendarDays().map((day, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.calendarDay,
+                      day.isCurrentMonth && styles.currentMonthDay,
+                      day.date && selectedDate && 
+                      day.date.toDateString() === selectedDate.toDateString() && 
+                      styles.selectedDay
+                    ]}
+                    onPress={() => day.date && setSelectedDate(day.date)}
+                    disabled={!day.date}
+                  >
+                    {day.date && (
+                      <View style={styles.dayContainer}>
+                        <Text style={[
+                          styles.dayNumber,
+                          day.isCurrentMonth && styles.currentMonthDayNumber,
+                          day.date && selectedDate && 
+                          day.date.toDateString() === selectedDate.toDateString() && 
+                          styles.selectedDayNumber
+                        ]}>
+                          {day.date.getDate()}
+                        </Text>
+                        {/* Vis kun 1 prikk per dag hvis brukeren har skift */}
+                        {day.date && datesWithShifts.includes(day.date.toISOString().split('T')[0]) && (
+                          <View style={styles.shiftDot}>
+                            <Text style={{ color: 'white', fontSize: 8 }}>•</Text>
+                          </View>
+                        )}
+                      </View>
                     )}
-                  </View>
-                </View>
-              ))}
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
+
+            {/* Informasjon under kalenderen - samlet i samme kort */}
+            {selectedDate && (shiftsForSelectedDate.length > 0 || coworkersForSelectedDate.length > 0) && (
+              <View style={styles.infoSection}>
+                {/* Vis enten arbeidstid ELLER medarbeider-liste, ikke begge samtidig */}
+                {!showCoworkersList ? (
+                  // Vis arbeidstid når medarbeider-listen ikke er synlig
+                  shiftsForSelectedDate.length > 0 && (
+                    <View style={styles.shiftTimeContainer}>
+                      <Text style={styles.shiftTimeText}>
+                        {formatTime(shiftsForSelectedDate[0].startTime)} - {formatTime(shiftsForSelectedDate[0].endTime)}
+                      </Text>
+                      <Text style={styles.shiftTimeSubtext}>
+                        🕐 Du jobber i dag
+                      </Text>
+                    </View>
+                  )
+                ) : (
+                  // Vis medarbeider-liste når knappen er trykket
+                  coworkersForSelectedDate.length > 0 && (
+                    <View style={styles.coworkersList}>
+                      <Text style={styles.coworkersListTitle}>Medarbeidere denne dagen:</Text>
+                      {coworkersForSelectedDate
+                        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+                        .map((coworker, index) => (
+                          <View key={index} style={styles.coworkerItem}>
+                            <Text style={styles.coworkerName}>👤 {coworker.name}</Text>
+                            <Text style={styles.coworkerTime}>
+                              🕐 {formatTime(coworker.startTime)} - {formatTime(coworker.endTime)}
+                            </Text>
+                            {coworker.location && (
+                              <Text style={styles.coworkerLocation}>
+                                🗺️ {coworker.location}
+                              </Text>
+                            )}
+                          </View>
+                        ))}
+                    </View>
+                  )
+                )}
+
+                {/* Knapp for å vise/skjule medarbeidere */}
+                {coworkersForSelectedDate.length > 0 && (
+                  <View style={styles.coworkersButtonContainer}>
+                    <TouchableOpacity 
+                      style={styles.coworkersButton}
+                      onPress={() => setShowCoworkersList(!showCoworkersList)}
+                    >
+                      <Text style={styles.coworkersButtonText}>
+                        {showCoworkersList ? 'Tilbake til arbeidstid' : 'Se medarbeidere'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
-        )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -422,7 +438,7 @@ const styles = StyleSheet.create({
   monthYear: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1976d2',
+    color: '#667eea',
   },
   weekDays: {
     flexDirection: 'row',
@@ -441,10 +457,11 @@ const styles = StyleSheet.create({
   },
   calendarDay: {
     width: (width - 64) / 7,
-    height: 50, // Økt høyde for å gi plass til prikk
+    height: 55,  // Litt høyere for bedre touch-target
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 2,
+    marginVertical: 3,  // Litt mer mellomrom
+    borderRadius: 8,  // Runde hjørner på hver dag
   },
   dayContainer: {
     alignItems: 'center',
@@ -459,8 +476,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   selectedDay: {
-    backgroundColor: '#1976d2',
-    borderRadius: 20,
+    backgroundColor: '#667eea',
+    borderRadius: 25,  // Mer rundt for valgt dag
+    elevation: 3,  // Litt skygge for valgt dag
   },
   selectedDayNumber: {
     color: 'white',
@@ -475,7 +493,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#ff9800',
+    backgroundColor: '#667eea',
     marginTop: 2,
   },
   summaryCard: {
@@ -492,15 +510,15 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   summaryTitle: {
-    fontSize: 16,
+    fontSize: 18,  // Litt mindre for bedre balanse
     fontWeight: '600',
-    color: '#666',
+    color: '#666',  // Litt lysere for mindre oppmerksomhet
     marginBottom: 8,
   },
   summaryHours: {
-    fontSize: 24,
+    fontSize: 24,  // Større for å fremheve det viktige
     fontWeight: 'bold',
-    color: '#1976d2',
+    color: '#667eea',
   },
   shiftsCard: {
     marginBottom: 16,
@@ -602,6 +620,145 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: '#666',
+    textAlign: 'center',
+  },
+  summarySection: {
+    marginBottom: 20,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  calendarSection: {
+    // No specific styles needed here, content will be inside
+  },
+  coworkersButtonContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    marginHorizontal: 16,
+  },
+  coworkersButton: {
+    backgroundColor: '#667eea',
+    paddingVertical: 18,  // Litt høyere
+    paddingHorizontal: 36,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,  // Litt mer skygge
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    minHeight: 60,
+    minWidth: 220,
+  },
+  coworkersButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  coworkersList: {
+    marginTop: 16,
+    // Fjernet paddingTop og borderTopWidth for å unngå doble streker
+  },
+  coworkersListTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#667eea',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  coworkerItem: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: '#f8f9fa',
+    marginBottom: 12,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#667eea',
+    minHeight: 70,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coworkerName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#667eea',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  coworkerTime: {
+    fontSize: 16,
+    color: '#667eea',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  coworkerLocation: {
+    fontSize: 16,
+    color: '#667eea',
+    textAlign: 'center',
+  },
+  shiftTimeContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    paddingVertical: 20,  // Litt mer padding
+    paddingHorizontal: 24,
+    backgroundColor: '#f0f4ff',  // Litt blåere bakgrunn
+    borderRadius: 16,  // Mer rundt
+    marginHorizontal: 16,
+    minHeight: 70,
+    borderWidth: 1,
+    borderColor: '#e8f0ff',  // Subtil kant
+  },
+  shiftTimeText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#667eea',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  shiftTimeSubtext: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  coworkersButtonCard: {
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: 'white',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  coworkersListCard: {
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: 'white',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  infoSection: {
+    marginTop: 24,  // Litt mer mellomrom
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',  // Litt lysere linje
+  },
+  coworkersListTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
     textAlign: 'center',
   },
 });
