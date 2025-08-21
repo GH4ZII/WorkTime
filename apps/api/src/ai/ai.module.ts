@@ -7,15 +7,15 @@ import { PromptBuilder } from './services/prompt-builder.service';
 import { ResponseParser } from './services/response-parser';
 import { PrismaService } from '../prisma.service';
 import { UsersModule } from '../users/users.module';
-import { ShiftsModule } from '../shifts/shifts.module'; // ← Sjekk at denne er importert
+import { ShiftsModule } from '../shifts/shifts.module';
 import { TimeOffReqModule } from '../timeOffReq/timeOffReq.module';
 
 @Module({
   imports: [
     ConfigModule,
     UsersModule,
-    ShiftsModule, // ← Dette fungerer nå
-    TimeOffReqModule, // ← Sjekk at denne er riktig
+    ShiftsModule, 
+    TimeOffReqModule,
   ],
   controllers: [AiController],
   providers: [

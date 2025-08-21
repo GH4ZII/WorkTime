@@ -1,5 +1,4 @@
 import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ChatGPTService } from './services/chatgpt.service';
 import { PromptBuilder } from './services/prompt-builder.service';
 import { UsersService } from '../users/users.service';
@@ -13,7 +12,7 @@ export class AiController {
     private readonly promptBuilder: PromptBuilder,
     private readonly usersService: UsersService,
     private readonly shiftsService: ShiftsService,
-    private readonly timeOffReqService: TimeOffReqService, // ← Sjekk at denne er importert
+    private readonly timeOffReqService: TimeOffReqService,
   ) {}
 
   // Test OpenAI tilkobling
@@ -39,7 +38,96 @@ export class AiController {
     }
   }
 
-  // ← Oppdater denne metoden med test-data
+  // Endre fra månedlig til ukentlig generering
+  @Post('generate-weekly-schedule')
+  async generateWeeklySchedule(@Body() body: { weekStart: string }) {
+    try {
+      const weekStart = new Date(body.weekStart);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6); // 7 dager (ukedag + 6 dager)
+      
+      const dbEmployees = await this.usersService.findAll();
+      const dbTimeOffRequests = await this.timeOffReqService.findAll();
+
+      const employees = dbEmployees.map(emp => ({
+        id: emp.id, 
+        name: emp.name, 
+        role: emp.role, 
+        preferredShifts: [], 
+        positionPercentage: emp.positionPercentage || 100
+      }));
+      
+      const timeOffRequests = dbTimeOffRequests.map(req => ({
+        employeeId: req.userId, 
+        startDate: req.fromDate, 
+        endDate: req.toDate,
+        type: this.convertTimeOffType(req.type), 
+        status: this.convertRequestStatus(req.status)
+      }));
+
+      // Bruk prompt-builder for uke i stedet for måned
+      const prompt = this.promptBuilder.buildWeeklySchedulePrompt(
+        employees, 
+        timeOffRequests, 
+        weekStart, 
+        weekEnd
+      );
+      
+      const aiResponse = await this.chatGPTService.generateSchedule(prompt);
+
+      if (!aiResponse.content || aiResponse.content.trim() === '') {
+        return { success: false, message: 'AI returnerte tomt svar' };
+      }
+
+      let schedule;
+      let cleanedContent = '';
+      try {
+        let content = aiResponse.content;
+        
+        // Fjern markdown og kommentarer
+        if (content.includes('```json')) {
+          content = content.replace(/```json\n?/, '').replace(/\n?```$/, '');
+        }
+        content = content.replace(/\/\/.*$/gm, '');
+        content = content.replace(/\/\/.*?(?=\n|$)/g, '');
+        content = content.replace(/^\s*[\r\n]/gm, '');
+        content = content.replace(/,\s*\/\/.*?(?=\n|,|$)/g, '');
+        
+        cleanedContent = content;
+        console.log('Renset AI-innhold (første 500 tegn):', cleanedContent.substring(0, 500) + '...');
+        
+        schedule = JSON.parse(cleanedContent);
+      } catch (parseError) {
+        console.error('Feil ved JSON parsing etter rensing:', parseError);
+        console.error('Renset innhold (første 1000 tegn):', cleanedContent.substring(0, 1000) + '...');
+        return { 
+          success: false, 
+          message: 'AI returnerte ugyldig JSON-format. Prøv igjen.',
+          error: parseError.message,
+          rawContent: cleanedContent.substring(0, 500) + '...'
+        };
+      }
+      
+      return { 
+        success: true, 
+        message: `Skiftplan generert med AI for uke ${weekStart.toLocaleDateString('nb-NO')} - ${weekEnd.toLocaleDateString('nb-NO')}`, 
+        shifts: schedule.shifts || [], 
+        summary: schedule.summary || {}, 
+        weekStart: weekStart.toISOString(),
+        weekEnd: weekEnd.toISOString(),
+        employeeCount: employees.length 
+      };
+    } catch (error) {
+      console.error('Feil ved AI-generering:', error);
+      return { 
+        success: false, 
+        message: 'Feil ved AI-generering', 
+        error: error.message 
+      };
+    }
+  }
+
+  // Behold den gamle månedlige metoden som backup
   @Post('generate-monthly-schedule')
   async generateMonthlySchedule(@Body() body: { month: string }) {
     try {
@@ -63,31 +151,25 @@ export class AiController {
         }
 
         let schedule;
-        let cleanedContent = ''; // ← Ny: Initialiser med tom streng
+        let cleanedContent = '';
         try {
             let content = aiResponse.content;
             
-            // ← Ny: Fjern markdown
             if (content.includes('```json')) {
                 content = content.replace(/```json\n?/, '').replace(/\n?```$/, '');
             }
             
-            // ← Ny: Fjern alle kommentarer (// ...)
             content = content.replace(/\/\/.*$/gm, '');
             
-            // ← Ny: Fjern kommentarer på slutten av linjer
             content = content.replace(/\/\/.*?(?=\n|$)/g, '');
             
-            // ← Ny: Fjern tomme linjer
             content = content.replace(/^\s*[\r\n]/gm, '');
             
-            // ← Ny: Fjern kommentarer i JSON (// ... (same structure repeated...))
             content = content.replace(/,\s*\/\/.*?(?=\n|,|$)/g, '');
             
-            // ← Ny: Lagre renset innhold
             cleanedContent = content;
             
-            // ← Ny: Log renset innhold for debugging
+            
             console.log('Renset AI-innhold (første 500 tegn):', cleanedContent.substring(0, 500) + '...');
             
             schedule = JSON.parse(cleanedContent);
@@ -118,7 +200,7 @@ export class AiController {
             error: error.message 
         };
     }
-}
+  }
 
   // Bruk generert skiftplan
   @Post('apply-schedule')

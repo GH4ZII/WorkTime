@@ -52,6 +52,76 @@ let AiController = class AiController {
             };
         }
     }
+    async generateWeeklySchedule(body) {
+        try {
+            const weekStart = new Date(body.weekStart);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            const dbEmployees = await this.usersService.findAll();
+            const dbTimeOffRequests = await this.timeOffReqService.findAll();
+            const employees = dbEmployees.map(emp => ({
+                id: emp.id,
+                name: emp.name,
+                role: emp.role,
+                preferredShifts: [],
+                positionPercentage: emp.positionPercentage || 100
+            }));
+            const timeOffRequests = dbTimeOffRequests.map(req => ({
+                employeeId: req.userId,
+                startDate: req.fromDate,
+                endDate: req.toDate,
+                type: this.convertTimeOffType(req.type),
+                status: this.convertRequestStatus(req.status)
+            }));
+            const prompt = this.promptBuilder.buildWeeklySchedulePrompt(employees, timeOffRequests, weekStart, weekEnd);
+            const aiResponse = await this.chatGPTService.generateSchedule(prompt);
+            if (!aiResponse.content || aiResponse.content.trim() === '') {
+                return { success: false, message: 'AI returnerte tomt svar' };
+            }
+            let schedule;
+            let cleanedContent = '';
+            try {
+                let content = aiResponse.content;
+                if (content.includes('```json')) {
+                    content = content.replace(/```json\n?/, '').replace(/\n?```$/, '');
+                }
+                content = content.replace(/\/\/.*$/gm, '');
+                content = content.replace(/\/\/.*?(?=\n|$)/g, '');
+                content = content.replace(/^\s*[\r\n]/gm, '');
+                content = content.replace(/,\s*\/\/.*?(?=\n|,|$)/g, '');
+                cleanedContent = content;
+                console.log('Renset AI-innhold (første 500 tegn):', cleanedContent.substring(0, 500) + '...');
+                schedule = JSON.parse(cleanedContent);
+            }
+            catch (parseError) {
+                console.error('Feil ved JSON parsing etter rensing:', parseError);
+                console.error('Renset innhold (første 1000 tegn):', cleanedContent.substring(0, 1000) + '...');
+                return {
+                    success: false,
+                    message: 'AI returnerte ugyldig JSON-format. Prøv igjen.',
+                    error: parseError.message,
+                    rawContent: cleanedContent.substring(0, 500) + '...'
+                };
+            }
+            return {
+                success: true,
+                message: `Skiftplan generert med AI for uke ${weekStart.toLocaleDateString('nb-NO')} - ${weekEnd.toLocaleDateString('nb-NO')}`,
+                shifts: schedule.shifts || [],
+                summary: schedule.summary || {},
+                weekStart: weekStart.toISOString(),
+                weekEnd: weekEnd.toISOString(),
+                employeeCount: employees.length
+            };
+        }
+        catch (error) {
+            console.error('Feil ved AI-generering:', error);
+            return {
+                success: false,
+                message: 'Feil ved AI-generering',
+                error: error.message
+            };
+        }
+    }
     async generateMonthlySchedule(body) {
         try {
             const month = new Date(body.month);
@@ -203,6 +273,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], AiController.prototype, "testConnection", null);
+__decorate([
+    (0, common_1.Post)('generate-weekly-schedule'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AiController.prototype, "generateWeeklySchedule", null);
 __decorate([
     (0, common_1.Post)('generate-monthly-schedule'),
     __param(0, (0, common_1.Body)()),

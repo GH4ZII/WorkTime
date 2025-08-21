@@ -121,6 +121,18 @@ const SkiftPage: NextPage = () => {
     const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
 
+    // Legg til ny state for ukesgenerering
+    const [isGeneratingWeeklySchedule, setIsGeneratingWeeklySchedule] = useState(false);
+    const [selectedWeekStart, setSelectedWeekStart] = useState(() => {
+        // Start med mandag i inneværende uke
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - daysToMonday);
+        return monday;
+    });
+
     // ← Ny: Hent AI-genererte skift
     const handleAiGenerateSchedule = async () => {
         setIsGeneratingSchedule(true);
@@ -132,7 +144,7 @@ const SkiftPage: NextPage = () => {
             if (response.data.success) {
                 setAiGeneratedSchedule(response.data);
                 // ← Viktig: Ikke overskriv eksisterende skift enda
-                console.log('AI-skift generert:', response.data.shifts.length, 'skift');
+        
                 setShowAiScheduler(true); // ← Vis AI-delen
             } else {
                 console.error('AI-generering feilet:', response.data.message);
@@ -175,6 +187,36 @@ const SkiftPage: NextPage = () => {
         alert('AI-skiftplan forkastet.');
     };
 
+    // Legg til ny funksjon for ukentlig AI-generering
+    const handleAiGenerateWeeklySchedule = async () => {
+        setIsGeneratingWeeklySchedule(true);
+        try {
+            const response = await axios.post('http://localhost:3001/ai/generate-weekly-schedule', {
+                weekStart: selectedWeekStart.toISOString(),
+            });
+            
+            if (response.data.success) {
+                setAiGeneratedSchedule(response.data);
+        
+                setShowAiScheduler(true);
+            } else {
+                console.error('AI-ukesgenerering feilet:', response.data.message);
+                alert(`AI-ukesgenerering feilet: ${response.data.message}`);
+            }
+        } catch (error) {
+            console.error('Feil ved AI-ukesgenerering:', error);
+            alert('Feil ved AI-ukesgenerering. Sjekk konsollen for detaljer.');
+        } finally {
+            setIsGeneratingWeeklySchedule(false);
+        }
+    };
+
+    // Legg til funksjon for å endre uke
+    const handleWeekChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newWeekStart = new Date(event.target.value);
+        setSelectedWeekStart(newWeekStart);
+    };
+
     // ← Ny: Måned velger
     const handleMonthChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newMonth = new Date(event.target.value);
@@ -194,7 +236,7 @@ const SkiftPage: NextPage = () => {
         }
     };
 
-    // ← Ny: Sjekk om en ansatt har AI-skift på en dato
+    // ← Sjekk om en ansatt har AI-skift på en dato
     const hasAiShiftOnDate = (employeeId: string, date: Date) => {
         if (!aiGeneratedSchedule || !aiGeneratedSchedule.shifts) return false
         
@@ -284,8 +326,10 @@ const SkiftPage: NextPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         
-        const startDateTime = new Date(`${form.date}T${form.startTime}`).toISOString()
-        const endDateTime = new Date(`${form.date}T${form.endTime}`).toISOString()
+        // Lagre tider som lokale tider, ikke UTC
+        // Bruk ISO string uten 'Z' for å indikere at det er lokal tid
+        const startDateTime = `${form.date}T${form.startTime}:00`
+        const endDateTime = `${form.date}T${form.endTime}:00`
         
         const payload = {
             userId: form.userId,
@@ -314,8 +358,9 @@ const SkiftPage: NextPage = () => {
         
         if (!editingShift) return
 
-        const startDateTime = new Date(`${editForm.date}T${editForm.startTime}`).toISOString()
-        const endDateTime = new Date(`${editForm.date}T${editForm.endTime}`).toISOString()
+        // Lagre tider som lokale tider, ikke UTC
+        const startDateTime = `${editForm.date}T${editForm.startTime}:00`
+        const endDateTime = `${editForm.date}T${editForm.endTime}:00`
         
         const payload = {
             userId: editForm.userId,
@@ -354,9 +399,22 @@ const SkiftPage: NextPage = () => {
 
     // Start redigering
     const startEdit = (shift: Shift) => {
-        const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
-        const startTime = new Date(shift.startTime).toTimeString().slice(0, 5)
-        const endTime = new Date(shift.endTime).toTimeString().slice(0, 5)
+        // Hent dato og tid fra shift
+        let shiftDate: string
+        let startTime: string
+        let endTime: string
+        
+        if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+            // Lokal tid string
+            shiftDate = shift.startTime.split('T')[0]
+            startTime = shift.startTime.split('T')[1].substring(0, 5)
+            endTime = shift.endTime.split('T')[1].substring(0, 5)
+        } else {
+            // UTC tid - bruk som før
+            shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+            startTime = new Date(shift.startTime).toTimeString().slice(0, 5)
+            endTime = new Date(shift.endTime).toTimeString().slice(0, 5)
+        }
         
         setEditingShift(shift)
         setEditForm({
@@ -370,39 +428,6 @@ const SkiftPage: NextPage = () => {
         })
         setShowEditForm(true)
     }
-
-    // Hent ukedager for gjeldende uke - fikset timezone-problem
-    // const getWeekDays = () => {
-    //     const days = []
-        
-    //     // Sørg for at vi starter på mandag
-    //     const startOfWeek = new Date(currentWeek)
-    //     const dayOfWeek = startOfWeek.getDay() // 0 = søndag, 1 = mandag, etc.
-        
-    //     // Beregn hvor mange dager tilbake til mandag
-    //     let daysToSubtract
-    //     if (dayOfWeek === 0) { // Søndag
-    //         daysToSubtract = 6
-    //     } else {
-    //         daysToSubtract = dayOfWeek - 1
-    //     }
-        
-    //     // Gå tilbake til mandag
-    //     startOfWeek.setDate(startOfWeek.getDate() - daysToSubtract)
-        
-    //     // Generer ukedager fra mandag til søndag
-    //     for (let i = 0; i < 7; i++) {
-    //         const day = new Date(startOfWeek)
-    //         day.setDate(startOfWeek.getDate() + i)
-            
-    //         // Sørg for at klokken er satt til 12:00 for å unngå timezone-problemer
-    //         day.setHours(12, 0, 0, 0)
-            
-    //         days.push(day)
-    //     }
-            
-    //     return days
-    // }
 
     // Formater dato til norsk format
     const formatDate = (date: Date) => {
@@ -426,7 +451,18 @@ const SkiftPage: NextPage = () => {
         normalizedDate.setHours(0, 0, 0, 0)
         
         return shifts.find(shift => {
-            const shiftDate = new Date(shift.startTime)
+            let shiftDate: Date
+            
+            if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                // Lokal tid string - parse som lokal tid
+                const [datePart, timePart] = shift.startTime.split('T')
+                const [year, month, day] = datePart.split('-').map(Number)
+                shiftDate = new Date(year, month - 1, day) // month er 0-basert
+            } else {
+                // UTC tid - bruk som før
+                shiftDate = new Date(shift.startTime)
+            }
+            
             const normalizedShiftDate = new Date(shiftDate)
             normalizedShiftDate.setHours(0, 0, 0, 0)
             
@@ -434,13 +470,21 @@ const SkiftPage: NextPage = () => {
         })
     }
 
-    // ← Oppdater getShiftsForDate for å inkludere AI-skift
+    // Oppdater getShiftsForDate for å inkludere AI-skift
     const getShiftsForDate = (date: Date) => {
         const dateStr = date.toISOString().split('T')[0]
+
         
         // ← Hent eksisterende skift fra databasen
         const existingShifts = shifts.filter(shift => {
-            const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+            let shiftDate: string
+            if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                // Lokal tid string
+                shiftDate = shift.startTime.split('T')[0]
+            } else {
+                // UTC tid - bruk som før
+                shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+            }
             return shiftDate === dateStr
         })
         
@@ -449,37 +493,160 @@ const SkiftPage: NextPage = () => {
         if (aiGeneratedSchedule && aiGeneratedSchedule.shifts) {
             aiShifts = aiGeneratedSchedule.shifts.filter((shift: any) => {
                 return shift.date === dateStr
-            }).map((aiShift: any) => ({
-                // ← Konverter AI-skift til samme format som eksisterende skift
+            }).map((aiShift: any) => {
+
+                
+                const convertedShift = {
                 id: `ai-${aiShift.employeeId}-${aiShift.date}`,
                 userId: aiShift.employeeId,
+                // Konverter AI-skift til lokal tid format (YYYY-MM-DDTHH:MM:SS)
                 startTime: `${aiShift.date}T${aiShift.startTime}:00`,
                 endTime: `${aiShift.date}T${aiShift.endTime}:00`,
                 location: 'AI-generert',
                 notes: `AI: ${aiShift.shiftType}`,
                 createdBy: 'AI',
-                user: { id: aiShift.employeeId, name: aiShift.employeeName }
-            }))
+                user: { id: aiShift.employeeId, name: aiShift.employeeName },
+                hours: aiShift.hours // Inkluder timer for AI-skift
+                }
+                
+
+                
+                return convertedShift
+            })
         }
         
         // ← Kombiner og sorter alle skift
         const allShifts = [...existingShifts, ...aiShifts]
-        return allShifts.sort((a, b) => {
-            const aTime = new Date(a.startTime).getTime()
-            const bTime = new Date(b.startTime).getTime()
+
+        
+        const sortedShifts = allShifts.sort((a, b) => {
+            // Fiks sortering for AI-skift
+            let aTime: number
+            let bTime: number
+            
+            if (a.createdBy === 'AI') {
+                // AI-skift: nå konvertert til lokal tid format, bruk som eksisterende skift
+                if (a.startTime.includes('T') && !a.startTime.includes('Z') && !a.startTime.includes('+')) {
+                    // Lokal tid string
+                    const [hour, min] = a.startTime.split('T')[1].substring(0, 5).split(':').map(Number)
+                    aTime = hour * 60 + min
+                } else {
+                    // Fallback
+                    aTime = 0
+                }
+
+            } else {
+                // Eksisterende skift: bruk ISO-string
+                if (a.startTime.includes('T') && !a.startTime.includes('Z') && !a.startTime.includes('+')) {
+                    // Lokal tid string
+                    const [hour, min] = a.startTime.split('T')[1].substring(0, 5).split(':').map(Number)
+                    aTime = hour * 60 + min
+                } else {
+                    // UTC tid
+                    aTime = new Date(a.startTime).getTime()
+                }
+
+            }
+            
+            if (b.createdBy === 'AI') {
+                // AI-skift: nå konvertert til lokal tid format, bruk som eksisterende skift
+                if (b.startTime.includes('T') && !b.startTime.includes('Z') && !b.startTime.includes('+')) {
+                    // Lokal tid string
+                    const [hour, min] = b.startTime.split('T')[1].substring(0, 5).split(':').map(Number)
+                    bTime = hour * 60 + min
+                } else {
+                    // Fallback
+                    bTime = 0
+                }
+
+            } else {
+                // Eksisterende skift: bruk ISO-string
+                if (b.startTime.includes('T') && !b.startTime.includes('Z') && !b.startTime.includes('+')) {
+                    // Lokal tid string
+                    const [hour, min] = b.startTime.split('T')[1].substring(0, 5).split(':').map(Number)
+                    bTime = hour * 60 + min
+                } else {
+                    // UTC tid
+                    bTime = new Date(b.startTime).getTime()
+                }
+
+            }
+            
             return aTime - bTime
         })
+        
+
+        
+        return sortedShifts
     }
 
     // Hent alle unike starttider for en dato (for å lage rader)
     const getUniqueStartTimes = (date: Date) => {
         const shiftsForDate = getShiftsForDate(date)
+
+        
         const startTimes = shiftsForDate.map(shift => {
-            const startTime = new Date(shift.startTime)
-            return {
-                time: startTime,
-                timeString: startTime.toTimeString().slice(0, 5), // HH:MM format
-                timestamp: startTime.getTime()
+
+            
+            if (shift.createdBy === 'AI') {
+                // AI-skift: nå konvertert til lokal tid format, bruk som eksisterende skift
+                if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                    // Lokal tid string (YYYY-MM-DDTHH:MM:SS)
+                    const [datePart, timePart] = shift.startTime.split('T')
+                    const [hour, min] = timePart.split(':').map(Number)
+                    const time = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, min)
+                    const timeString = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
+                    const timestamp = time.getTime()
+                    
+
+                    
+                    return {
+                        time,
+                        timeString,
+                        timestamp
+                    }
+                } else {
+                    // Fallback for gamle AI-skift format
+                    const [hour, min] = shift.startTime.split(':').map(Number)
+                    const time = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, min)
+                    const timeString = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
+                    const timestamp = time.getTime()
+                    
+
+                    
+                    return {
+                        time,
+                        timeString,
+                        timestamp
+                    }
+                }
+            } else {
+                // Eksisterende skift: bruk ISO-string eller lokal tid string
+                let startTime: Date
+                let timeString: string
+                let timestamp: number
+                
+                if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                    // Lokal tid string (YYYY-MM-DDTHH:MM:SS)
+                    const [datePart, timePart] = shift.startTime.split('T')
+                    const [hour, min] = timePart.split(':').map(Number)
+                    startTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, min)
+                    timeString = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
+                    timestamp = startTime.getTime()
+                } else {
+                    // UTC tid - bruk som før
+                    startTime = new Date(shift.startTime)
+                    timeString = startTime.toTimeString().slice(0, 5)
+                    timestamp = startTime.getTime()
+                }
+                
+
+                
+                return {
+                    time: startTime,
+                    timeString,
+                    timestamp
+                }
             }
         })
         
@@ -487,6 +654,8 @@ const SkiftPage: NextPage = () => {
         const uniqueTimes = startTimes.filter((time, index, self) => 
             index === self.findIndex(t => t.timeString === time.timeString)
         ).sort((a, b) => a.timestamp - b.timestamp)
+        
+
         
         return uniqueTimes
     }
@@ -497,8 +666,19 @@ const SkiftPage: NextPage = () => {
         
         // ← Sjekk eksisterende skift
         const existingShift = shifts.find(shift => {
-            const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
-            const shiftStartTime = new Date(shift.startTime).toTimeString().slice(0, 5)
+            let shiftDate: string
+            let shiftStartTime: string
+            
+            if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                // Lokal tid string
+                shiftDate = shift.startTime.split('T')[0]
+                shiftStartTime = shift.startTime.split('T')[1].substring(0, 5)
+            } else {
+                // UTC tid - bruk som før
+                shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+                shiftStartTime = new Date(shift.startTime).toTimeString().slice(0, 5)
+            }
+            
             return shift.userId === employeeId && shiftDate === dateStr && shiftStartTime === startTime
         })
         
@@ -515,12 +695,14 @@ const SkiftPage: NextPage = () => {
                 return {
                     id: `ai-${aiShift.employeeId}-${aiShift.date}`,
                     userId: aiShift.employeeId,
+                    // Konverter AI-skift til lokal tid format (YYYY-MM-DDTHH:MM:SS)
                     startTime: `${aiShift.date}T${aiShift.startTime}:00`,
                     endTime: `${aiShift.date}T${aiShift.endTime}:00`,
                     location: 'AI-generert',
                     notes: `AI: ${aiShift.shiftType}`,
                     createdBy: 'AI',
-                    user: { id: aiShift.employeeId, name: aiShift.employeeName }
+                    user: { id: aiShift.employeeId, name: aiShift.employeeName },
+                    hours: aiShift.hours // Inkluder timer for AI-skift
                 }
             }
         }
@@ -533,27 +715,105 @@ const SkiftPage: NextPage = () => {
         const dateStr = date.toISOString().split('T')[0]
         return shifts
             .filter(shift => {
-                const shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
-                const shiftStartTime = new Date(shift.startTime).toTimeString().slice(0, 5)
+                let shiftDate: string
+                let shiftStartTime: string
+                
+                if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                    // Lokal tid string
+                    shiftDate = shift.startTime.split('T')[0]
+                    shiftStartTime = shift.startTime.split('T')[1].substring(0, 5)
+                } else {
+                    // UTC tid - bruk som før
+                    shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+                    shiftStartTime = new Date(shift.startTime).toTimeString().slice(0, 5)
+                }
+                
                 return shiftDate === dateStr && shiftStartTime === startTime
             })
             .map(shift => shift.userId)
     }
 
-    // Formater tid
-    const formatTime = (dateString: string) => {
-        const date = new Date(dateString)
-        return date.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })
+    // Enkel funksjon for å trekke fra 2 timer fra alle tidspunkter
+    const subtractTwoHours = (timeString: string) => {
+        if (!timeString.includes(':')) return timeString
+        
+        const [hours, minutes] = timeString.split(':').map(Number)
+        let newHours = hours - 2
+        
+        // Håndter overgang til forrige dag
+        if (newHours < 0) {
+            newHours += 24
+        }
+        
+        return `${newHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
     }
 
-    // Beregn varighet
-    const getDuration = (startTime: string, endTime: string) => {
-        const start = new Date(startTime)
-        const end = new Date(endTime)
-        const diffMs = end.getTime() - start.getTime()
-        const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-        return `${diffHours} hrs.`
+    // Oppdater formatTime funksjonen
+    const formatTime = (dateString: string) => {
+
+        
+        let result: string
+        
+        // Hvis det er AI-skift (kun HH:MM)
+        if (!dateString.includes('T') && dateString.includes(':') && !dateString.includes('Z') && !dateString.includes('+')) {
+            // Returner tiden direkte for AI-skift
+            result = dateString
+        } else if (dateString.includes('T') && dateString.includes(':') && !dateString.includes('Z') && !dateString.includes('+')) {
+            // Hvis det er en lokal tid string (YYYY-MM-DDTHH:MM:SS uten Z eller +)
+            // Parse som lokal tid uten timezone-konvertering
+            const [datePart, timePart] = dateString.split('T')
+            const [hours, minutes] = timePart.split(':')
+            result = `${hours}:${minutes}`
+        } else if (dateString.includes('Z') || dateString.includes('+')) {
+            // ISO string med timezone - parse riktig
+            const date = new Date(dateString)
+            result = date.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })
+
+        } else {
+            // Kun tid (HH:MM) - returner direkte
+            result = dateString
+        }
+        
+        // Trekk fra 2 timer fra alle tidspunkter
+        const adjustedTime = subtractTwoHours(result)
+        
+        return adjustedTime
     }
+
+// Erstatt hele getDuration med denne
+const getDuration = (startTime: string, endTime: string) => {
+    // Normaliser til Date-objekter
+    let start: Date;
+    let end: Date;
+  
+    if (startTime.includes('T') && !startTime.includes('Z') && !startTime.includes('+')) {
+      // Lokal "YYYY-MM-DDTHH:MM:SS"
+      const [d1, t1] = startTime.split('T');
+      const [y1, m1, da1] = d1.split('-').map(Number);
+      const [h1, mi1, s1 = '0'] = t1.split(':');
+      start = new Date(y1, (m1 - 1), da1, Number(h1), Number(mi1), Number(s1));
+  
+      const [d2, t2] = endTime.split('T');
+      const [y2, m2, da2] = d2.split('-').map(Number);
+      const [h2, mi2, s2 = '0'] = t2.split(':');
+      end = new Date(y2, (m2 - 1), da2, Number(h2), Number(mi2), Number(s2));
+    } else {
+      // ISO med Z/+ eller annet: la Date håndtere parsing
+      start = new Date(startTime);
+      end = new Date(endTime);
+    }
+  
+    // Hvis sluttiden ikke er etter start (overnight), legg til 24h på end
+    if (end.getTime() <= start.getTime()) {
+      end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+    }
+  
+    const diffMs = end.getTime() - start.getTime();
+    const diffHours = Math.round(diffMs / (1000 * 60 * 60)); // evt. Math.floor hvis du vil alltid runde ned
+  
+    return `${diffHours} hrs.`;
+  };
+  
 
     // Naviger til forrige uke
     const goToPreviousWeek = () => {
@@ -690,7 +950,7 @@ const SkiftPage: NextPage = () => {
                             transition: 'all 0.3s ease',
                         }}
                     >
-                        +Add Employee
+                        Add Skift
                     </Button>
                 </Box>
 
@@ -1206,8 +1466,11 @@ const SkiftPage: NextPage = () => {
                         🤖 AI Skiftplanlegging
                     </Typography>
                     
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        {/* ← Månedsvelger */}
+                    {/* Månedlig generering */}
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+                        <Typography variant="subtitle1" sx={{ minWidth: 120 }}>
+                            📅 Månedlig:
+                        </Typography>
                         <TextField
                             type="month"
                             value={selectedMonth.toISOString().slice(0, 7)}
@@ -1216,7 +1479,6 @@ const SkiftPage: NextPage = () => {
                             sx={{ minWidth: 150 }}
                         />
                         
-                        {/* ← AI Generer Knapp */}
                         <Button
                             variant="contained"
                             startIcon={<AiIcon />}
@@ -1237,7 +1499,49 @@ const SkiftPage: NextPage = () => {
                                     Genererer...
                                 </>
                             ) : (
-                                '🚀 Generer AI-skiftplan'
+                                '🚀 Generer månedlig plan'
+                            )}
+                        </Button>
+                    </Box>
+
+                    {/* Ukentlig generering */}
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <Typography variant="subtitle1" sx={{ minWidth: 120 }}>
+                            📅 Ukentlig:
+                        </Typography>
+                        <TextField
+                            type="date"
+                            value={selectedWeekStart.toISOString().split('T')[0]}
+                            onChange={handleWeekChange}
+                            size="small"
+                            sx={{ minWidth: 150 }}
+                            inputProps={{
+                                min: '2020-01-01',
+                                max: '2030-12-31'
+                            }}
+                        />
+                        
+                        <Button
+                            variant="contained"
+                            startIcon={<AiIcon />}
+                            onClick={handleAiGenerateWeeklySchedule}
+                            disabled={isGeneratingWeeklySchedule}
+                            sx={{
+                                background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #45a049 0%, #4caf50 100%)',
+                                },
+                                px: 3,
+                                py: 1.5
+                            }}
+                        >
+                            {isGeneratingWeeklySchedule ? (
+                                <>
+                                    <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                                    Genererer...
+                                </>
+                            ) : (
+                                '⚡ Generer ukentlig plan'
                             )}
                         </Button>
                     </Box>

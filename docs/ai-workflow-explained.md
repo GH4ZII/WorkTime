@@ -1,7 +1,7 @@
 # 🤖 AI Skiftplanlegging - Workflow Forklaring
 
 ## 📖 Hva er dette?
-Dette dokumentet forklarer **enkelt og tydelig** hvordan hele AI-skiftplanleggingssystemet fungerer, fra start til slutt. Du trenger ikke være teknisk for å forstå det!
+Dette dokumentet forklarer **enkelt og tydelig** hvordan hele AI-skiftplanleggingssystemet fungerer, fra start til slutt.
 
 ## 🎯 Hva gjør systemet?
 **Kort sagt:** En AI (ChatGPT) lager automatisk skiftplaner for deg, så du slipper å gjøre det manuelt.

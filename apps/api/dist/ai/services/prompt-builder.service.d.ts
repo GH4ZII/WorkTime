@@ -18,6 +18,7 @@ export interface ShiftConstraint {
     priority: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 export declare class PromptBuilder {
+    buildWeeklySchedulePrompt(employees: Employee[], timeOffRequests: TimeOffRequest[], weekStart: Date, weekEnd: Date): string;
     buildMonthlySchedulePrompt(employees: Employee[], timeOffRequests: TimeOffRequest[], month: Date, constraints: ShiftConstraint[]): string;
     private formatEmployeesWithPosition;
     private formatTimeOffRequests;

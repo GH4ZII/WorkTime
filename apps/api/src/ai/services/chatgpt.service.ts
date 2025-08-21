@@ -31,8 +31,8 @@ export class ChatGPTService {
   private openai: OpenAI;
   
   private readonly defaultOptions: ChatGPTOptions = {
-    model: 'gpt-4o-mini',
-    maxTokens: 16000,  // ← Øk fra 8000 til 16000
+    model: 'gpt-5-mini',
+    maxTokens: 32000,
     temperature: 0.7,
     retryAttempts: 3,
   };
@@ -99,7 +99,7 @@ export class ChatGPTService {
     try {
       this.logger.log('Starter OpenAI API-kall...');
       
-      const model = options.model || this.defaultOptions.model || 'gpt-4o-mini';
+      const model = options.model || this.defaultOptions.model || 'gpt-5-mini';
       const maxTokens = options.maxTokens || this.defaultOptions.maxTokens || 4000;
       
       this.logger.log(`Bruker modell: ${model}, maxTokens: ${maxTokens}`);

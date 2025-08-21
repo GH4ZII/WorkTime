@@ -19,8 +19,8 @@ let ChatGPTService = ChatGPTService_1 = class ChatGPTService {
     configService;
     openai;
     defaultOptions = {
-        model: 'gpt-4o-mini',
-        maxTokens: 16000,
+        model: 'gpt-5-mini',
+        maxTokens: 32000,
         temperature: 0.7,
         retryAttempts: 3,
     };
@@ -66,7 +66,7 @@ let ChatGPTService = ChatGPTService_1 = class ChatGPTService {
     async callOpenAI(prompt, options) {
         try {
             this.logger.log('Starter OpenAI API-kall...');
-            const model = options.model || this.defaultOptions.model || 'gpt-4o-mini';
+            const model = options.model || this.defaultOptions.model || 'gpt-5-mini';
             const maxTokens = options.maxTokens || this.defaultOptions.maxTokens || 4000;
             this.logger.log(`Bruker modell: ${model}, maxTokens: ${maxTokens}`);
             this.logger.log('Prompt preview:', prompt.substring(0, 100) + '...');

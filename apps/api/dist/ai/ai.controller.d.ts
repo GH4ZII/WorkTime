@@ -23,6 +23,49 @@ export declare class AiController {
         error: any;
         timestamp: string;
     }>;
+    generateWeeklySchedule(body: {
+        weekStart: string;
+    }): Promise<{
+        success: boolean;
+        message: string;
+        error?: undefined;
+        rawContent?: undefined;
+        shifts?: undefined;
+        summary?: undefined;
+        weekStart?: undefined;
+        weekEnd?: undefined;
+        employeeCount?: undefined;
+    } | {
+        success: boolean;
+        message: string;
+        error: any;
+        rawContent: string;
+        shifts?: undefined;
+        summary?: undefined;
+        weekStart?: undefined;
+        weekEnd?: undefined;
+        employeeCount?: undefined;
+    } | {
+        success: boolean;
+        message: string;
+        shifts: any;
+        summary: any;
+        weekStart: string;
+        weekEnd: string;
+        employeeCount: number;
+        error?: undefined;
+        rawContent?: undefined;
+    } | {
+        success: boolean;
+        message: string;
+        error: any;
+        rawContent?: undefined;
+        shifts?: undefined;
+        summary?: undefined;
+        weekStart?: undefined;
+        weekEnd?: undefined;
+        employeeCount?: undefined;
+    }>;
     generateMonthlySchedule(body: {
         month: string;
     }): Promise<{
