@@ -7,6 +7,8 @@ export declare class UsersService {
     constructor(prisma: PrismaService);
     create(data: CreateUserDto): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
@@ -14,8 +16,6 @@ export declare class UsersService {
         role: string;
         positionPercentage: number;
         hireDate: Date;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     findAll(): Promise<{
         id: string;
@@ -28,6 +28,8 @@ export declare class UsersService {
     }[]>;
     findOne(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
@@ -35,11 +37,11 @@ export declare class UsersService {
         role: string;
         positionPercentage: number;
         hireDate: Date;
-        createdAt: Date;
-        updatedAt: Date;
     } | null>;
     update(id: string, data: UpdateUserDto): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
@@ -47,11 +49,11 @@ export declare class UsersService {
         role: string;
         positionPercentage: number;
         hireDate: Date;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
@@ -59,12 +61,12 @@ export declare class UsersService {
         role: string;
         positionPercentage: number;
         hireDate: Date;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     findOneByEmail(email: string): Promise<User | null>;
     updatePassword(id: string, newPasswordHash: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         email: string;
         phone: string | null;
@@ -72,7 +74,5 @@ export declare class UsersService {
         role: string;
         positionPercentage: number;
         hireDate: Date;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
 }
