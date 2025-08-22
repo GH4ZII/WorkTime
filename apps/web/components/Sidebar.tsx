@@ -1,4 +1,4 @@
-﻿import React from 'react'
+﻿import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import {
@@ -13,7 +13,8 @@ import {
     Divider,
     Avatar,
     Tooltip,
-    Badge
+    Badge,
+    IconButton
 } from '@mui/material'
 import {
     Dashboard as DashboardIcon,
@@ -24,7 +25,9 @@ import {
     Chat as ChatIcon,
     History as HistoryIcon,
     Analytics as AnalyticsIcon,
-    Work as WorkIcon
+    Work as WorkIcon,
+    ChevronLeft as ChevronLeftIcon,
+    ChevronRight as ChevronRightIcon
 } from '@mui/icons-material'
 
 const menuItems = [
@@ -80,81 +83,119 @@ const menuItems = [
 
 export const Sidebar: React.FC = () => {
     const router = useRouter()
+    const [isCollapsed, setIsCollapsed] = useState(false)
 
     const isActive = (href: string) => {
         return router.pathname === href
     }
 
+    const toggleSidebar = () => {
+        setIsCollapsed(!isCollapsed)
+    }
+
+    const sidebarWidth = isCollapsed ? 80 : 280
+
     return (
-        <Drawer
-            variant="permanent"
+        <Box
             sx={{
-                width: 280,
+                width: sidebarWidth,
                 flexShrink: 0,
-                '& .MuiDrawer-paper': {
-                    width: 280,
-                    boxSizing: 'border-box',
-                    background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)',
-                    borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    position: 'relative', // Add this to fix positioning
-                },
+                transition: 'width 0.3s ease',
+                position: 'relative',
+                zIndex: 1200
             }}
         >
             <Box sx={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                height: '100%',
-                background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)'
+                height: 'auto',
+                backgroundColor: '#667eea !important',
+                borderRadius: '0 0 16px 0',
+                marginBottom: 2,
+                boxShadow: 'none !important',
+                outline: 'none !important',
+                border: 'none !important',
+                '&::before': {
+                    display: 'none !important'
+                },
+                '&::after': {
+                    display: 'none !important'
+                },
+                '& *': {
+                    boxShadow: 'none !important'
+                }
             }}>
-                {/* Logo Section */}
-                <Box sx={{ 
-                    p: 3, 
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                    background: 'rgba(255, 255, 255, 0.05)'
-                }}>
+                                 {/* Logo Section */}
+                 <Box sx={{ 
+                     p: isCollapsed ? 2 : 3, 
+                     borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                     background: 'transparent',
+                     position: 'relative'
+                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar 
-                            sx={{ 
-                                bgcolor: 'primary.main',
-                                width: 48,
-                                height: 48,
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                            }}
-                        >
+                                                 <Avatar 
+                             sx={{ 
+                                 bgcolor: 'primary.main',
+                                 width: isCollapsed ? 40 : 48,
+                                 height: isCollapsed ? 40 : 48,
+                                 backgroundColor: '#667eea',
+                                 transition: 'all 0.3s ease'
+                             }}
+                         >
                             <WorkIcon />
                         </Avatar>
-                        <Box>
-                            <Typography 
-                                variant="h5" 
-                                component="div" 
-                                sx={{ 
-                                    fontWeight: 'bold',
-                                    background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)',
-                                    backgroundClip: 'text',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    letterSpacing: '0.5px'
-                                }}
-                            >
-                                WorkTime
-                            </Typography>
-                            <Typography 
-                                variant="caption" 
-                                sx={{ 
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    fontSize: '0.75rem'
-                                }}
-                            >
-                                Administrasjonssystem
-                            </Typography>
-                        </Box>
+                        {!isCollapsed && (
+                            <Box>
+                                <Typography 
+                                    variant="h5" 
+                                    component="div" 
+                                    sx={{ 
+                                        fontWeight: 'bold',
+                                        color: '#ffffff',
+                                        letterSpacing: '0.5px'
+                                    }}
+                                >
+                                    WorkTime
+                                </Typography>
+                                <Typography 
+                                    variant="caption" 
+                                    sx={{ 
+                                        color: 'rgba(255, 255, 255, 0.7)',
+                                        fontSize: '0.75rem'
+                                    }}
+                                >
+                                    Administrasjonssystem
+                                </Typography>
+                            </Box>
+                        )}
                     </Box>
+                    
+                    {/* Toggle Button - Repositioned to avoid collision */}
+                    <IconButton
+                        onClick={toggleSidebar}
+                        sx={{
+                            position: 'absolute',
+                            top: isCollapsed ? 10 : 12,
+                            right: isCollapsed ? 10 : 12,
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            width: isCollapsed ? 32 : 36,
+                            height: isCollapsed ? 32 : 36,
+                            '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                color: '#ffffff'
+                            },
+                            transition: 'all 0.3s ease',
+                            zIndex: 10
+                        }}
+                    >
+                        {isCollapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon />}
+                    </IconButton>
                 </Box>
 
                 {/* Navigation Menu */}
                 <Box sx={{ flex: 1, overflow: 'auto', py: 2 }}>
-                    <List sx={{ px: 2 }}>
+                    <List sx={{ px: isCollapsed ? 1 : 2 }}>
                         {menuItems.map((item, index) => (
                             <ListItem 
                                 key={item.label} 
@@ -169,107 +210,117 @@ export const Sidebar: React.FC = () => {
                                         width: '100%'
                                     }}
                                 >
-                                    <ListItemButton
-                                        selected={isActive(item.href)}
-                                        sx={{
-                                            borderRadius: 2,
-                                            py: 1.5,
-                                            px: 2,
-                                            transition: 'all 0.3s ease',
-                                            background: isActive(item.href) 
-                                                ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)'
-                                                : 'transparent',
-                                            border: isActive(item.href) 
-                                                ? '1px solid rgba(102, 126, 234, 0.3)'
-                                                : '1px solid transparent',
-                                            '&:hover': {
-                                                background: isActive(item.href)
-                                                    ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%)'
-                                                    : 'rgba(255, 255, 255, 0.05)',
-                                                transform: 'translateX(4px)',
-                                            },
-                                            '&.Mui-selected': {
-                                                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)',
-                                                '&:hover': {
-                                                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%)',
-                                                }
-                                            }
-                                        }}
+                                    <Tooltip 
+                                        title={isCollapsed ? item.label : ''} 
+                                        placement="right"
+                                        disableHoverListener={!isCollapsed}
                                     >
-                                        <ListItemIcon 
-                                            sx={{ 
-                                                minWidth: 40,
-                                                color: isActive(item.href) 
-                                                    ? '#667eea' 
-                                                    : 'rgba(255, 255, 255, 0.8)'
+                                        <ListItemButton
+                                            selected={isActive(item.href)}
+                                            sx={{
+                                                borderRadius: 2,
+                                                py: 1.5,
+                                                px: isCollapsed ? 1.5 : 2,
+                                                transition: 'all 0.3s ease',
+                                                background: isActive(item.href) 
+                                                    ? 'rgba(255, 255, 255, 0.25)'
+                                                    : 'transparent',
+                                                border: isActive(item.href) 
+                                                    ? '2px solid rgba(255, 255, 255, 0.4)'
+                                                    : '1px solid transparent',
+                                                '&:hover': {
+                                                    background: isActive(item.href)
+                                                        ? 'rgba(255, 255, 255, 0.35)'
+                                                        : 'rgba(255, 255, 255, 0.08)',
+                                                    transform: isCollapsed ? 'scale(1.05)' : 'translateX(4px)',
+                                                },
+                                                '&.Mui-selected': {
+                                                    background: 'rgba(255, 255, 255, 0.25)',
+                                                    '&:hover': {
+                                                        background: 'rgba(255, 255, 255, 0.35)',
+                                                    }
+                                                }
                                             }}
                                         >
-                                            {item.icon}
-                                        </ListItemIcon>
-                                        <ListItemText
-                                            primary={item.label}
-                                            primaryTypographyProps={{
-                                                fontSize: '0.95rem',
-                                                fontWeight: isActive(item.href) ? 'bold' : 'normal',
-                                                color: isActive(item.href) 
-                                                    ? '#ffffff' 
-                                                    : 'rgba(255, 255, 255, 0.9)'
-                                            }}
-                                            secondary={item.description}
-                                            secondaryTypographyProps={{
-                                                fontSize: '0.75rem',
-                                                color: 'rgba(255, 255, 255, 0.6)',
-                                                display: { xs: 'none', md: 'block' }
-                                            }}
-                                        />
-                                        {isActive(item.href) && (
-                                            <Box
-                                                sx={{
-                                                    width: 4,
-                                                    height: 20,
-                                                    bgcolor: '#667eea',
-                                                    borderRadius: 2,
-                                                    ml: 1
+                                            <ListItemIcon 
+                                                sx={{ 
+                                                    minWidth: isCollapsed ? 32 : 40,
+                                                    color: isActive(item.href) 
+                                                        ? '#ffffff' 
+                                                        : 'rgba(255, 255, 255, 0.8)'
                                                 }}
-                                            />
-                                        )}
-                                    </ListItemButton>
+                                            >
+                                                {item.icon}
+                                            </ListItemIcon>
+                                            {!isCollapsed && (
+                                                <ListItemText
+                                                    primary={item.label}
+                                                    primaryTypographyProps={{
+                                                        fontSize: '0.95rem',
+                                                        fontWeight: isActive(item.href) ? 'bold' : 'normal',
+                                                        color: isActive(item.href) 
+                                                            ? '#ffffff' 
+                                                            : 'rgba(255, 255, 255, 0.9)'
+                                                    }}
+                                                    secondary={item.description}
+                                                    secondaryTypographyProps={{
+                                                        fontSize: '0.75rem',
+                                                        color: 'rgba(255, 255, 255, 0.6)',
+                                                        display: { xs: 'none', md: 'block' }
+                                                    }}
+                                                />
+                                            )}
+                                            {isActive(item.href) && !isCollapsed && (
+                                                <Box
+                                                    sx={{
+                                                        width: 4,
+                                                        height: 20,
+                                                        bgcolor: '#ffffff',
+                                                        borderRadius: 2,
+                                                        ml: 1
+                                                    }}
+                                                />
+                                            )}
+                                        </ListItemButton>
+                                    </Tooltip>
                                 </Link>
                             </ListItem>
                         ))}
                     </List>
                 </Box>
 
-                {/* Footer Section */}
-                <Box sx={{ 
-                    p: 3, 
-                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                    background: 'rgba(0, 0, 0, 0.1)'
-                }}>
-                    <Box sx={{ textAlign: 'center' }}>
-                        <Typography 
-                            variant="caption" 
-                            sx={{ 
-                                color: 'rgba(255, 255, 255, 0.5)',
-                                fontSize: '0.7rem'
-                            }}
-                        >
-                            WorkTime v1.0
-                        </Typography>
-                        <Typography 
-                            variant="caption" 
-                            sx={{ 
-                                display: 'block',
-                                color: 'rgba(255, 255, 255, 0.4)',
-                                fontSize: '0.65rem',
-                                mt: 0.5
-                            }}
-                        >
-                            Administrasjonssystem
-                        </Typography>
+                                     {/* Footer Section */}
+                     {!isCollapsed && (
+                         <Box sx={{ 
+                             p: 3, 
+                             borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                             background: 'transparent'
+                         }}>
+                        <Box sx={{ textAlign: 'center' }}>
+                            <Typography 
+                                variant="caption" 
+                                sx={{ 
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    fontSize: '0.7rem'
+                                }}
+                            >
+                                WorkTime v1.0
+                            </Typography>
+                            <Typography 
+                                variant="caption" 
+                                sx={{ 
+                                    display: 'block',
+                                    color: 'rgba(255, 255, 255, 0.4)',
+                                    fontSize: '0.65rem',
+                                    mt: 0.5
+                                }}
+                            >
+                                Administrasjonssystem
+                            </Typography>
+                        </Box>
                     </Box>
-                </Box>
+                )}
             </Box>
-        </Drawer>
+        </Box>
     )
 }

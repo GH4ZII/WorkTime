@@ -326,10 +326,9 @@ const SkiftPage: NextPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         
-        // Lagre tider som lokale tider, ikke UTC
-        // Bruk ISO string uten 'Z' for å indikere at det er lokal tid
-        const startDateTime = `${form.date}T${form.startTime}:00`
-        const endDateTime = `${form.date}T${form.endTime}:00`
+        // Lag riktig ISO-8601 format med millisekunder og timezone
+        const startDateTime = `${form.date}T${form.startTime}:00.000Z`
+        const endDateTime = `${form.date}T${form.endTime}:00.000Z`
         
         const payload = {
             userId: form.userId,
@@ -358,9 +357,9 @@ const SkiftPage: NextPage = () => {
         
         if (!editingShift) return
 
-        // Lagre tider som lokale tider, ikke UTC
-        const startDateTime = `${editForm.date}T${editForm.startTime}:00`
-        const endDateTime = `${editForm.date}T${editForm.endTime}:00`
+        // Lag riktig ISO-8601 format med millisekunder og timezone
+        const startDateTime = `${editForm.date}T${editForm.startTime}:00.000Z`
+        const endDateTime = `${editForm.date}T${editForm.endTime}:00.000Z`
         
         const payload = {
             userId: editForm.userId,
@@ -908,168 +907,240 @@ const getDuration = (startTime: string, endTime: string) => {
 
     return (
         <Layout>
-            <Box sx={{ p: 3 }}>
-                {error && (
-                    <Alert severity="error" sx={{ mb: 3 }}>
-                        {error}
-                    </Alert>
-                )}
-                
-                {success && (
-                    <Alert severity="success" sx={{ mb: 3 }}>
-                        {success}
-                    </Alert>
-                )}
+            <Box sx={{ 
+                minHeight: '100vh',
+                backgroundColor: '#e8edf5',
 
-                {/* Header */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                    <Box>
-                        <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
-                            Shift Board
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Administrer skift og arbeidstider
-                        </Typography>
-                    </Box>
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => setShowForm(true)}
-                        sx={{
-                            py: 1.5,
-                            px: 3,
-                            borderRadius: 2,
-                            fontSize: '1rem',
-                            fontWeight: 'bold',
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            '&:hover': {
-                                background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
-                                transform: 'translateY(-1px)',
-                                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
-                            },
-                            transition: 'all 0.3s ease',
-                        }}
-                    >
-                        Add Skift
-                    </Button>
-                </Box>
-
-                {/* Shift Board */}
-                <Card elevation={2}>
-                    <CardContent sx={{ p: 0 }}>
-                        {/* Date Navigation */}
-                        <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'space-between',
-                            p: 3,
-                            borderBottom: '1px solid #e0e0e0'
-                        }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <IconButton onClick={goToPreviousWeek}>
-                                    <ChevronLeftIcon />
-                                </IconButton>
-                                <Typography variant="h6" fontWeight="bold">
-                                    {formatWeekRange()}
-                                </Typography>
-                                <IconButton onClick={goToNextWeek}>
-                                    <ChevronRightIcon />
-                                </IconButton>
+            }}>
+                <Box sx={{ p: 3 }}>
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 3 }}>
+                            {error}
+                        </Alert>
+                    )}
+                    
+                    {success && (
+                        <Alert severity="success" sx={{ mb: 3 }}>
+                            {success}
+                        </Alert>
+                    )}
+                    <Card elevation={2} sx={{ borderRadius: '16px 16px 0 0' }}>
+                        <CardContent sx={{ p: 0, borderRadius: '16px 16px 0 0' }}>
+                            {/* Date Navigation */}
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'space-between',
+                                p: 3,
+                                backgroundColor: '#f8faff',
+                                borderBottom: '1px solid rgba(102, 126, 234, 0.1)',
+                                borderTopLeftRadius: 3,
+                                borderTopRightRadius: 3
+                            }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <IconButton onClick={goToPreviousWeek}>
+                                        <ChevronLeftIcon />
+                                    </IconButton>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {formatWeekRange()}
+                                    </Typography>
+                                    <IconButton onClick={goToNextWeek}>
+                                        <ChevronRightIcon />
+                                    </IconButton>
+                                </Box>
+                                
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <IconButton onClick={goToToday}>
+                                        <CalendarIcon />
+                                    </IconButton>
+                                </Box>
                             </Box>
-                            
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <IconButton onClick={goToToday}>
-                                    <CalendarIcon />
-                                </IconButton>
-                                <IconButton onClick={fetchShifts}>
-                                    <RefreshIcon />
-                                </IconButton>
-                            </Box>
-                        </Box>
 
-                        {/* Dynamic Shift Board Table */}
-                        <TableContainer>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell sx={{ 
-                                            fontWeight: 'bold', 
-                                            minWidth: 200,
-                                            backgroundColor: '#f8f9fa',
-                                            borderRight: '1px solid #e0e0e0'
-                                        }}>
-                                            Employee Name
-                                        </TableCell>
-                                        {weekDays.map((day, dayIndex) => (
-                                            <TableCell 
-                                                key={dayIndex}
-                                                align="center"
-                                                sx={{ 
-                                                    fontWeight: 'bold',
-                                                    minWidth: 120,
-                                                    backgroundColor: '#f8f9fa',
-                                                    borderRight: dayIndex < 6 ? '1px solid #e0e0e0' : 'none'
-                                                }}
-                                            >
-                                                <Box>
-                                                    <Typography variant="body2" fontWeight="bold">
-                                                        {day.getDate()} {formatWeekday(day)}
-                                                    </Typography>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {day.toLocaleDateString('nb-NO', { month: 'short' })}
-                                                    </Typography>
-                                                </Box>
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {employees.map((employee) => (
-                                        <TableRow key={employee.id} hover>
+                            {/* Dynamic Shift Board Table */}
+                            <TableContainer sx={{ borderRadius: 2 }}>
+                                <Table sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                                    <TableHead>
+                                        <TableRow>
                                             <TableCell sx={{ 
-                                                borderRight: '1px solid #e0e0e0',
-                                                backgroundColor: '#fafafa'
+                                                fontWeight: 'bold', 
+                                                minWidth: 180, // Redusert fra 200 til 180
+                                                maxWidth: 200, // Lagt til maxWidth
+                                                backgroundColor: '#f8f9fa',
+                                                borderRight: '1px solid #e0e0e0'
                                             }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                                    <Avatar sx={{ 
-                                                        bgcolor: 'primary.main',
-                                                        width: 32,
-                                                        height: 32,
-                                                        fontSize: '0.875rem'
-                                                    }}>
-                                                        {employee.name.split(' ').map(n => n[0]).join('')}
-                                                    </Avatar>
-                                                    <Typography variant="body2" fontWeight="medium">
-                                                        {employee.name}
-                                                    </Typography>
-                                                </Box>
+                                                Employee Name
                                             </TableCell>
-                                            {weekDays.map((day, dayIndex) => {
-                                                const shift = getShiftForEmployeeAndDate(employee.id, day)
-                                                return (
-                                                    <TableCell 
-                                                        key={dayIndex}
-                                                        align="center"
-                                                        sx={{ 
-                                                            borderRight: dayIndex < 6 ? '1px solid #e0e0e0' : 'none',
-                                                            minHeight: 80,
-                                                            position: 'relative'
-                                                        }}
-                                                    >
-                                                        {shift ? (
-                                                            <Box sx={{
-                                                                backgroundColor: shift.createdBy === 'AI' ? '#fff3e0' : '#e3f2fd',
-                                                                borderRadius: 1,
-                                                                p: 1,
-                                                                border: shift.createdBy === 'AI' ? '2px dashed #ff9800' : '1px solid #bbdefb',
+                                            {weekDays.map((day, dayIndex) => (
+                                                <TableCell 
+                                                    key={dayIndex}
+                                                    align="center"
+                                                    sx={{ 
+                                                        fontWeight: 'bold',
+                                                        minWidth: 100, // Redusert fra 120 til 100
+                                                        maxWidth: 110, // Lagt til maxWidth for å begrense størrelsen
+                                                        backgroundColor: '#f8f9fa',
+                                                        borderRight: dayIndex < 6 ? '1px solid #e0e0e0' : 'none'
+                                                    }}
+                                                >
+                                                    <Box>
+                                                        <Typography variant="body2" fontWeight="bold">
+                                                            {day.getDate()} {formatWeekday(day)}
+                                                        </Typography>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {day.toLocaleDateString('nb-NO', { month: 'short' })}
+                                                        </Typography>
+                                                    </Box>
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {employees.map((employee) => (
+                                            <TableRow key={employee.id} hover>
+                                                <TableCell sx={{ 
+                                                    borderRight: '1px solid #e0e0e0',
+                                                    backgroundColor: '#fafafa'
+                                                }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                        <Avatar sx={{ 
+                                                            bgcolor: 'primary.main',
+                                                            width: 32,
+                                                            height: 32,
+                                                            fontSize: '0.875rem'
+                                                        }}>
+                                                            {employee.name.split(' ').map(n => n[0]).join('')}
+                                                        </Avatar>
+                                                        <Typography variant="body2" fontWeight="medium">
+                                                            {employee.name}
+                                                        </Typography>
+                                                    </Box>
+                                                </TableCell>
+                                                {weekDays.map((day, dayIndex) => {
+                                                    const shift = getShiftForEmployeeAndDate(employee.id, day)
+                                                    return (
+                                                        <TableCell 
+                                                            key={dayIndex}
+                                                            align="center"
+                                                            sx={{ 
+                                                                borderRight: dayIndex < 6 ? '1px solid #e0e0e0' : 'none',
+                                                                minHeight: 80,
                                                                 position: 'relative'
-                                                            }}>
-                                                                {shift.createdBy === 'AI' && (
+                                                            }}
+                                                        >
+                                                            {shift ? (
+                                                                <Box sx={{
+                                                                    backgroundColor: '#ffffff',
+                                                                    borderRadius: 2,
+                                                                    p: 2,
+                                                                    border: shift.createdBy === 'AI' ? '2px solid #667eea' : '2px solid #e2e8f0',
+                                                                    position: 'relative',
+                                                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                                    '&:hover': {
+                                                                        transform: 'translateY(-2px)',
+                                                                        boxShadow: '0 12px 24px rgba(102, 126, 234, 0.15)'
+                                                                    }
+                                                                }}>
+                                                                    {shift.createdBy === 'AI' && (
+                                                                        <Box 
+                                                                            sx={{
+                                                                                position: 'absolute',
+                                                                                top: -8,
+                                                                                right: -8,
+                                                                                backgroundColor: '#667eea',
+                                                                                color: 'white',
+                                                                                borderRadius: '50%',
+                                                                                width: 20,
+                                                                                height: 20,
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center',
+                                                                                fontSize: '0.7rem',
+                                                                                fontWeight: 'bold',
+                                                                                cursor: 'pointer',
+                                                                                transition: 'all 0.2s ease-in-out',
+                                                                                '&:hover': {
+                                                                                    backgroundColor: '#5a6fd8',
+                                                                                    transform: 'scale(1.1)'
+                                                                                }
+                                                                            }}
+                                                                            onMouseEnter={(e) => {
+                                                                                e.currentTarget.innerHTML = '+'
+                                                                                e.currentTarget.style.fontSize = '1rem'
+                                                                                e.currentTarget.style.fontWeight = 'bold'
+                                                                            }}
+                                                                            onMouseLeave={(e) => {
+                                                                                e.currentTarget.innerHTML = 'AI'
+                                                                                e.currentTarget.style.fontSize = '0.7rem'
+                                                                                e.currentTarget.style.fontWeight = 'bold'
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                startEdit(shift)
+                                                                            }}
+                                                                        >
+                                                                            AI
+                                                                        </Box>
+                                                                    )}
+                                                                    <Typography variant="body2" fontWeight="medium" sx={{ mb: 0.5 }}>
+                                                                        {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
+                                                                    </Typography>
+                                                                    <Typography variant="caption" color="text.secondary">
+                                                                        {getDuration(shift.startTime, shift.endTime)}
+                                                                    </Typography>
+                                                                    {shift.createdBy === 'AI' && (
+                                                                        <Typography 
+                                                                            variant="caption" 
+                                                                            sx={{ 
+                                                                                display: 'block',
+                                                                                color: '#667eea',
+                                                                                fontWeight: 'bold',
+                                                                                mt: 0.5
+                                                                            }}
+                                                                        >
+                                                                            AI-generert
+                                                                        </Typography>
+                                                                    )}
+                                                                    <Box sx={{ 
+                                                                        display: 'flex', 
+                                                                        gap: 0.5, 
+                                                                        justifyContent: 'center', 
+                                                                        mt: 1 
+                                                                    }}>
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            onClick={() => startEdit(shift)}
+                                                                            sx={{ 
+                                                                                color: '#667eea',
+                                                                                '&:hover': { backgroundColor: 'rgba(102, 126, 234, 0.1)' }
+                                                                            }}
+                                                                        >
+                                                                            <EditIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            onClick={() => handleDelete(shift.id)}
+                                                                            sx={{ 
+                                                                                color: 'error.main',
+                                                                                '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.1)' }
+                                                                            }}
+                                                                        >
+                                                                            <DeleteIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </Box>
+                                                                </Box>
+                                                            ) : hasAiShiftOnDate(employee.id, day) ? (
+                                                                // ← Vis AI-skift som "Ventende godkjenning"
+                                                                <Box sx={{
+                                                                    backgroundColor: '#ffffff',
+                                                                    borderRadius: 2,
+                                                                    p: 2,
+                                                                    border: '2px dashed #667eea',
+                                                                    position: 'relative'
+                                                                }}>
                                                                     <Box sx={{
                                                                         position: 'absolute',
                                                                         top: -8,
                                                                         right: -8,
-                                                                        backgroundColor: '#ff9800',
+                                                                        backgroundColor: '#667eea',
                                                                         color: 'white',
                                                                         borderRadius: '50%',
                                                                         width: 20,
@@ -1082,565 +1153,615 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                     }}>
                                                                         AI
                                                                     </Box>
-                                                                )}
-                                                                <Typography variant="body2" fontWeight="medium" color={shift.createdBy === 'AI' ? '#e65100' : 'inherit'}>
-                                                                    {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
-                                                                </Typography>
-                                                                <Typography variant="caption" color="text.secondary">
-                                                                    {getDuration(shift.startTime, shift.endTime)}
-                                                                </Typography>
-                                                                {shift.createdBy === 'AI' && (
-                                                                    <Typography variant="caption" color="#ff9800" sx={{ display: 'block', mt: 0.5 }}>
-                                                                        AI-generert
+                                                                    <Typography variant="body2" fontWeight="medium" color="#4a5568">
+                                                                        AI-generert skift
                                                                     </Typography>
-                                                                )}
-                                                                <Box sx={{ display: 'flex', gap: 0.5, mt: 1, justifyContent: 'center' }}>
-                                                                    {shift.createdBy !== 'AI' ? (
-                                                                        // ← Vis rediger/slett knapper kun for eksisterende skift
-                                                                        <>
-                                                                            <Tooltip title="Rediger">
-                                                                                <IconButton
-                                                                                    size="small"
-                                                                                    onClick={() => startEdit(shift)}
-                                                                                    sx={{ 
-                                                                                        color: 'primary.main',
-                                                                                        width: 20,
-                                                                                        height: 20
-                                                                                    }}
-                                                                                >
-                                                                                    <EditIcon fontSize="small" />
-                                                                                </IconButton>
-                                                                            </Tooltip>
-                                                                            <Tooltip title="Slett">
-                                                                                <IconButton
-                                                                                    size="small"
-                                                                                    onClick={() => handleDelete(shift.id)}
-                                                                                    sx={{ 
-                                                                                        color: 'error.main',
-                                                                                        width: 20,
-                                                                                        height: 20
-                                                                                    }}
-                                                                                >
-                                                                                    <DeleteIcon fontSize="small" />
-                                                                                </IconButton>
-                                                                            </Tooltip>
-                                                                        </>
-                                                                    ) : (
-                                                                        // ← Vis AI-badge for AI-genererte skift
-                                                                        <Typography variant="caption" color="#ff9800" sx={{ fontSize: '0.7rem' }}>
-                                                                            🤖 AI
-                                                                        </Typography>
-                                                                    )}
+                                                                    <Typography variant="caption" color="text.secondary">
+                                                                        Ventende godkjenning
+                                                                    </Typography>
                                                                 </Box>
-                                                            </Box>
-                                                        ) : hasAiShiftOnDate(employee.id, day) ? (
-                                                            // ← Vis AI-skift som "Ventende godkjenning"
-                                                            <Box sx={{
-                                                                backgroundColor: '#fff3e0',
-                                                                borderRadius: 1,
-                                                                p: 1,
-                                                                border: '2px dashed #ff9800',
-                                                                position: 'relative'
-                                                            }}>
-                                                                <Box sx={{
-                                                                    position: 'absolute',
-                                                                    top: -8,
-                                                                    right: -8,
-                                                                    backgroundColor: '#ff9800',
-                                                                    color: 'white',
-                                                                    borderRadius: '50%',
-                                                                    width: 20,
-                                                                    height: 20,
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center',
-                                                                    fontSize: '0.7rem',
-                                                                    fontWeight: 'bold'
-                                                                }}>
-                                                                    AI
+                                                            ) : (
+                                                                // ← Stilig stiplet "Legg til skift" boks
+                                                                <Box 
+                                                                    sx={{
+                                                                        width: '100%',
+                                                                        height: 60,
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        cursor: 'pointer',
+                                                                        borderRadius: 2,
+                                                                        border: '2px dashed #667eea',
+                                                                        transition: 'all 0.2s ease',
+                                                                        backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                                                                        '&:hover': {
+                                                                            borderColor: '#5a6fd8',
+                                                                            backgroundColor: 'rgba(102, 126, 234, 0.1)'
+                                                                        }
+                                                                    }}
+                                                                    onClick={() => handleAddShiftClick(employee.id, day)}
+                                                                >
+                                                                    <Box
+                                                                        sx={{
+                                                                            width: 32,
+                                                                            height: 32,
+                                                                            borderRadius: '50%',
+                                                                            backgroundColor: '#667eea',
+                                                                            color: 'white',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            transition: 'all 0.2s ease',
+                                                                            '&:hover': {
+                                                                                backgroundColor: '#5a6fd8',
+                                                                                transform: 'scale(1.1)'
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <AddIcon sx={{ fontSize: 20 }} />
+                                                                    </Box>
                                                                 </Box>
-                                                                <Typography variant="body2" fontWeight="medium" color="#e65100">
-                                                                    AI-generert skift
-                                                                </Typography>
-                                                                <Typography variant="caption" color="text.secondary">
-                                                                    Ventende godkjenning
-                                                                </Typography>
-                                                            </Box>
-                                                        ) : (
-                                                            // ← Vanlig "Legg til skift" knapp
-                                                            <Button
-                                                                variant="outlined"
-                                                                size="small"
-                                                                startIcon={<AddIcon />}
-                                                                onClick={() => handleAddShiftClick(employee.id, day)}
-                                                                sx={{
-                                                                    minWidth: 'auto',
-                                                                    width: 32,
-                                                                    height: 32,
-                                                                    borderRadius: '50%',
-                                                                    p: 0
-                                                                }}
-                                                            />
-                                                        )}
-                                                    </TableCell>
-                                                )
-                                            })}
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </CardContent>
-                </Card>
+                                                            )}
+                                                        </TableCell>
+                                                    )
+                                                })}
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </CardContent>
+                    </Card>
+                
 
-                {/* Skjema for nytt skift - oppdatert for å vise forhåndsutfylt data */}
-                <Dialog 
-                    open={showForm} 
-                    onClose={() => setShowForm(false)}
-                    maxWidth="md"
-                    fullWidth
-                >
-                    <DialogTitle sx={{ pb: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <ScheduleIcon color="primary" />
-                            <Typography variant="h6" fontWeight="bold">
-                                Opprett nytt skift
-                            </Typography>
-                        </Box>
-                    </DialogTitle>
-                    <form onSubmit={handleSubmit}>
-                        <DialogContent>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
-                                    <FormControl fullWidth>
-                                        <InputLabel>Ansatt</InputLabel>
-                                        <Select
-                                            name="userId"
-                                            value={form.userId}
+                    {/* Skjema for nytt skift - oppdatert for å vise forhåndsutfylt data */}
+                    <Dialog 
+                        open={showForm} 
+                        onClose={() => setShowForm(false)}
+                        maxWidth="md"
+                        fullWidth
+                    >
+                        <DialogTitle sx={{ pb: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <ScheduleIcon color="primary" />
+                                <Typography variant="h6" fontWeight="bold">
+                                    Opprett nytt skift
+                                </Typography>
+                            </Box>
+                        </DialogTitle>
+                        <form onSubmit={handleSubmit}>
+                            <DialogContent>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Ansatt</InputLabel>
+                                            <Select
+                                                name="userId"
+                                                value={form.userId}
+                                                onChange={handleChange}
+                                                label="Ansatt"
+                                                required
+                                            >
+                                                {employees.map(emp => (
+                                                    <MenuItem key={emp.id} value={emp.id}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
+                                                                {emp.name.charAt(0)}
+                                                            </Avatar>
+                                                            {emp.name}
+                                                        </Box>
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Dato"
+                                            name="date"
+                                            type="date"
+                                            value={form.date}
                                             onChange={handleChange}
-                                            label="Ansatt"
                                             required
-                                        >
-                                            {employees.map(emp => (
-                                                <MenuItem key={emp.id} value={emp.id}>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
-                                                            {emp.name.charAt(0)}
-                                                        </Avatar>
-                                                        {emp.name}
-                                                    </Box>
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Starttid"
+                                            name="startTime"
+                                            type="time"
+                                            value={form.startTime}
+                                            onChange={handleChange}
+                                            required
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Sluttid"
+                                            name="endTime"
+                                            type="time"
+                                            value={form.endTime}
+                                            onChange={handleChange}
+                                            required
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Lokasjon (valgfritt)"
+                                            name="location"
+                                            value={form.location}
+                                            onChange={handleChange}
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Notater (valgfritt)"
+                                            name="notes"
+                                            value={form.notes}
+                                            onChange={handleChange}
+                                            variant="outlined"
+                                            multiline
+                                            rows={3}
+                                        />
+                                    </Grid>
                                 </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Dato"
-                                        name="date"
-                                        type="date"
-                                        value={form.date}
-                                        onChange={handleChange}
-                                        required
-                                        variant="outlined"
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Starttid"
-                                        name="startTime"
-                                        type="time"
-                                        value={form.startTime}
-                                        onChange={handleChange}
-                                        required
-                                        variant="outlined"
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Sluttid"
-                                        name="endTime"
-                                        type="time"
-                                        value={form.endTime}
-                                        onChange={handleChange}
-                                        required
-                                        variant="outlined"
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Lokasjon (valgfritt)"
-                                        name="location"
-                                        value={form.location}
-                                        onChange={handleChange}
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="Notater (valgfritt)"
-                                        name="notes"
-                                        value={form.notes}
-                                        onChange={handleChange}
-                                        variant="outlined"
-                                        multiline
-                                        rows={3}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </DialogContent>
-                        <DialogActions sx={{ p: 3, pt: 1 }}>
-                            <Button
-                                onClick={() => setShowForm(false)}
-                                startIcon={<CancelIcon />}
-                                variant="outlined"
-                            >
-                                Avbryt
-                            </Button>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                startIcon={<SaveIcon />}
-                                sx={{
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    '&:hover': {
-                                        background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
-                                    }
-                                }}
-                            >
-                                Lagre skift
-                            </Button>
-                        </DialogActions>
-                    </form>
-                </Dialog>
+                            </DialogContent>
+                            <DialogActions sx={{ p: 3, pt: 1 }}>
+                                <Button
+                                    onClick={() => setShowForm(false)}
+                                    startIcon={<CancelIcon />}
+                                    variant="outlined"
+                                >
+                                    Avbryt
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    startIcon={<SaveIcon />}
+                                    sx={{
+                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        '&:hover': {
+                                            background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
+                                        }
+                                    }}
+                                >
+                                    Lagre skift
+                                </Button>
+                            </DialogActions>
+                        </form>
+                    </Dialog>
 
-                {/* Skjema for redigering */}
-                <Dialog 
-                    open={showEditForm} 
-                    onClose={() => setShowEditForm(false)}
-                    maxWidth="md"
-                    fullWidth
-                >
-                    <DialogTitle sx={{ pb: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <EditIcon color="primary" />
-                            <Typography variant="h6" fontWeight="bold">
-                                Rediger skift
-                            </Typography>
-                        </Box>
-                    </DialogTitle>
-                    <form onSubmit={handleEdit}>
-                        <DialogContent>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
-                                    <FormControl fullWidth>
-                                        <InputLabel>Ansatt</InputLabel>
-                                        <Select
-                                            name="userId"
-                                            value={editForm.userId}
+                    {/* Skjema for redigering */}
+                    <Dialog 
+                        open={showEditForm} 
+                        onClose={() => setShowEditForm(false)}
+                        maxWidth="md"
+                        fullWidth
+                    >
+                        <DialogTitle sx={{ pb: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <EditIcon color="primary" />
+                                <Typography variant="h6" fontWeight="bold">
+                                    Rediger skift
+                                </Typography>
+                            </Box>
+                        </DialogTitle>
+                        <form onSubmit={handleEdit}>
+                            <DialogContent>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Ansatt</InputLabel>
+                                            <Select
+                                                name="userId"
+                                                value={editForm.userId}
+                                                onChange={handleEditChange}
+                                                label="Ansatt"
+                                                required
+                                            >
+                                                {employees.map(emp => (
+                                                    <MenuItem key={emp.id} value={emp.id}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
+                                                                {emp.name.charAt(0)}
+                                                            </Avatar>
+                                                            {emp.name}
+                                                        </Box>
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Dato"
+                                            name="date"
+                                            type="date"
+                                            value={editForm.date}
                                             onChange={handleEditChange}
-                                            label="Ansatt"
                                             required
-                                        >
-                                            {employees.map(emp => (
-                                                <MenuItem key={emp.id} value={emp.id}>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
-                                                            {emp.name.charAt(0)}
-                                                        </Avatar>
-                                                        {emp.name}
-                                                    </Box>
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Starttid"
+                                            name="startTime"
+                                            type="time"
+                                            value={editForm.startTime}
+                                            onChange={handleEditChange}
+                                            required
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Sluttid"
+                                            name="endTime"
+                                            type="time"
+                                            value={editForm.endTime}
+                                            onChange={handleEditChange}
+                                            required
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Lokasjon (valgfritt)"
+                                            name="location"
+                                            value={editForm.location}
+                                            onChange={handleEditChange}
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Notater (valgfritt)"
+                                            name="notes"
+                                            value={editForm.notes}
+                                            onChange={handleEditChange}
+                                            variant="outlined"
+                                            multiline
+                                            rows={3}
+                                        />
+                                    </Grid>
                                 </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Dato"
-                                        name="date"
-                                        type="date"
-                                        value={editForm.date}
-                                        onChange={handleEditChange}
-                                        required
-                                        variant="outlined"
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Starttid"
-                                        name="startTime"
-                                        type="time"
-                                        value={editForm.startTime}
-                                        onChange={handleEditChange}
-                                        required
-                                        variant="outlined"
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Sluttid"
-                                        name="endTime"
-                                        type="time"
-                                        value={editForm.endTime}
-                                        onChange={handleEditChange}
-                                        required
-                                        variant="outlined"
-                                        InputLabelProps={{ shrink: true }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Lokasjon (valgfritt)"
-                                        name="location"
-                                        value={editForm.location}
-                                        onChange={handleEditChange}
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="Notater (valgfritt)"
-                                        name="notes"
-                                        value={editForm.notes}
-                                        onChange={handleEditChange}
-                                        variant="outlined"
-                                        multiline
-                                        rows={3}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </DialogContent>
-                        <DialogActions sx={{ p: 3, pt: 1 }}>
-                            <Button
-                                onClick={() => setShowEditForm(false)}
-                                startIcon={<CancelIcon />}
-                                variant="outlined"
-                            >
-                                Avbryt
-                            </Button>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                startIcon={<SaveIcon />}
-                                sx={{
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    '&:hover': {
-                                        background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
-                                    }
-                                }}
-                            >
-                                Oppdater skift
-                            </Button>
-                        </DialogActions>
-                    </form>
-                </Dialog>
+                            </DialogContent>
+                            <DialogActions sx={{ p: 3, pt: 1 }}>
+                                <Button
+                                    onClick={() => setShowEditForm(false)}
+                                    startIcon={<CancelIcon />}
+                                    variant="outlined"
+                                >
+                                    Avbryt
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    startIcon={<SaveIcon />}
+                                    sx={{
+                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        '&:hover': {
+                                            background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
+                                        }
+                                    }}
+                                >
+                                    Oppdater skift
+                                </Button>
+                            </DialogActions>
+                        </form>
+                    </Dialog>
 
-                {/* ← Ny: AI Scheduler Header */}
-                <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    mb: 3,
-                    p: 2,
-                    bgcolor: 'background.paper',
-                    borderRadius: 2,
-                    boxShadow: 1
-                }}>
-                    <Typography variant="h4" fontWeight="bold" color="primary">
-                        🤖 AI Skiftplanlegging
-                    </Typography>
-                    
-                    {/* Månedlig generering */}
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-                        <Typography variant="subtitle1" sx={{ minWidth: 120 }}>
-                            📅 Månedlig:
-                        </Typography>
-                        <TextField
-                            type="month"
-                            value={selectedMonth.toISOString().slice(0, 7)}
-                            onChange={handleMonthChange}
-                            size="small"
-                            sx={{ minWidth: 150 }}
-                        />
-                        
-                        <Button
-                            variant="contained"
-                            startIcon={<AiIcon />}
-                            onClick={handleAiGenerateSchedule}
-                            disabled={isGeneratingSchedule}
-                            sx={{
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                '&:hover': {
-                                    background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
-                                },
-                                px: 3,
-                                py: 1.5
-                            }}
-                        >
-                            {isGeneratingSchedule ? (
-                                <>
-                                    <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
-                                    Genererer...
-                                </>
-                            ) : (
-                                '🚀 Generer månedlig plan'
-                            )}
-                        </Button>
-                    </Box>
-
-                    {/* Ukentlig generering */}
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        <Typography variant="subtitle1" sx={{ minWidth: 120 }}>
-                            📅 Ukentlig:
-                        </Typography>
-                        <TextField
-                            type="date"
-                            value={selectedWeekStart.toISOString().split('T')[0]}
-                            onChange={handleWeekChange}
-                            size="small"
-                            sx={{ minWidth: 150 }}
-                            inputProps={{
-                                min: '2020-01-01',
-                                max: '2030-12-31'
-                            }}
-                        />
-                        
-                        <Button
-                            variant="contained"
-                            startIcon={<AiIcon />}
-                            onClick={handleAiGenerateWeeklySchedule}
-                            disabled={isGeneratingWeeklySchedule}
-                            sx={{
-                                background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
-                                '&:hover': {
-                                    background: 'linear-gradient(135deg, #45a049 0%, #4caf50 100%)',
-                                },
-                                px: 3,
-                                py: 1.5
-                            }}
-                        >
-                            {isGeneratingWeeklySchedule ? (
-                                <>
-                                    <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
-                                    Genererer...
-                                </>
-                            ) : (
-                                '⚡ Generer ukentlig plan'
-                            )}
-                        </Button>
-                    </Box>
-                </Box>
-
-                {/* ← Oppdater AI Generert Skiftplan Visning */}
-                {aiGeneratedSchedule && (
+                    {/* AI Skiftplanlegging - Integrated with calendar */}
                     <Box sx={{ 
-                        mb: 3, 
-                        p: 3, 
-                        bgcolor: 'background.paper', 
-                        borderRadius: 2,
-                        border: '2px solid #4caf50',
-                        boxShadow: 3
+                        p: 4, 
+                        backgroundColor: '#ffffff',
+                        borderBottomLeftRadius: 16,
+                        borderBottomRightRadius: 16
                     }}>
-                        <Typography variant="h5" sx={{ mb: 2, color: 'success.main' }}>
-                            🤖 AI-generert Skiftplan for {aiGeneratedSchedule.month}
-                        </Typography>
-                        
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="h6" sx={{ mb: 2 }}>
-                                Genererte Skift ({aiGeneratedSchedule.shifts?.length || 0})
-                            </Typography>
-                            
-                            {aiGeneratedSchedule.shifts && aiGeneratedSchedule.shifts.length > 0 ? (
                                 <Box sx={{ 
-                                    maxHeight: 400, 
-                                    overflow: 'auto',
-                                    border: '1px solid #e0e0e0',
-                                    borderRadius: 1
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: 2, 
+                                    mb: 4
+                                }}>
+                                    <Box sx={{
+                                        backgroundColor: '#667eea',
+                                        borderRadius: '50%',
+                                        width: 48,
+                                        height: 48,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                                    }}>
+                                        <AiIcon sx={{ color: 'white', fontSize: 28 }} />
+                                    </Box>
+                                    <Typography 
+                                        variant="h4" 
+                                        fontWeight="bold" 
+                                        sx={{
+                                            color: '#667eea'
+                                        }}
+                                    >
+                                        AI Skiftplanlegging
+                                    </Typography>
+                                </Box>
+                                
+                                {/* Månedlig generering */}
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    gap: 3, 
+                                    alignItems: 'center', 
+                                    mb: 3,
+                                    p: 3,
+                                    bgcolor: 'white',
+                                    borderRadius: 2,
+                                    border: '1px solid rgba(102, 126, 234, 0.1)',
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
                                 }}>
                                     <Box sx={{ 
-                                        display: 'grid', 
-                                        gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
-                                        bgcolor: 'grey.100',
-                                        p: 1,
-                                        fontWeight: 'bold'
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: 1,
+                                        minWidth: 140 
                                     }}>
-                                        <Box>Ansatt</Box>
-                                        <Box>Dato</Box>
-                                        <Box>Tid</Box>
-                                        <Box>Skift-type</Box>
-                                        <Box>Timer</Box>
+                                        <Typography variant="subtitle1" fontWeight="600" color="#667eea">
+                                            📅 Månedlig:
+                                        </Typography>
                                     </Box>
+                                    <TextField
+                                        type="month"
+                                        value={selectedMonth.toISOString().slice(0, 7)}
+                                        onChange={handleMonthChange}
+                                        size="small"
+                                        sx={{ 
+                                            minWidth: 180,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: 'rgba(102, 126, 234, 0.3)',
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: 'rgba(102, 126, 234, 0.5)',
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: '#667eea',
+                                                },
+                                            }
+                                        }}
+                                    />
                                     
-                                    {aiGeneratedSchedule.shifts.map((shift: any, index: number) => (
-                                        <Box key={index} sx={{ 
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<AiIcon />}
+                                        onClick={handleAiGenerateSchedule}
+                                        disabled={isGeneratingSchedule}
+                                        sx={{
+                                            backgroundColor: '#667eea',
+                                            '&:hover': {
+                                                backgroundColor: '#5a6fd8',
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                                            },
+                                            '&:disabled': {
+                                                backgroundColor: '#b0b7c4',
+                                            },
+                                            px: 4,
+                                            py: 1.5,
+                                            borderRadius: 2,
+                                            fontWeight: 600,
+                                            fontSize: '1rem',
+                                            transition: 'all 0.3s ease',
+                                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                                        }}
+                                    >
+                                        {isGeneratingSchedule ? (
+                                            <>
+                                                <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                                                Genererer...
+                                            </>
+                                        ) : (
+                                            'Generer månedlig plan'
+                                        )}
+                                    </Button>
+                                </Box>
+
+                                {/* Ukentlig generering */}
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    gap: 3, 
+                                    alignItems: 'center',
+                                    p: 3,
+                                    bgcolor: 'white',
+                                    borderRadius: 2,
+                                    border: '1px solid rgba(102, 126, 234, 0.1)',
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                                }}>
+                                    <Box sx={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: 1,
+                                        minWidth: 140 
+                                    }}>
+                                        <Typography variant="subtitle1" fontWeight="600" color="#667eea">
+                                            📅 Ukentlig:
+                                        </Typography>
+                                    </Box>
+                                    <TextField
+                                        type="date"
+                                        value={selectedWeekStart.toISOString().split('T')[0]}
+                                        onChange={handleWeekChange}
+                                        size="small"
+                                        sx={{ 
+                                            minWidth: 180,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: 'rgba(102, 126, 234, 0.3)',
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: 'rgba(102, 126, 234, 0.5)',
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: '#667eea',
+                                                },
+                                            }
+                                        }}
+                                        inputProps={{
+                                            min: '2020-01-01',
+                                            max: '2030-12-31'
+                                        }}
+                                    />
+                                    
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<AiIcon />}
+                                        onClick={handleAiGenerateWeeklySchedule}
+                                        disabled={isGeneratingWeeklySchedule}
+                                        sx={{
+                                            backgroundColor: '#667eea',
+                                            '&:hover': {
+                                                backgroundColor: '#5a6fd8',
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                                            },
+                                            '&:disabled': {
+                                                backgroundColor: '#b0b7c4',
+                                            },
+                                            px: 4,
+                                            py: 1.5,
+                                            borderRadius: 2,
+                                            fontWeight: 600,
+                                            fontSize: '1rem',
+                                            transition: 'all 0.3s ease',
+                                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                                        }}
+                                    >
+                                        {isGeneratingWeeklySchedule ? (
+                                            <>
+                                                <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                                                Genererer...
+                                            </>
+                                        ) : (
+                                            'Generer ukentlig plan'
+                                        )}
+                                    </Button>
+                                </Box>
+                            </Box>
+
+                    {/* ← Oppdater AI Generert Skiftplan Visning */}
+                    {aiGeneratedSchedule && (
+                        <Box sx={{ 
+                            mb: 3, 
+                            p: 3, 
+                            bgcolor: 'background.paper', 
+                            borderRadius: 2,
+                            border: '2px solid #667eea',
+                            boxShadow: 3
+                        }}>
+                            <Typography variant="h5" sx={{ mb: 2, color: '#667eea' }}>
+                                AI-generert Skiftplan for {aiGeneratedSchedule.month}
+                            </Typography>
+                            
+                            <Box sx={{ mb: 3 }}>
+                                <Typography variant="h6" sx={{ mb: 2 }}>
+                                    Genererte Skift ({aiGeneratedSchedule.shifts?.length || 0})
+                                </Typography>
+                                
+                                {aiGeneratedSchedule.shifts && aiGeneratedSchedule.shifts.length > 0 ? (
+                                    <Box sx={{ 
+                                        maxHeight: 400, 
+                                        overflow: 'auto',
+                                        border: '1px solid #e0e0e0',
+                                        borderRadius: 1
+                                    }}>
+                                        <Box sx={{ 
                                             display: 'grid', 
                                             gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
+                                            bgcolor: 'grey.100',
                                             p: 1,
-                                            borderBottom: '1px solid #e0e0e0',
-                                            '&:hover': { bgcolor: 'grey.50' }
+                                            fontWeight: 'bold'
                                         }}>
-                                            <Box>{shift.employeeName}</Box>
-                                            <Box>{shift.date}</Box>
-                                            <Box>{shift.startTime} - {shift.endTime}</Box>
-                                            <Box>{shift.shiftType}</Box>
-                                            <Box>{shift.hours}t</Box>
+                                            <Box>Ansatt</Box>
+                                            <Box>Dato</Box>
+                                            <Box>Tid</Box>
+                                            <Box>Skift-type</Box>
+                                            <Box>Timer</Box>
                                         </Box>
-                                    ))}
-                                </Box>
-                            ) : (
-                                <Typography color="text.secondary">
-                                    Ingen skift generert ennå. Prøv å generere på nytt.
-                                </Typography>
-                            )}
-                        </Box>
+                                        
+                                        {aiGeneratedSchedule.shifts.map((shift: any, index: number) => (
+                                            <Box key={index} sx={{ 
+                                                display: 'grid', 
+                                                gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
+                                                p: 1,
+                                                borderBottom: '1px solid #e0e0e0',
+                                                '&:hover': { bgcolor: 'grey.50' }
+                                            }}>
+                                                <Box>{shift.employeeName}</Box>
+                                                <Box>{shift.date}</Box>
+                                                <Box>{shift.startTime} - {shift.endTime}</Box>
+                                                <Box>{shift.shiftType}</Box>
+                                                <Box>{shift.hours}t</Box>
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                ) : (
+                                    <Typography color="text.secondary">
+                                        Ingen skift generert ennå. Prøv å generere på nytt.
+                                    </Typography>
+                                )}
+                            </Box>
 
-                        {/* ← Godkjenning/Forkast Knapper */}
-                        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                            <Button
-                                variant="outlined"
-                                color="error"
-                                size="large"
-                                onClick={handleRejectAiSchedule}
-                                sx={{ px: 4, py: 1.5 }}
-                            >
-                                ❌ Forkast AI-plan
-                            </Button>
-                            
-                            <Button
-                                variant="contained"
-                                color="success"
-                                size="large"
-                                onClick={handleApproveAiSchedule}
-                                sx={{ 
-                                    px: 4, 
-                                    py: 1.5,
-                                    background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)',
-                                    '&:hover': {
-                                        background: 'linear-gradient(135deg, #45a049 0%, #3d8b40 100%)',
-                                    }
-                                }}
-                            >
-                                ✅ Godkjenn og Bruk AI-plan
-                            </Button>
+                            {/* ← Godkjenning/Forkast Knapper */}
+                            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                                <Button
+                                    variant="outlined"
+                                    color="error"
+                                    size="large"
+                                    onClick={handleRejectAiSchedule}
+                                    sx={{ px: 4, py: 1.5 }}
+                                >
+                                    ❌ Forkast AI-plan
+                                </Button>
+                                
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    onClick={handleApproveAiSchedule}
+                                    sx={{ 
+                                        px: 4, 
+                                        py: 1.5,
+                                        backgroundColor: '#667eea',
+                                        '&:hover': {
+                                            backgroundColor: '#5a6fd8',
+                                        }
+                                    }}
+                                >
+                                    ✅ Godkjenn og Bruk AI-plan
+                                </Button>
+                            </Box>
                         </Box>
-                    </Box>
-                )}
+                    )}
+                </Box>
             </Box>
         </Layout>
     )
