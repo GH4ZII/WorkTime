@@ -301,7 +301,7 @@ const HomePage: NextPage = () => {
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                                         <SwapIcon sx={{ mr: 1, color: 'primary.main' }} />
                                         <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Bytteforespørsler (Venter)
+                                            Bytteforespørsler
                                         </Typography>
                                     </Box>
                                     <TableContainer component={Paper} elevation={0}>
@@ -369,7 +369,7 @@ const HomePage: NextPage = () => {
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                                         <EventIcon sx={{ mr: 1, color: 'primary.main' }} />
                                         <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Fraværsforespørsler (Venter)
+                                            Fraværsforespørsler
                                         </Typography>
                                     </Box>
                                     <TableContainer component={Paper} elevation={0}>
