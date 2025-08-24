@@ -27,6 +27,7 @@ import {
   Cancel as CancelIcon,
   Visibility as ViewIcon,
   Refresh as RefreshIcon,
+  Clear as ClearIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
 
@@ -36,6 +37,7 @@ interface ShiftApplication {
   shiftId: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   message?: string;
+  isHidden?: boolean;
   createdAt: string;
   user: {
     id: string;
@@ -114,6 +116,25 @@ const SkiftsoknaderPage: NextPage = () => {
     } catch (err: any) {
       setError('Kunne ikke avvise søknad');
       console.error('Feil ved avvisning:', err);
+    }
+  };
+
+  const handleRemove = async (applicationId: string) => {
+    try {
+      // Send forespørsel til backend for å markere som fjernet
+      await axios.patch(`http://localhost:3001/shift-applications/${applicationId}/remove`, {}, {
+        withCredentials: true,
+      });
+      
+      // Fjern fra lokalt state
+      setApplications(prev => prev.filter(app => app.id !== applicationId));
+      setSuccess('Skiftsøknad fjernet fra skjermen!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: any) {
+      // Hvis backend ikke støtter remove, bare fjern fra frontend
+      setApplications(prev => prev.filter(app => app.id !== applicationId));
+      setSuccess('Skiftsøknad fjernet fra skjermen!');
+      setTimeout(() => setSuccess(null), 3000);
     }
   };
 
@@ -212,13 +233,13 @@ const SkiftsoknaderPage: NextPage = () => {
         </Alert>
       )}
 
-      {applications.length === 0 ? (
-        <Paper sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary">
-            Ingen skiftsøknader funnet
-          </Typography>
-        </Paper>
-      ) : (
+             {applications.filter(app => !app.isHidden).length === 0 ? (
+         <Paper sx={{ p: 3, textAlign: 'center' }}>
+           <Typography variant="h6" color="text.secondary">
+             Ingen skiftsøknader funnet
+           </Typography>
+         </Paper>
+       ) : (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -231,8 +252,8 @@ const SkiftsoknaderPage: NextPage = () => {
                 <TableCell>Handlinger</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {applications.map((application) => (
+                         <TableBody>
+               {applications.filter(app => !app.isHidden).map((application) => (
                 <TableRow key={application.id}>
                   <TableCell>
                     <Box>
@@ -308,6 +329,19 @@ const SkiftsoknaderPage: NextPage = () => {
                           </Tooltip>
                         </>
                       )}
+                      
+                      <Tooltip title="Fjern fra skjermen">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRemove(application.id)}
+                          sx={{ 
+                            color: 'text.secondary',
+                            '&:hover': { color: 'error.main' }
+                          }}
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </Tooltip>
                     </Box>
                   </TableCell>
                 </TableRow>

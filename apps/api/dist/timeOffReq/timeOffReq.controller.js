@@ -43,6 +43,12 @@ let TimeOffReqController = class TimeOffReqController {
     reject(id) {
         return this.service.reject(id);
     }
+    hide(id) {
+        return this.service.hide(id);
+    }
+    hidePatch(id) {
+        return this.service.hide(id);
+    }
 };
 exports.TimeOffReqController = TimeOffReqController;
 __decorate([
@@ -94,6 +100,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TimeOffReqController.prototype, "reject", null);
+__decorate([
+    (0, common_1.Post)(':id/remove'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TimeOffReqController.prototype, "hide", null);
+__decorate([
+    (0, common_1.Patch)(':id/remove'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TimeOffReqController.prototype, "hidePatch", null);
 exports.TimeOffReqController = TimeOffReqController = __decorate([
     (0, common_1.Controller)('time-off-requests'),
     __metadata("design:paramtypes", [timeOffReq_service_1.TimeOffReqService])

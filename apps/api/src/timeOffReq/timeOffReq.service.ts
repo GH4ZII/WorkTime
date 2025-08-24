@@ -21,7 +21,9 @@ export class TimeOffReqService {
     }
 
     async findAll() {
-        return this.prisma.timeOffRequest.findMany();
+        return this.prisma.timeOffRequest.findMany({
+            where: { isHidden: false }
+        });
     }
 
     async findOne(id: string) {
@@ -44,8 +46,13 @@ export class TimeOffReqService {
     }
 
     async remove(id: string) {
-        return this.prisma.timeOffRequest.delete({
+        // Sjekk at forespørselen finnes
+        await this.findOne(id);
+
+        // Bruk hide i stedet for delete - dette bevarer data men skjuler den
+        return this.prisma.timeOffRequest.update({
             where: { id },
+            data: { isHidden: true }
         });
     }
 
@@ -80,6 +87,19 @@ export class TimeOffReqService {
         return this.prisma.timeOffRequest.update({
             where: { id },
             data: { status: RequestStatus.REJECTED }
+        });
+    }
+
+    async hide(id: string) {
+        const request = await this.findOne(id);
+        
+        if (!request) {
+            throw new NotFoundException('Forespørsel ikke funnet');
+        }
+
+        return this.prisma.timeOffRequest.update({
+            where: { id },
+            data: { isHidden: true }
         });
     }
 }

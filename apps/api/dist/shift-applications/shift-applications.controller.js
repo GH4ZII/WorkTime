@@ -48,6 +48,12 @@ let ShiftApplicationsController = class ShiftApplicationsController {
     reject(id) {
         return this.shiftApplicationsService.update(id, { status: 'REJECTED' });
     }
+    hide(id) {
+        return this.shiftApplicationsService.hide(id);
+    }
+    hidePatch(id) {
+        return this.shiftApplicationsService.hide(id);
+    }
 };
 exports.ShiftApplicationsController = ShiftApplicationsController;
 __decorate([
@@ -107,6 +113,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ShiftApplicationsController.prototype, "reject", null);
+__decorate([
+    (0, common_1.Post)(':id/remove'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ShiftApplicationsController.prototype, "hide", null);
+__decorate([
+    (0, common_1.Patch)(':id/remove'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ShiftApplicationsController.prototype, "hidePatch", null);
 exports.ShiftApplicationsController = ShiftApplicationsController = __decorate([
     (0, common_1.Controller)('shift-applications'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

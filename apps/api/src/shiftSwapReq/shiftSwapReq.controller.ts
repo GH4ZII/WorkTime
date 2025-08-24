@@ -41,4 +41,9 @@ export class ShiftSwapReqController {
     reject(@Param('id') id: string) {
         return this.service.reject(id);
     }
+
+    @Post(':id/remove')
+    hide(@Param('id') id: string) {
+        return this.service.hide(id);
+    }
 }

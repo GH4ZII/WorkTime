@@ -45,7 +45,9 @@ let ShiftSwapReqService = class ShiftSwapReqService {
         return this.prisma.shiftSwapRequest.create({ data });
     }
     async findAll() {
-        return this.prisma.shiftSwapRequest.findMany();
+        return this.prisma.shiftSwapRequest.findMany({
+            where: { isHidden: false }
+        });
     }
     async findOne(id) {
         return this.prisma.shiftSwapRequest.findUnique({
@@ -74,8 +76,9 @@ let ShiftSwapReqService = class ShiftSwapReqService {
     }
     async remove(id) {
         await this.findOne(id);
-        return this.prisma.shiftSwapRequest.delete({
+        return this.prisma.shiftSwapRequest.update({
             where: { id },
+            data: { isHidden: true }
         });
     }
     async approve(id) {
@@ -102,6 +105,16 @@ let ShiftSwapReqService = class ShiftSwapReqService {
         return this.prisma.shiftSwapRequest.update({
             where: { id },
             data: { status: prisma_1.RequestStatus.REJECTED }
+        });
+    }
+    async hide(id) {
+        const request = await this.findOne(id);
+        if (!request) {
+            throw new common_1.NotFoundException('Forespørsel ikke funnet');
+        }
+        return this.prisma.shiftSwapRequest.update({
+            where: { id },
+            data: { isHidden: true }
         });
     }
 };

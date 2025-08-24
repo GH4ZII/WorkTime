@@ -42,6 +42,7 @@ let ShiftApplicationsService = class ShiftApplicationsService {
     }
     async findAll() {
         return this.prisma.shiftApplication.findMany({
+            where: { isHidden: false },
             include: {
                 user: {
                     select: {
@@ -123,13 +124,28 @@ let ShiftApplicationsService = class ShiftApplicationsService {
         return updated;
     }
     async remove(id) {
-        return this.prisma.shiftApplication.delete({
+        await this.findOne(id);
+        return this.prisma.shiftApplication.update({
             where: { id },
+            data: { isHidden: true }
+        });
+    }
+    async hide(id) {
+        const application = await this.findOne(id);
+        if (!application) {
+            throw new Error('Søknad ikke funnet');
+        }
+        return this.prisma.shiftApplication.update({
+            where: { id },
+            data: { isHidden: true }
         });
     }
     async findByUser(userId) {
         return this.prisma.shiftApplication.findMany({
-            where: { userId },
+            where: {
+                userId,
+                isHidden: false
+            },
             include: {
                 shift: {
                     select: {
@@ -148,7 +164,10 @@ let ShiftApplicationsService = class ShiftApplicationsService {
     }
     async findByShift(shiftId) {
         return this.prisma.shiftApplication.findMany({
-            where: { shiftId },
+            where: {
+                shiftId,
+                isHidden: false
+            },
             include: {
                 user: {
                     select: {

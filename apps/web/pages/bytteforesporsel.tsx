@@ -29,7 +29,8 @@ import {
     ArrowForward as ArrowIcon,
     SwapHoriz as SwapHorizIcon,
     CheckCircle as CheckCircleIcon,
-    Cancel as CancelIcon
+    Cancel as CancelIcon,
+    Clear as ClearIcon
 } from '@mui/icons-material';
 
 interface User {
@@ -55,6 +56,7 @@ interface ShiftSwapRequest {
     fromShift?: Shift;
     toShift?: Shift;
     reason?: string;
+    isHidden?: boolean;
     requestedAt: string;
     updatedAt: string;
     location?: string;
@@ -66,6 +68,7 @@ const ShiftSwapPage: NextPage = () => {
     const [shifts, setShifts] = useState<Shift[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -171,9 +174,30 @@ const ShiftSwapPage: NextPage = () => {
             await axios.post(`http://localhost:3001/shift-swap-requests/${requestId}/reject`, {}, {
                 withCredentials: true
             });
+            setSuccess('Forespørsel avvist!');
             fetchData();
+            setTimeout(() => setSuccess(null), 3000);
         } catch (err: any) {
             setError(err.message);
+        }
+    }
+
+    const handleRemove = async (requestId: string) => {
+        try {
+            // Send forespørsel til backend for å markere som fjernet
+            await axios.patch(`http://localhost:3001/shift-swap-requests/${requestId}/remove`, {}, {
+                withCredentials: true
+            });
+            
+            // Fjern fra lokalt state
+            setSwapRequests(prev => prev.filter(req => req.id !== requestId));
+            setSuccess('Forespørsel fjernet fra skjermen!');
+            setTimeout(() => setSuccess(null), 3000);
+        } catch (err: any) {
+            // Hvis backend ikke støtter remove, bare fjern fra frontend
+            setSwapRequests(prev => prev.filter(req => req.id !== requestId));
+            setSuccess('Forespørsel fjernet fra skjermen!');
+            setTimeout(() => setSuccess(null), 3000);
         }
     }
 
@@ -214,10 +238,10 @@ const ShiftSwapPage: NextPage = () => {
         });
     };
 
-    // Filtrer forespørsler etter status
-    const pendingRequests = swapRequests.filter(req => req.status === 'PENDING')
-    const approvedRequests = swapRequests.filter(req => req.status === 'APPROVED')
-    const rejectedRequests = swapRequests.filter(req => req.status === 'REJECTED')
+    // Filtrer forespørsler etter status og skjul skjulte
+    const pendingRequests = swapRequests.filter(req => req.status === 'PENDING' && !req.isHidden)
+    const approvedRequests = swapRequests.filter(req => req.status === 'APPROVED' && !req.isHidden)
+    const rejectedRequests = swapRequests.filter(req => req.status === 'REJECTED' && !req.isHidden)
 
     if (loading) {
         return (
@@ -235,6 +259,12 @@ const ShiftSwapPage: NextPage = () => {
                 {error && (
                     <Alert severity="error" sx={{ mb: 3 }}>
                         {error}
+                    </Alert>
+                )}
+
+                {success && (
+                    <Alert severity="success" sx={{ mb: 3 }}>
+                        {success}
                     </Alert>
                 )}
 
@@ -295,12 +325,25 @@ const ShiftSwapPage: NextPage = () => {
                                                                 {getRequestDescription(request)}
                                                             </Typography>
                                                         </Box>
-                                                        <Chip
-                                                            label={getStatusDisplay(request.status)}
-                                                            color={getStatusColor(request.status) as any}
-                                                            variant={request.status === 'PENDING' ? 'filled' : 'outlined'}
-                                                            sx={{ ml: 2 }}
-                                                        />
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Chip
+                                                                label={getStatusDisplay(request.status)}
+                                                                color={getStatusColor(request.status) as any}
+                                                                variant={request.status === 'PENDING' ? 'filled' : 'outlined'}
+                                                            />
+                                                            <Tooltip title="Fjern fra skjermen">
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => handleRemove(request.id)}
+                                                                    sx={{ 
+                                                                        color: 'text.secondary',
+                                                                        '&:hover': { color: 'error.main' }
+                                                                    }}
+                                                                >
+                                                                    <ClearIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </Box>
                                                     </Box>
 
                                                     <Divider sx={{ my: 3 }} />
@@ -516,12 +559,26 @@ const ShiftSwapPage: NextPage = () => {
                                                 }}
                                             >
                                                 <CardContent>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                         <CheckCircleIcon sx={{ color: 'success.main', mr: 1 }} />
                                                         <Typography variant="h6" fontWeight="bold" color="success.main">
                                                             Godkjent
                                                         </Typography>
                                                     </Box>
+                                                    <Tooltip title="Fjern fra skjermen">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleRemove(request.id)}
+                                                            sx={{ 
+                                                                color: 'text.secondary',
+                                                                '&:hover': { color: 'error.main' }
+                                                            }}
+                                                        >
+                                                            <ClearIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Box>
                                                     
                                                     {/* Fra skift */}
                                                     <Card 
@@ -664,12 +721,26 @@ const ShiftSwapPage: NextPage = () => {
                                                 }}
                                             >
                                                 <CardContent>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                         <CancelIcon sx={{ color: 'error.main', mr: 1 }} />
                                                         <Typography variant="h6" fontWeight="bold" color="error.main">
                                                             Avvist
                                                         </Typography>
                                                     </Box>
+                                                    <Tooltip title="Fjern fra skjermen">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleRemove(request.id)}
+                                                            sx={{ 
+                                                                color: 'text.secondary',
+                                                                '&:hover': { color: 'error.main' }
+                                                            }}
+                                                        >
+                                                            <ClearIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Box>
                                                     
                                                     {/* Samme innhold som godkjente, men med rød styling */}
                                                     {/* Fra skift */}

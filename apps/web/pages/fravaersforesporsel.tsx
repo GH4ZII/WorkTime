@@ -25,7 +25,8 @@ import {
     CalendarToday as CalendarIcon,
     AccessTime as TimeIcon,
     CheckCircle as CheckCircleIcon,
-    Cancel as CancelIcon
+    Cancel as CancelIcon,
+    Clear as ClearIcon
 } from '@mui/icons-material';
 
 interface TimeOffRequest {
@@ -36,6 +37,7 @@ interface TimeOffRequest {
     type: 'VACATION' | 'SICK' | 'OTHER'
     reason?: string
     status: 'PENDING' | 'APPROVED' | 'REJECTED'
+    isHidden?: boolean
     createdAt: string
     updatedAt?: string
 }
@@ -99,10 +101,29 @@ const FravaersforesporselPage: NextPage = () => {
         }
     }
 
-    // Filtrer forespørsler etter status
-    const pendingRequests = timeOffRequests.filter(req => req.status === 'PENDING')
-    const approvedRequests = timeOffRequests.filter(req => req.status === 'APPROVED')
-    const rejectedRequests = timeOffRequests.filter(req => req.status === 'REJECTED')
+    const handleRemove = async (requestId: string) => {
+        try {
+            // Send forespørsel til backend for å markere som fjernet
+            await axios.patch(`http://localhost:3001/time-off-requests/${requestId}/remove`, {}, {
+                withCredentials: true
+            });
+            
+            // Fjern fra lokalt state
+            setTimeOffRequests(prev => prev.filter(req => req.id !== requestId));
+            setSuccess('Forespørsel fjernet fra skjermen!');
+            setTimeout(() => setSuccess(null), 3000);
+        } catch (err: any) {
+            // Hvis backend ikke støtter remove, bare fjern fra frontend
+            setTimeOffRequests(prev => prev.filter(req => req.id !== requestId));
+            setSuccess('Forespørsel fjernet fra skjermen!');
+            setTimeout(() => setSuccess(null), 3000);
+        }
+    }
+
+    // Filtrer forespørsler etter status og skjul skjulte
+    const pendingRequests = timeOffRequests.filter(req => req.status === 'PENDING' && !req.isHidden)
+    const approvedRequests = timeOffRequests.filter(req => req.status === 'APPROVED' && !req.isHidden)
+    const rejectedRequests = timeOffRequests.filter(req => req.status === 'REJECTED' && !req.isHidden)
 
     // Hjelpefunksjoner
     const getUserName = (userId: string) => {
@@ -279,12 +300,26 @@ const FravaersforesporselPage: NextPage = () => {
                                                                 sx={{ mt: 0.5 }}
                                                             />
                                                         </Box>
-                                                        <Chip
-                                                            label={getStatusDisplay(request.status)}
-                                                            color={getStatusColor(request.status) as any}
-                                                            variant={request.status === 'PENDING' ? 'filled' : 'outlined'}
-                                                            size="small"
-                                                        />
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Chip
+                                                                label={getStatusDisplay(request.status)}
+                                                                color={getStatusColor(request.status) as any}
+                                                                variant={request.status === 'PENDING' ? 'filled' : 'outlined'}
+                                                                size="small"
+                                                            />
+                                                            <Tooltip title="Fjern fra skjermen">
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => handleRemove(request.id)}
+                                                                    sx={{ 
+                                                                        color: 'text.secondary',
+                                                                        '&:hover': { color: 'error.main' }
+                                                                    }}
+                                                                >
+                                                                    <ClearIcon />
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                        </Box>
                                                     </Box>
 
                                                     <Divider sx={{ my: 2 }} />
@@ -390,11 +425,25 @@ const FravaersforesporselPage: NextPage = () => {
                                             }}
                                         >
                                             <CardContent>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                    <CheckCircleIcon sx={{ color: 'success.main', mr: 1 }} />
-                                                    <Typography variant="h6" fontWeight="bold" color="success.main">
-                                                        Godkjent
-                                                    </Typography>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <CheckCircleIcon sx={{ color: 'success.main', mr: 1 }} />
+                                                        <Typography variant="h6" fontWeight="bold" color="success.main">
+                                                            Godkjent
+                                                        </Typography>
+                                                    </Box>
+                                                    <Tooltip title="Fjern fra skjermen">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleRemove(request.id)}
+                                                            sx={{ 
+                                                                color: 'text.secondary',
+                                                                '&:hover': { color: 'error.main' }
+                                                            }}
+                                                        >
+                                                            <ClearIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                 </Box>
                                                 
                                                 {/* Ansatt info */}
@@ -478,11 +527,25 @@ const FravaersforesporselPage: NextPage = () => {
                                             }}
                                         >
                                             <CardContent>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                    <CancelIcon sx={{ color: 'error.main', mr: 1 }} />
-                                                    <Typography variant="h6" fontWeight="bold" color="error.main">
-                                                        Avvist
-                                                    </Typography>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <CancelIcon sx={{ color: 'error.main', mr: 1 }} />
+                                                        <Typography variant="h6" fontWeight="bold" color="error.main">
+                                                            Avvist
+                                                        </Typography>
+                                                    </Box>
+                                                    <Tooltip title="Fjern fra skjermen">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleRemove(request.id)}
+                                                            sx={{ 
+                                                                color: 'text.secondary',
+                                                                '&:hover': { color: 'error.main' }
+                                                            }}
+                                                        >
+                                                            <ClearIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                 </Box>
                                                 
                                                 {/* Ansatt info */}

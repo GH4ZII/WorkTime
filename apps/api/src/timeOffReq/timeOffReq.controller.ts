@@ -1,4 +1,4 @@
-﻿import { Controller, Get, Put, Post, Delete, Body, Param} from "@nestjs/common";
+﻿import { Controller, Get, Put, Post, Delete, Body, Param, Patch} from "@nestjs/common";
 import { TimeOffReqService } from "./timeOffReq.service";
 import { CreateTimeOffRequestDto } from "./dto/create-timeoff-request.dto";
 import { UpdateTimeOffRequestDto } from "./dto/update-timeoff-request.dto";
@@ -40,6 +40,16 @@ export class TimeOffReqController {
     @Post(':id/reject')
     reject(@Param('id') id: string) {
         return this.service.reject(id);
+    }
+
+    @Post(':id/remove')
+    hide(@Param('id') id: string) {
+        return this.service.hide(id);
+    }
+
+    @Patch(':id/remove')
+    hidePatch(@Param('id') id: string) {
+        return this.service.hide(id);
     }
 }
 

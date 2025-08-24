@@ -526,6 +526,7 @@ const SkiftPage: NextPage = () => {
         return absences.some(absence => {
             if (absence.userId !== employeeId) return false
             if (absence.status !== 'APPROVED') return false
+            if (absence.isHidden) return false // Filtrer bort skjulte forespørsler
             
             const fromDate = new Date(absence.fromDate).toISOString().split('T')[0]
             const toDate = new Date(absence.toDate).toISOString().split('T')[0]
@@ -571,6 +572,7 @@ const SkiftPage: NextPage = () => {
         const absence = absences.find(absence => {
             if (absence.userId !== employeeId) return false
             if (absence.status !== 'APPROVED') return false
+            if (absence.isHidden) return false // Filtrer bort skjulte forespørsler
             
             const fromDate = new Date(absence.fromDate).toISOString().split('T')[0]
             const toDate = new Date(absence.toDate).toISOString().split('T')[0]

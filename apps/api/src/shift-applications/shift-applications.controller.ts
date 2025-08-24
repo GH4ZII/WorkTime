@@ -63,4 +63,14 @@ export class ShiftApplicationsController {
   reject(@Param('id') id: string) {
     return this.shiftApplicationsService.update(id, { status: 'REJECTED' });
   }
+
+  @Post(':id/remove')
+  hide(@Param('id') id: string) {
+    return this.shiftApplicationsService.hide(id);
+  }
+
+  @Patch(':id/remove')
+  hidePatch(@Param('id') id: string) {
+    return this.shiftApplicationsService.hide(id);
+  }
 }

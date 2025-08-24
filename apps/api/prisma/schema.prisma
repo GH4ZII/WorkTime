@@ -56,6 +56,7 @@ model TimeOffRequest {
   type      TimeOffType
   reason    String?
   status    RequestStatus @default(PENDING)
+  isHidden  Boolean       @default(false)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -68,6 +69,7 @@ model ShiftSwapRequest {
   swapWithId    String?
   toShiftId     String?
   status        RequestStatus   @default(PENDING)
+  isHidden      Boolean         @default(false)
   requestedAt   DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   reason        String?
@@ -97,6 +99,7 @@ model ShiftApplication {
   shiftId   String
   status    RequestStatus @default(PENDING)
   message   String?
+  isHidden  Boolean       @default(false)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)

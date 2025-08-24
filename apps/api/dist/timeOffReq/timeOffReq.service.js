@@ -30,7 +30,9 @@ let TimeOffReqService = class TimeOffReqService {
         });
     }
     async findAll() {
-        return this.prisma.timeOffRequest.findMany();
+        return this.prisma.timeOffRequest.findMany({
+            where: { isHidden: false }
+        });
     }
     async findOne(id) {
         return this.prisma.timeOffRequest.findUnique({
@@ -50,8 +52,10 @@ let TimeOffReqService = class TimeOffReqService {
         });
     }
     async remove(id) {
-        return this.prisma.timeOffRequest.delete({
+        await this.findOne(id);
+        return this.prisma.timeOffRequest.update({
             where: { id },
+            data: { isHidden: true }
         });
     }
     async approve(id) {
@@ -78,6 +82,16 @@ let TimeOffReqService = class TimeOffReqService {
         return this.prisma.timeOffRequest.update({
             where: { id },
             data: { status: prisma_1.RequestStatus.REJECTED }
+        });
+    }
+    async hide(id) {
+        const request = await this.findOne(id);
+        if (!request) {
+            throw new common_1.NotFoundException('Forespørsel ikke funnet');
+        }
+        return this.prisma.timeOffRequest.update({
+            where: { id },
+            data: { isHidden: true }
         });
     }
 };

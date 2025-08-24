@@ -48,7 +48,9 @@ export class ShiftSwapReqService {
     }
 
     async findAll() {
-        return this.prisma.shiftSwapRequest.findMany();
+        return this.prisma.shiftSwapRequest.findMany({
+            where: { isHidden: false }
+        });
     }
 
     async findOne(id: string) {
@@ -87,8 +89,10 @@ export class ShiftSwapReqService {
         // Sjekk at forespørselen finnes
         await this.findOne(id);
 
-        return this.prisma.shiftSwapRequest.delete({
+        // Bruk hide i stedet for delete
+        return this.prisma.shiftSwapRequest.update({
             where: { id },
+            data: { isHidden: true }
         });
     }
 
@@ -123,6 +127,19 @@ export class ShiftSwapReqService {
         return this.prisma.shiftSwapRequest.update({
             where: { id },
             data: { status: RequestStatus.REJECTED }
+        });
+    }
+
+    async hide(id: string) {
+        const request = await this.findOne(id);
+        
+        if (!request) {
+            throw new NotFoundException('Forespørsel ikke funnet');
+        }
+
+        return this.prisma.shiftSwapRequest.update({
+            where: { id },
+            data: { isHidden: true }
         });
     }
 }
