@@ -1,4 +1,4 @@
-﻿import React, {useEffect} from 'react';
+﻿import React, {useEffect, useState} from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { Layout } from '../components/Layout';
@@ -17,20 +17,12 @@ import {
     TableRow,
     Paper,
     Chip,
-    Avatar,
-    IconButton,
-    Tooltip,
     CircularProgress,
     Alert,
     Divider
 } from '@mui/material';
 import {
-    People as PeopleIcon,
     Schedule as ScheduleIcon,
-    Notifications as NotificationsIcon,
-    Work as WorkIcon,
-    Phone as PhoneIcon,
-    Email as EmailIcon,
     SwapHoriz as SwapIcon,
     Event as EventIcon
 } from '@mui/icons-material';
@@ -57,6 +49,27 @@ interface SwapRequest {
     swapWithId: string;
     toShiftId: string;
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+interface ShiftApplication {
+    id: string;
+    userId: string;
+    shiftId: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    message?: string;
+    createdAt: string;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+    };
+    shift: {
+        id: string;
+        startTime: string;
+        endTime: string;
+        location?: string;
+        notes?: string;
+    };
 }
 
 interface Employee {
@@ -126,14 +139,34 @@ const HomePage: NextPage = () => {
         error 
     } = useData();
 
-    const totalEmployees = employees.length;
-    
+    const [pendingShiftApplications, setPendingShiftApplications] = useState<ShiftApplication[]>([]);
+
     // Filtrer kun på ventende forespørsler
     const pendingTimeOffRequests = timeOffRequests.filter(req => req.status === 'PENDING');
     const pendingSwapRequests = swapRequests.filter(req => req.status === 'PENDING');
     
-    const totalRequests = pendingTimeOffRequests.length + pendingSwapRequests.length;
     const pendingRequests = pendingTimeOffRequests.filter(req => req.type === 'VACATION').length;
+
+    // Hent skiftsøknader
+    const fetchShiftApplications = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/shift-applications', {
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const pending = data.filter((app: ShiftApplication) => app.status === 'PENDING');
+                setPendingShiftApplications(pending);
+            }
+        } catch (error) {
+            console.error('Feil ved henting av skiftsøknader:', error);
+        }
+    };
+
+    // Hent skiftsøknader når komponenten lastes
+    useEffect(() => {
+        fetchShiftApplications();
+    }, []);
 
     // Oppslagskart
     const shiftDateById = React.useMemo(() => {
@@ -146,6 +179,16 @@ const HomePage: NextPage = () => {
     const formatDate = (iso: string) => {
         const d = new Date(iso);
         return d.toLocaleDateString('no-NO');
+    };
+
+    // Formater tid til norsk format (HH:MM)
+    const formatTime = (iso: string) => {
+        const d = new Date(iso);
+        return d.toLocaleTimeString('no-NO', {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'UTC'
+        });
     };
 
     const getRequestTypeColor = (type: string) => {
@@ -195,12 +238,7 @@ const HomePage: NextPage = () => {
 
                     {/* Stats Cards */}
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 4 }}>
-                        <StatCard
-                            title="Totalt ansatte"
-                            value={totalEmployees}
-                            icon={<PeopleIcon sx={{ color: 'white' }} />}
-                            color="#667eea"
-                        />
+
                         <StatCard
                             title="Aktive skift"
                             value={shifts.length}
@@ -208,9 +246,9 @@ const HomePage: NextPage = () => {
                             color="#764ba2"
                         />
                         <StatCard
-                            title="Ventende forespørsler"
-                            value={totalRequests}
-                            icon={<NotificationsIcon sx={{ color: 'white' }} />}
+                            title="Bytteforespørsler"
+                            value={pendingSwapRequests.length}
+                            icon={<SwapIcon sx={{ color: 'white' }} />}
                             color="#f093fb"
                         />
                         <StatCard
@@ -219,17 +257,23 @@ const HomePage: NextPage = () => {
                             icon={<EventIcon sx={{ color: 'white' }} />}
                             color="#4facfe"
                         />
+                        <StatCard
+                            title="Skiftsøknader"
+                            value={pendingShiftApplications.length}
+                            icon={<ScheduleIcon sx={{ color: 'white' }} />}
+                            color="#4caf50"
+                        />
                     </Box>
 
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, 1fr)' }, gap: 3 }}>
-                        {/* Ansatte og kommende skift */}
+                        {/* Skiftsøknader - kun ventende */}
                         <Box>
                             <Card elevation={2} sx={{ height: '100%' }}>
                                 <CardContent>
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                                        <WorkIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                        <ScheduleIcon sx={{ mr: 1, color: 'primary.main' }} />
                                         <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Ansatte
+                                            Skiftsøknader
                                         </Typography>
                                     </Box>
                                     <TableContainer component={Paper} elevation={0}>
@@ -237,52 +281,44 @@ const HomePage: NextPage = () => {
                                             <TableHead>
                                                 <TableRow>
                                                     <TableCell sx={{ fontWeight: 'bold' }}>Ansatt</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Rolle</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Kontakt</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold' }}>Skift</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold' }}>Melding</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {employees.length > 0 ? (
-                                                    employees.map((employee) => (
-                                                        <TableRow key={employee.id} hover>
+                                                {pendingShiftApplications.length > 0 ? (
+                                                    pendingShiftApplications.map(app => (
+                                                        <TableRow key={app.id} hover>
                                                             <TableCell>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                                    <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
-                                                                        {employee.name.charAt(0)}
-                                                                    </Avatar>
-                                                                    <Typography variant="body2" fontWeight="medium">
-                                                                        {employee.name}
-                                                                    </Typography>
-                                                                </Box>
+                                                                <Typography variant="body2" fontWeight="medium">
+                                                                    {app.user.name}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2">
+                                                                    {formatTime(app.shift.startTime)} - {formatTime(app.shift.endTime)}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
+                                                                    {app.message || 'Ingen melding'}
+                                                                </Typography>
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Chip
-                                                                    label={employee.role === 'ADMIN' ? 'Administrator' : 'Ansatt'}
+                                                                    label="Venter"
+                                                                    color="warning"
                                                                     size="small"
-                                                                    color={employee.role === 'ADMIN' ? 'primary' : 'default'}
                                                                 />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Box sx={{ display: 'flex', gap: 1 }}>
-                                                                    <Tooltip title={employee.phone}>
-                                                                        <IconButton size="small">
-                                                                            <PhoneIcon fontSize="small" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                    <Tooltip title={employee.email}>
-                                                                        <IconButton size="small">
-                                                                            <EmailIcon fontSize="small" />
-                                                                        </IconButton>
-                                                                    </Tooltip>
-                                                                </Box>
                                                             </TableCell>
                                                         </TableRow>
                                                     ))
                                                 ) : (
                                                     <TableRow>
-                                                        <TableCell colSpan={3} align="center">
+                                                        <TableCell colSpan={4} align="center">
                                                             <Typography color="text.secondary">
-                                                                Ingen ansatte funnet
+                                                                Ingen ventende skiftsøknader
                                                             </Typography>
                                                         </TableCell>
                                                     </TableRow>

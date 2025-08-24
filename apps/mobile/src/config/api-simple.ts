@@ -2,6 +2,7 @@
 // Use this for debugging network issues
 
 export const API_ENDPOINTS = {
+    BASE_URL: 'http://10.129.48.163:3001',
     AUTH: {
         LOGIN: 'http://10.129.48.163:3001/auth/login',
         CHANGE_PASSWORD: 'http://10.129.48.163:3001/auth/change-password',
@@ -13,6 +14,7 @@ export const API_ENDPOINTS = {
     CHAT: 'http://10.129.48.163:3001/chatrooms', // Endret fra 'chat' til 'chatrooms'
     SHIFT_SWAP_REQUESTS: 'http://10.129.48.163:3001/shift-swap-requests',
     TIME_OFF_REQUESTS: 'http://10.129.48.163:3001/time-off-requests',
+    SHIFT_APPLICATIONS: 'http://10.129.48.163:3001/shift-applications',
 };
 
 export default 'http://10.129.48.163:3001';

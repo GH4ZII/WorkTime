@@ -5,7 +5,7 @@ export interface Employee {
   name: string;
   role: string;
   preferredShifts?: string[];
-  positionPercentage: number;
+  positionPercentage?: number;
 }
 
 export interface TimeOffRequest {
@@ -162,7 +162,7 @@ JSON-struktur:
 
   private formatEmployeesWithPosition(employees: Employee[]): string {
     return employees.map(emp => 
-        `- ID: "${emp.id}" | Navn: ${emp.name} | Rolle: ${emp.role} | Stillingsprosent: ${emp.positionPercentage}%`
+        `- ID: "${emp.id}" | Navn: ${emp.name} | Rolle: ${emp.role} | Stillingsprosent: ${emp.positionPercentage || 100}%`
     ).join('\n');
   }
 

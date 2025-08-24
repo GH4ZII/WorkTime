@@ -117,56 +117,55 @@ const ProfileScreen: React.FC = () => {
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 {/* Profile Info Section */}
                 <View style={styles.profileSection}>
-                <View style={styles.infoCard}>
-                    <Text style={styles.sectionTitle}>Personlig informasjon</Text>
-                    
-                    <View style={styles.avatarSection}>
-                        <View style={styles.avatar}>
-                            <Text style={styles.avatarText}>{user?.name?.charAt(0)?.toUpperCase() || '?'}</Text>
+                    <View style={styles.infoCard}>
+                        <Text style={styles.sectionTitle}>Personlig informasjon</Text>
+                        
+                        <View style={styles.avatarSection}>
+                            <View style={styles.avatar}>
+                                <Text style={styles.avatarText}>{user?.name?.charAt(0)?.toUpperCase() || '?'}</Text>
+                            </View>
+                            <Text style={styles.avatarName}>{user?.name || 'Ukjent bruker'}</Text>
                         </View>
-                        <Text style={styles.avatarName}>{user?.name || 'Ukjent bruker'}</Text>
-                    </View>
-                    
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>📧 E-post</Text>
-                        <Text style={styles.infoValue}>{user?.email || 'Ikke satt'}</Text>
-                    </View>
-                    
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>🎭 Rolle</Text>
-                        <View style={styles.roleContainer}>
-                            <Text style={styles.roleIcon}>{getRoleIcon(user?.role)}</Text>
-                            <View style={[styles.roleBadge, { backgroundColor: getRoleColor(user?.role) }]}>
-                                <Text style={styles.roleText}>{formatRole(user?.role)}</Text>
+                        
+                        <View style={styles.infoRow}>
+                            <Text style={styles.infoLabel}>📧 E-post</Text>
+                            <Text style={styles.infoValue}>{user?.email || 'Ikke satt'}</Text>
+                        </View>
+                        
+                        <View style={styles.infoRow}>
+                            <Text style={styles.infoLabel}>🎭 Rolle</Text>
+                            <View style={styles.roleContainer}>
+                                <Text style={styles.roleIcon}>{getRoleIcon(user?.role)}</Text>
+                                <View style={[styles.roleBadge, { backgroundColor: getRoleColor(user?.role) }]}>
+                                    <Text style={styles.roleText}>{formatRole(user?.role)}</Text>
+                                </View>
                             </View>
                         </View>
-                    </View>
 
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>📱 Telefon</Text>
-                        <Text style={styles.infoValue}>{user?.phone || 'Ikke satt'}</Text>
-                    </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.infoLabel}>📱 Telefon</Text>
+                            <Text style={styles.infoValue}>Ikke tilgjengelig</Text>
+                        </View>
 
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>📅 Ansettelsesdato</Text>
-                        <Text style={styles.infoValue}>
-                            {user?.hireDate ? new Date(user.hireDate).toLocaleDateString('nb-NO') : 'Ikke satt'}
-                        </Text>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.infoLabel}>📅 Ansettelsesdato</Text>
+                            <Text style={styles.infoValue}>Ikke tilgjengelig</Text>
+                        </View>
                     </View>
                 </View>
 
                 {/* Arbeidsinformasjon Section */}
-                <View style={styles.section}>
+                <View style={styles.infoCard}>
                     <Text style={styles.sectionTitle}>Arbeidsinformasjon</Text>
                     
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Stillingsprosent:</Text>
-                        <Text style={styles.infoValue}>{user?.positionPercentage || 100}%</Text>
+                        <Text style={styles.infoValue}>Ikke tilgjengelig</Text>
                     </View>
                     
                     <View style={styles.infoRow}>
                         <Text style={styles.infoLabel}>Maks timer per uke:</Text>
-                        <Text style={styles.infoValue}>{user?.maxHoursPerWeek || 40}t</Text>
+                        <Text style={styles.infoValue}>Ikke tilgjengelig</Text>
                     </View>
                 </View>
 
@@ -192,7 +191,7 @@ const ProfileScreen: React.FC = () => {
                         <Text style={styles.actionArrow}>›</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('EditProfile')}>
+                    <TouchableOpacity style={styles.actionButton} onPress={() => Alert.alert('Info', 'Funksjonalitet kommer snart')}>
                         <Text style={styles.actionIcon}>✏️</Text>
                         <Text style={styles.actionText}>Rediger profil</Text>
                         <Text style={styles.actionArrow}>›</Text>

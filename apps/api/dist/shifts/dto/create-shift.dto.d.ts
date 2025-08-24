@@ -1,8 +1,9 @@
 export declare class CreateShiftDto {
-    userId: string;
+    userId?: string;
     startTime: string;
     endTime: string;
     location?: string;
     notes?: string;
     createdBy: string;
+    isAvailableShift?: boolean;
 }

@@ -73,6 +73,7 @@ interface Shift {
 }
 
 interface ShiftPayload {
+    id?: string
     userId: string
     date: string
     startTime: string
@@ -102,6 +103,7 @@ const SkiftPage: NextPage = () => {
 
     const [editingShift, setEditingShift] = useState<Shift | null>(null)
     const [editForm, setEditForm] = useState<ShiftPayload>({
+        id: '',
         userId: '',
         date: '',
         startTime: '',
@@ -120,6 +122,30 @@ const SkiftPage: NextPage = () => {
     const [aiGeneratedSchedule, setAiGeneratedSchedule] = useState<any>(null);
     const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState(new Date());
+
+    // ← Ny: Fravær state
+    const [showAbsenceForm, setShowAbsenceForm] = useState(false);
+    const [absenceForm, setAbsenceForm] = useState({
+        userId: '',
+        fromDate: '',
+        toDate: '',
+        type: 'SICK' as 'VACATION' | 'SICK' | 'OTHER',
+        reason: '',
+        shiftId: ''
+    });
+    const [absences, setAbsences] = useState<any[]>([]);
+
+    // ← Ny: Ledige skift state
+    const [showAvailableShiftForm, setShowAvailableShiftForm] = useState(false);
+    const [availableShiftForm, setAvailableShiftForm] = useState({
+        date: '',
+        startTime: '',
+        endTime: '',
+        location: '',
+        notes: '',
+        createdBy: 'admin'
+    });
+    const [availableShifts, setAvailableShifts] = useState<any[]>([]);
 
     // Legg til ny state for ukesgenerering
     const [isGeneratingWeeklySchedule, setIsGeneratingWeeklySchedule] = useState(false);
@@ -279,12 +305,35 @@ const SkiftPage: NextPage = () => {
         return days
     }
 
+    const fetchAbsences = async () => {
+        try {
+            const res = await axios.get<any[]>('http://localhost:3001/time-off-requests', { withCredentials: true })
+            setAbsences(res.data)
+        } catch (err: any) {
+            console.error('Feil ved henting av fravær:', err)
+            // Ikke sett error state for fravær - det er ikke kritisk
+        }
+    }
+
+    const fetchAvailableShifts = async () => {
+        try {
+            // Hent ledige skift fra samme endpoint som vanlige skift
+            const res = await axios.get<any[]>('http://localhost:3001/shifts', { withCredentials: true })
+            const available = res.data.filter((shift: any) => shift.isAvailableShift === true)
+            setAvailableShifts(available)
+        } catch (err: any) {
+            console.error('Feil ved henting av ledige skift:', err)
+        }
+    }
+
     // ← NÅ kan du deklarere weekDays
     const weekDays = getWeekDays()
 
     useEffect(() => {
         fetchEmployees()
         fetchShifts()
+        fetchAbsences()
+        fetchAvailableShifts()
         
         // Sørg for at currentWeek starter på riktig uke
         const today = new Date()
@@ -417,6 +466,7 @@ const SkiftPage: NextPage = () => {
         
         setEditingShift(shift)
         setEditForm({
+            id: shift.id,
             userId: shift.userId,
             date: shiftDate,
             startTime: startTime,
@@ -469,6 +519,68 @@ const SkiftPage: NextPage = () => {
         })
     }
 
+    // ← Ny: Sjekk om ansatt har fravær på en dato
+    const hasAbsenceOnDate = (employeeId: string, date: Date) => {
+        const dateStr = date.toISOString().split('T')[0]
+        
+        return absences.some(absence => {
+            if (absence.userId !== employeeId) return false
+            if (absence.status !== 'APPROVED') return false
+            
+            const fromDate = new Date(absence.fromDate).toISOString().split('T')[0]
+            const toDate = new Date(absence.toDate).toISOString().split('T')[0]
+            
+            return dateStr >= fromDate && dateStr <= toDate
+        })
+    }
+
+    // ← Ny: Sjekk om det finnes ledige skift på en dato
+    const hasAvailableShiftOnDate = (date: Date) => {
+        const dateStr = date.toISOString().split('T')[0]
+        
+        return availableShifts.some(shift => {
+            let shiftDate: string
+            if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                shiftDate = shift.startTime.split('T')[0]
+            } else {
+                shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+            }
+            return shiftDate === dateStr && shift.isAvailableShift === true
+        })
+    }
+
+    // ← Ny: Hent ledig skift for en dato
+    const getAvailableShiftOnDate = (date: Date) => {
+        const dateStr = date.toISOString().split('T')[0]
+        
+        return availableShifts.find(shift => {
+            let shiftDate: string
+            if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                shiftDate = shift.startTime.split('T')[0]
+            } else {
+                shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+            }
+            return shiftDate === dateStr && shift.isAvailableShift === true
+        })
+    }
+
+    // ← Ny: Hent fraværstype for en ansatt på en dato
+    const getAbsenceTypeOnDate = (employeeId: string, date: Date) => {
+        const dateStr = date.toISOString().split('T')[0]
+        
+        const absence = absences.find(absence => {
+            if (absence.userId !== employeeId) return false
+            if (absence.status !== 'APPROVED') return false
+            
+            const fromDate = new Date(absence.fromDate).toISOString().split('T')[0]
+            const toDate = new Date(absence.toDate).toISOString().split('T')[0]
+            
+            return dateStr >= fromDate && dateStr <= toDate
+        })
+        
+        return absence ? absence.type : null
+    }
+
     // Oppdater getShiftsForDate for å inkludere AI-skift
     const getShiftsForDate = (date: Date) => {
         const dateStr = date.toISOString().split('T')[0]
@@ -514,8 +626,31 @@ const SkiftPage: NextPage = () => {
             })
         }
         
+        // ← Hent ledige skift for samme dato
+        let availableShiftsForDate: any[] = []
+        if (availableShifts.length > 0) {
+            availableShiftsForDate = availableShifts.filter((shift: any) => {
+                let shiftDate: string
+                if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                    shiftDate = shift.startTime.split('T')[0]
+                } else {
+                    shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+                }
+                return shiftDate === dateStr && shift.isAvailableShift === true
+            }).map((availableShift: any) => ({
+                id: `available-${availableShift.id}`,
+                userId: 'AVAILABLE',
+                startTime: availableShift.startTime,
+                endTime: availableShift.endTime,
+                location: availableShift.location || 'Ledig skift',
+                notes: availableShift.notes || 'Ledig for påmelding',
+                createdBy: availableShift.createdBy,
+                user: { id: 'AVAILABLE', name: 'Ledig skift' }
+            }))
+        }
+        
         // ← Kombiner og sorter alle skift
-        const allShifts = [...existingShifts, ...aiShifts]
+        const allShifts = [...existingShifts, ...aiShifts, ...availableShiftsForDate]
 
         
         const sortedShifts = allShifts.sort((a, b) => {
@@ -619,6 +754,31 @@ const SkiftPage: NextPage = () => {
                         timestamp
                     }
                 }
+            } else if (shift.isAvailableShift === true) {
+                // Ledige skift: bruk samme logikk som eksisterende skift
+                let startTime: Date
+                let timeString: string
+                let timestamp: number
+                
+                if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                    // Lokal tid string (YYYY-MM-DDTHH:MM:SS)
+                    const [datePart, timePart] = shift.startTime.split('T')
+                    const [hour, min] = timePart.split(':').map(Number)
+                    startTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, min)
+                    timeString = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
+                    timestamp = startTime.getTime()
+                } else {
+                    // UTC tid - bruk som før
+                    startTime = new Date(shift.startTime)
+                    timeString = startTime.toTimeString().slice(0, 5)
+                    timestamp = startTime.getTime()
+                }
+                
+                return {
+                    time: startTime,
+                    timeString,
+                    timestamp
+                }
             } else {
                 // Eksisterende skift: bruk ISO-string eller lokal tid string
                 let startTime: Date
@@ -638,8 +798,6 @@ const SkiftPage: NextPage = () => {
                     timeString = startTime.toTimeString().slice(0, 5)
                     timestamp = startTime.getTime()
                 }
-                
-
                 
                 return {
                     time: startTime,
@@ -706,13 +864,46 @@ const SkiftPage: NextPage = () => {
             }
         }
         
+        // ← Sjekk ledige skift
+        if (availableShifts.length > 0) {
+            const availableShift = availableShifts.find((shift: any) => {
+                let shiftDate: string
+                let shiftStartTime: string
+                
+                if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                    shiftDate = shift.startTime.split('T')[0]
+                    shiftStartTime = shift.startTime.split('T')[1].substring(0, 5)
+                } else {
+                    shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+                    shiftStartTime = new Date(shift.startTime).toTimeString().slice(0, 5)
+                }
+                
+                return shift.isAvailableShift === true && shiftDate === dateStr && shiftStartTime === startTime
+            })
+            
+            if (availableShift) {
+                return {
+                    id: `available-${availableShift.id}`,
+                    userId: 'AVAILABLE',
+                    startTime: availableShift.startTime,
+                    endTime: availableShift.endTime,
+                    location: availableShift.location || 'Ledig skift',
+                    notes: availableShift.notes || 'Ledig for påmelding',
+                    createdBy: availableShift.createdBy,
+                    user: { id: 'AVAILABLE', name: 'Ledig skift' }
+                }
+            }
+        }
+        
         return null
     }
 
     // Hent alle ansatte som har skift på en spesifikk dato og starttid
     const getEmployeesWithShiftAtTime = (date: Date, startTime: string) => {
         const dateStr = date.toISOString().split('T')[0]
-        return shifts
+        
+        // Hent vanlige skift
+        const regularShifts = shifts
             .filter(shift => {
                 let shiftDate: string
                 let shiftStartTime: string
@@ -730,6 +921,26 @@ const SkiftPage: NextPage = () => {
                 return shiftDate === dateStr && shiftStartTime === startTime
             })
             .map(shift => shift.userId)
+        
+        // Hent ledige skift
+        const availableShiftsAtTime = availableShifts
+            .filter(shift => {
+                let shiftDate: string
+                let shiftStartTime: string
+                
+                if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+                    shiftDate = shift.startTime.split('T')[0]
+                    shiftStartTime = shift.startTime.split('T')[1].substring(0, 5)
+                } else {
+                    shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+                    shiftStartTime = new Date(shift.startTime).toTimeString().slice(0, 5)
+                }
+                
+                return shiftDate === dateStr && shiftStartTime === startTime && shift.isAvailableShift === true
+            })
+            .map(shift => 'AVAILABLE')
+        
+        return [...regularShifts, ...availableShiftsAtTime]
     }
 
     // Enkel funksjon for å trekke fra 2 timer fra alle tidspunkter
@@ -869,6 +1080,176 @@ const getDuration = (startTime: string, endTime: string) => {
         setShowForm(true)
     }
 
+    // ← Ny: Fravær funksjoner
+    const handleAbsenceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        setAbsenceForm({ ...absenceForm, [e.target.name]: e.target.value })
+    }
+
+    const handleAbsenceSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
+        try {
+            // Opprett fraværsforespørsel kun hvis det er en spesifikk ansatt
+            if (absenceForm.userId) {
+                const absenceResponse = await axios.post('http://localhost:3001/time-off-requests', {
+                    userId: absenceForm.userId,
+                    fromDate: `${absenceForm.fromDate}T00:00:00.000Z`,
+                    toDate: `${absenceForm.toDate}T23:59:59.999Z`,
+                    type: absenceForm.type,
+                    reason: absenceForm.reason
+                }, { withCredentials: true })
+
+                // Godkjenn fraværsforespørselen automatisk (admin gjør det)
+                if (absenceResponse.data.id) {
+                    await axios.post(`http://localhost:3001/time-off-requests/${absenceResponse.data.id}/approve`, {}, { withCredentials: true })
+                }
+            }
+
+            // Slett skiftet hvis det finnes og ikke er AI-generert eller ledig skift
+            if (absenceForm.shiftId && !absenceForm.shiftId.startsWith('ai-') && !absenceForm.shiftId.startsWith('available-')) {
+                await axios.delete(`http://localhost:3001/shifts/${absenceForm.shiftId}`, { withCredentials: true })
+            }
+
+            // Oppdater AI-skiftplan hvis det var et AI-skift
+            if (absenceForm.shiftId && absenceForm.shiftId.startsWith('ai-')) {
+                // Fjern fra AI-generert skiftplan
+                if (aiGeneratedSchedule && aiGeneratedSchedule.shifts) {
+                    const updatedShifts = aiGeneratedSchedule.shifts.filter((shift: any) => {
+                        const shiftId = `ai-${shift.employeeId}-${shift.date}`
+                        return shiftId !== absenceForm.shiftId
+                    })
+                    setAiGeneratedSchedule({
+                        ...aiGeneratedSchedule,
+                        shifts: updatedShifts
+                    })
+                }
+            }
+
+            // Oppdater ledige skift hvis det var et ledig skift
+            if (absenceForm.shiftId && absenceForm.shiftId.startsWith('available-')) {
+                // Fjern fra ledige skift
+                const updatedAvailableShifts = availableShifts.filter((shift: any) => {
+                    const shiftId = `available-${shift.id}`
+                    return shiftId !== absenceForm.shiftId
+                })
+                setAvailableShifts(updatedAvailableShifts)
+            }
+
+            setShowAbsenceForm(false)
+            setAbsenceForm({
+                userId: '',
+                fromDate: '',
+                toDate: '',
+                type: 'SICK',
+                reason: '',
+                shiftId: ''
+            })
+            setSuccess(absenceForm.userId ? 'Ansatt satt i fravær og skift fjernet!' : 'Ledig skift fjernet!')
+            fetchShifts()
+            fetchAbsences()
+            fetchAvailableShifts()
+            setTimeout(() => setSuccess(null), 3000)
+        } catch (err: any) {
+            console.error('Feil ved setting av fravær:', err)
+            if (err.response?.data?.message) {
+                setError(`Feil ved setting av fravær: ${err.response.data.message}`)
+            } else {
+                setError('Feil ved setting av fravær. Sjekk konsollen for detaljer.')
+            }
+        }
+    }
+
+    const startAbsenceForm = (shift: Shift) => {
+        // Hent dato fra shift
+        let shiftDate: string
+        if (shift.startTime.includes('T') && !shift.startTime.includes('Z') && !shift.startTime.includes('+')) {
+            shiftDate = shift.startTime.split('T')[0]
+        } else {
+            shiftDate = new Date(shift.startTime).toISOString().split('T')[0]
+        }
+        
+        // Hent ansattnavn for visning
+        const employee = employees.find(emp => emp.id === shift.userId)
+        const employeeName = employee ? employee.name : 'Ukjent ansatt'
+        
+        // Hent ansattnavn for ledige skift
+        const availableShiftName = shift.userId === 'AVAILABLE' ? 'Ledig skift' : employeeName
+        
+        setAbsenceForm({
+            userId: shift.userId === 'AVAILABLE' ? '' : shift.userId, // Tom for ledige skift
+            fromDate: shiftDate,
+            toDate: shiftDate,
+            type: 'SICK', // Standard til sykdom, men kan endres
+            reason: shift.userId === 'AVAILABLE' ? 'Ledig skift fjernet' : 'Ringer og sier at jeg ikke kan jobbe i dag', // Standardårsak
+            shiftId: shift.id
+        })
+        setShowAbsenceForm(true)
+        
+        // Vis bekreftelse for AI-skift
+        if (shift.createdBy === 'AI') {
+            alert(`Merk: Dette er et AI-generert skift for ${availableShiftName}. Ved å sette i fravær vil skiftet fjernes fra AI-planen.`)
+        }
+        
+        // Vis bekreftelse for ledige skift
+        if (shift.userId === 'AVAILABLE') {
+            alert(`Merk: Dette er et ledig skift. Ved å sette i fravær vil skiftet fjernes fra ledige skift.`)
+        }
+    }
+
+    // ← Ny: Ledige skift funksjoner
+    const handleAvailableShiftChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        setAvailableShiftForm({ ...availableShiftForm, [e.target.name]: e.target.value })
+    }
+
+    const handleAvailableShiftSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
+        try {
+            // Opprett ledig skift (uten tilordnet ansatt)
+            await axios.post('http://localhost:3001/shifts', {
+                startTime: `${availableShiftForm.date}T${availableShiftForm.startTime}:00.000Z`,
+                endTime: `${availableShiftForm.date}T${availableShiftForm.endTime}:00.000Z`,
+                location: availableShiftForm.location,
+                notes: availableShiftForm.notes,
+                createdBy: availableShiftForm.createdBy,
+                isAvailableShift: true
+            }, { withCredentials: true })
+
+            setShowAvailableShiftForm(false)
+            setAvailableShiftForm({
+                date: '',
+                startTime: '',
+                endTime: '',
+                location: '',
+                notes: '',
+                createdBy: 'admin'
+            })
+            setSuccess('Ledig skift lagt ut!')
+            fetchShifts()
+            fetchAvailableShifts()
+            setTimeout(() => setSuccess(null), 3000)
+        } catch (err: any) {
+            console.error('Feil ved opprettelse av ledig skift:', err)
+            if (err.response?.data?.message) {
+                setError(`Feil ved opprettelse av ledig skift: ${err.response.data.message}`)
+            } else {
+                setError('Feil ved opprettelse av ledig skift. Sjekk konsollen for detaljer.')
+            }
+        }
+    }
+
+    const startAvailableShiftForm = () => {
+        setAvailableShiftForm({
+            date: new Date().toISOString().split('T')[0],
+            startTime: '07:00',
+            endTime: '15:00',
+            location: '',
+            notes: '',
+            createdBy: 'admin'
+        })
+        setShowAvailableShiftForm(true)
+    }
+
     // ← Ny: AI Scheduler funksjoner
     const handleAiScheduleApproval = async (approved: boolean) => {
         if (approved && aiGeneratedSchedule) {
@@ -950,6 +1331,28 @@ const getDuration = (startTime: string, endTime: string) => {
                                 </Box>
                                 
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<AddIcon />}
+                                        onClick={startAvailableShiftForm}
+                                        sx={{
+                                            backgroundColor: '#667eea',
+                                            '&:hover': {
+                                                backgroundColor: '#1565c0',
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+                                            },
+                                            px: 3,
+                                            py: 1,
+                                            borderRadius: 2,
+                                            fontWeight: 600,
+                                            fontSize: '0.9rem',
+                                            transition: 'all 0.3s ease',
+                                            boxShadow: '0 2px 8px rgba(25, 118, 210, 0.2)'
+                                        }}
+                                    >
+                                        Legg ut ledig skift
+                                    </Button>
                                     <IconButton onClick={goToToday}>
                                         <CalendarIcon />
                                     </IconButton>
@@ -963,8 +1366,8 @@ const getDuration = (startTime: string, endTime: string) => {
                                         <TableRow>
                                             <TableCell sx={{ 
                                                 fontWeight: 'bold', 
-                                                minWidth: 180, // Redusert fra 200 til 180
-                                                maxWidth: 200, // Lagt til maxWidth
+                                                minWidth: 150, // Redusert fra 180 til 150
+                                                maxWidth: 170, // Redusert fra 200 til 170
                                                 backgroundColor: '#f8f9fa',
                                                 borderRight: '1px solid #e0e0e0'
                                             }}>
@@ -1031,7 +1434,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                 <Box sx={{
                                                                     backgroundColor: '#ffffff',
                                                                     borderRadius: 2,
-                                                                    p: 2,
+                                                                    p: 1.5, // Redusert fra p: 2 til p: 1.5
                                                                     border: shift.createdBy === 'AI' ? '2px solid #667eea' : '2px solid #e2e8f0',
                                                                     position: 'relative',
                                                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -1076,6 +1479,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                             onClick={() => {
                                                                                 startEdit(shift)
                                                                             }}
+                                                                            title="Klikk for å redigere AI-skift"
                                                                         >
                                                                             AI
                                                                         </Box>
@@ -1112,6 +1516,8 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                                 color: '#667eea',
                                                                                 '&:hover': { backgroundColor: 'rgba(102, 126, 234, 0.1)' }
                                                                             }}
+                                                                            title="Rediger skift (dobbeltklikk for fravær)"
+                                                                            onDoubleClick={() => startAbsenceForm(shift)}
                                                                         >
                                                                             <EditIcon fontSize="small" />
                                                                         </IconButton>
@@ -1122,17 +1528,128 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                                 color: 'error.main',
                                                                                 '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.1)' }
                                                                             }}
+                                                                            title="Slett skift"
                                                                         >
                                                                             <DeleteIcon fontSize="small" />
                                                                         </IconButton>
                                                                     </Box>
                                                                 </Box>
+                                                            ) : hasAbsenceOnDate(employee.id, day) ? (
+                                                                // ← Vis fravær
+                                                                (() => {
+                                                                    const absenceType = getAbsenceTypeOnDate(employee.id, day)
+                                                                    const getAbsenceIcon = (type: string) => {
+                                                                        switch (type) {
+                                                                            case 'SICK': return '🏥'
+                                                                            case 'VACATION': return '🏖️'
+                                                                            case 'OTHER': return '📝'
+                                                                            default: return '🏥'
+                                                                        }
+                                                                    }
+                                                                    const getAbsenceLabel = (type: string) => {
+                                                                        switch (type) {
+                                                                            case 'SICK': return 'Sykdom'
+                                                                            case 'VACATION': return 'Ferie'
+                                                                            case 'OTHER': return 'Annet'
+                                                                            default: return 'Fravær'
+                                                                        }
+                                                                    }
+                                                                    const getAbsenceColor = (type: string) => {
+                                                                        switch (type) {
+                                                                            case 'SICK': return '#ff9800'
+                                                                            case 'VACATION': return '#4caf50'
+                                                                            case 'OTHER': return '#9c27b0'
+                                                                            default: return '#ff9800'
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    return (
+                                                                        <Box sx={{
+                                                                            backgroundColor: `${getAbsenceColor(absenceType)}15`,
+                                                                            borderRadius: 2,
+                                                                            p: 1.5, // Redusert fra p: 2 til p: 1.5
+                                                                            border: `2px solid ${getAbsenceColor(absenceType)}`,
+                                                                            position: 'relative'
+                                                                        }}>
+                                                                            <Box sx={{
+                                                                                position: 'absolute',
+                                                                                top: -8,
+                                                                                right: -8,
+                                                                                backgroundColor: getAbsenceColor(absenceType),
+                                                                                color: 'white',
+                                                                                borderRadius: '50%',
+                                                                                width: 20,
+                                                                                height: 20,
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center',
+                                                                                fontSize: '0.7rem',
+                                                                                fontWeight: 'bold'
+                                                                            }}>
+                                                                                {getAbsenceIcon(absenceType)}
+                                                                            </Box>
+                                                                            <Typography variant="body2" fontWeight="medium" color={getAbsenceColor(absenceType)}>
+                                                                                {getAbsenceLabel(absenceType)}
+                                                                            </Typography>
+                                                                            <Typography variant="caption" color="text.secondary">
+                                                                                Fravær
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    )
+                                                                })()
+                                                            ) : hasAvailableShiftOnDate(day) ? (
+                                                                // ← Vis ledig skift
+                                                                (() => {
+                                                                    const availableShift = getAvailableShiftOnDate(day)
+                                                                    return (
+                                                                        <Box sx={{
+                                                                            backgroundColor: '#e8f5e8',
+                                                                            borderRadius: 2,
+                                                                            p: 1.5, // Redusert fra p: 2 til p: 1.5
+                                                                            border: '2px solid #4caf50',
+                                                                            position: 'relative',
+                                                                            cursor: 'pointer',
+                                                                            transition: 'all 0.2s ease',
+                                                                            '&:hover': {
+                                                                                backgroundColor: '#c8e6c9',
+                                                                                transform: 'translateY(-2px)',
+                                                                                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
+                                                                            }
+                                                                        }}>
+                                                                            <Box sx={{
+                                                                                position: 'absolute',
+                                                                                top: -8,
+                                                                                right: -8,
+                                                                                backgroundColor: '#4caf50',
+                                                                                color: 'white',
+                                                                                borderRadius: '50%',
+                                                                                width: 20,
+                                                                                height: 20,
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center',
+                                                                                fontSize: '0.7rem',
+                                                                                fontWeight: 'bold'
+                                                                            }}>
+                                                                                !
+                                                                            </Box>
+                                                                            <Typography variant="body2" fontWeight="medium" color="#2e7d32">
+                                                                                Ledig skift
+                                                                            </Typography>
+                                                                            {availableShift && (
+                                                                                <Typography variant="caption" color="text.secondary">
+                                                                                    {formatTime(availableShift.startTime)} - {formatTime(availableShift.endTime)}
+                                                                                </Typography>
+                                                                            )}
+                                                                        </Box>
+                                                                    )
+                                                                })()
                                                             ) : hasAiShiftOnDate(employee.id, day) ? (
                                                                 // ← Vis AI-skift som "Ventende godkjenning"
                                                                 <Box sx={{
                                                                     backgroundColor: '#ffffff',
                                                                     borderRadius: 2,
-                                                                    p: 2,
+                                                                    p: 1.5, // Redusert fra p: 2 til p: 1.5
                                                                     border: '2px dashed #667eea',
                                                                     position: 'relative'
                                                                 }}>
@@ -1161,46 +1678,48 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                     </Typography>
                                                                 </Box>
                                                             ) : (
-                                                                // ← Stilig stiplet "Legg til skift" boks
-                                                                <Box 
-                                                                    sx={{
-                                                                        width: '100%',
-                                                                        height: 60,
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        cursor: 'pointer',
-                                                                        borderRadius: 2,
-                                                                        border: '2px dashed #667eea',
-                                                                        transition: 'all 0.2s ease',
-                                                                        backgroundColor: 'rgba(102, 126, 234, 0.05)',
-                                                                        '&:hover': {
-                                                                            borderColor: '#5a6fd8',
-                                                                            backgroundColor: 'rgba(102, 126, 234, 0.1)'
-                                                                        }
-                                                                    }}
-                                                                    onClick={() => handleAddShiftClick(employee.id, day)}
-                                                                >
-                                                                    <Box
+                                                                // ← Stilig stiplet "Legg til skift" boks (ikke vis hvis fravær eller ledige skift)
+                                                                !hasAbsenceOnDate(employee.id, day) && !hasAvailableShiftOnDate(day) && (
+                                                                    <Box 
                                                                         sx={{
-                                                                            width: 32,
-                                                                            height: 32,
-                                                                            borderRadius: '50%',
-                                                                            backgroundColor: '#667eea',
-                                                                            color: 'white',
+                                                                            width: '100%',
+                                                                            height: 60,
                                                                             display: 'flex',
                                                                             alignItems: 'center',
                                                                             justifyContent: 'center',
+                                                                            cursor: 'pointer',
+                                                                            borderRadius: 2,
+                                                                            border: '2px dashed #667eea',
                                                                             transition: 'all 0.2s ease',
+                                                                            backgroundColor: 'rgba(102, 126, 234, 0.05)',
                                                                             '&:hover': {
-                                                                                backgroundColor: '#5a6fd8',
-                                                                                transform: 'scale(1.1)'
+                                                                                borderColor: '#5a6fd8',
+                                                                                backgroundColor: 'rgba(102, 126, 234, 0.1)'
                                                                             }
                                                                         }}
+                                                                        onClick={() => handleAddShiftClick(employee.id, day)}
                                                                     >
-                                                                        <AddIcon sx={{ fontSize: 20 }} />
+                                                                        <Box
+                                                                            sx={{
+                                                                                width: 32,
+                                                                                height: 32,
+                                                                                borderRadius: '50%',
+                                                                                backgroundColor: '#667eea',
+                                                                                color: 'white',
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'center',
+                                                                                transition: 'all 0.2s ease',
+                                                                                '&:hover': {
+                                                                                    backgroundColor: '#5a6fd8',
+                                                                                    transform: 'scale(1.1)'
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            <AddIcon sx={{ fontSize: 20 }} />
+                                                                        </Box>
                                                                     </Box>
-                                                                </Box>
+                                                                )
                                                             )}
                                                         </TableCell>
                                                     )
@@ -1456,6 +1975,36 @@ const getDuration = (startTime: string, endTime: string) => {
                                     Avbryt
                                 </Button>
                                 <Button
+                                    onClick={() => {
+                                        // Sett fravær-formularen med data fra rediger-skjemaet
+                                        setAbsenceForm({
+                                            userId: editForm.userId,
+                                            fromDate: editForm.date,
+                                            toDate: editForm.date,
+                                            type: 'SICK',
+                                            reason: 'Satt i fravær fra rediger-skift',
+                                            shiftId: editForm.id
+                                        })
+                                        setShowEditForm(false)
+                                        setShowAbsenceForm(true)
+                                    }}
+                                    startIcon={<PersonIcon />}
+                                    variant="outlined"
+                                    color="warning"
+                                    sx={{ 
+                                        mr: 'auto',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                                            borderColor: 'warning.main',
+                                            transform: 'translateY(-1px)',
+                                            boxShadow: '0 4px 8px rgba(255, 152, 0, 0.2)'
+                                        },
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    Sett i fravær
+                                </Button>
+                                <Button
                                     type="submit"
                                     variant="contained"
                                     startIcon={<SaveIcon />}
@@ -1467,6 +2016,267 @@ const getDuration = (startTime: string, endTime: string) => {
                                     }}
                                 >
                                     Oppdater skift
+                                </Button>
+                            </DialogActions>
+                        </form>
+                    </Dialog>
+
+                    {/* Fraværsformular */}
+                    <Dialog 
+                        open={showAbsenceForm} 
+                        onClose={() => setShowAbsenceForm(false)}
+                        maxWidth="md"
+                        fullWidth
+                    >
+                        <DialogTitle sx={{ pb: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <PersonIcon color="warning" />
+                                <Typography variant="h6" fontWeight="bold">
+                                    Sett ansatt i fravær
+                                </Typography>
+                            </Box>
+                            {(() => {
+                                const employee = employees.find(emp => emp.id === absenceForm.userId)
+                                return employee ? (
+                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                        {employee.name}
+                                    </Typography>
+                                ) : null
+                            })()}
+                        </DialogTitle>
+                        <form onSubmit={handleAbsenceSubmit}>
+                            <DialogContent>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12}>
+                                        <Alert severity="info" sx={{ mb: 2 }}>
+                                            Dette vil fjerne skiftet og sette ansatten i fravær for den valgte perioden.
+                                        </Alert>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Ansatt</InputLabel>
+                                            <Select
+                                                name="userId"
+                                                value={absenceForm.userId}
+                                                onChange={handleAbsenceChange}
+                                                label="Ansatt"
+                                                required
+                                            >
+                                                <MenuItem value="">
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem', bgcolor: 'grey.400' }}>
+                                                            ?
+                                                        </Avatar>
+                                                        Ledig skift (ingen ansatt)
+                                                    </Box>
+                                                </MenuItem>
+                                                {employees.map(emp => (
+                                                    <MenuItem key={emp.id} value={emp.id}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
+                                                                {emp.name.charAt(0)}
+                                                            </Avatar>
+                                                            {emp.name}
+                                                        </Box>
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Fraværstype</InputLabel>
+                                            <Select
+                                                name="type"
+                                                value={absenceForm.type}
+                                                onChange={handleAbsenceChange}
+                                                label="Fraværstype"
+                                                required
+                                            >
+                                                <MenuItem value="SICK">Sykdom</MenuItem>
+                                                <MenuItem value="VACATION">Ferie</MenuItem>
+                                                <MenuItem value="OTHER">Annet</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Fra dato"
+                                            name="fromDate"
+                                            type="date"
+                                            value={absenceForm.fromDate}
+                                            onChange={handleAbsenceChange}
+                                            required
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Til dato"
+                                            name="toDate"
+                                            type="date"
+                                            value={absenceForm.toDate}
+                                            onChange={handleAbsenceChange}
+                                            required
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Årsak til fravær (valgfritt)"
+                                            name="reason"
+                                            value={absenceForm.reason}
+                                            onChange={handleAbsenceChange}
+                                            variant="outlined"
+                                            multiline
+                                            rows={3}
+                                            placeholder="F.eks. Ringer og sier at jeg ikke kan jobbe i dag"
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </DialogContent>
+                            <DialogActions sx={{ p: 3, pt: 1 }}>
+                                <Button
+                                    onClick={() => setShowAbsenceForm(false)}
+                                    startIcon={<CancelIcon />}
+                                    variant="outlined"
+                                >
+                                    Avbryt
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    color="warning"
+                                    startIcon={<PersonIcon />}
+                                    sx={{
+                                        background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
+                                        '&:hover': {
+                                            background: 'linear-gradient(135deg, #f57c00 0%, #ef6c00 100%)',
+                                        }
+                                    }}
+                                >
+                                    Sett i fravær
+                                </Button>
+                            </DialogActions>
+                        </form>
+                    </Dialog>
+
+                    {/* Ledig skift formular */}
+                    <Dialog 
+                        open={showAvailableShiftForm} 
+                        onClose={() => setShowAvailableShiftForm(false)}
+                        maxWidth="md"
+                        fullWidth
+                    >
+                        <DialogTitle sx={{ pb: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <AddIcon color="success" />
+                                <Typography variant="h6" fontWeight="bold">
+                                    Legg ut ledig skift
+                                </Typography>
+                            </Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                Dette skiftet vil vises til alle ansatte som ledig for påmelding
+                            </Typography>
+                        </DialogTitle>
+                        <form onSubmit={handleAvailableShiftSubmit}>
+                            <DialogContent>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12}>
+                                        <Alert severity="info" sx={{ mb: 2 }}>
+                                            Ledige skift vises til alle ansatte med et utropstegn (!) i kalenderen.
+                                        </Alert>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Dato"
+                                            name="date"
+                                            type="date"
+                                            value={availableShiftForm.date}
+                                            onChange={handleAvailableShiftChange}
+                                            required
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Starttid"
+                                            name="startTime"
+                                            type="time"
+                                            value={availableShiftForm.startTime}
+                                            onChange={handleAvailableShiftChange}
+                                            required
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Sluttid"
+                                            name="endTime"
+                                            type="time"
+                                            value={availableShiftForm.endTime}
+                                            onChange={handleAvailableShiftChange}
+                                            required
+                                            variant="outlined"
+                                            InputLabelProps={{ shrink: true }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Lokasjon (valgfritt)"
+                                            name="location"
+                                            value={availableShiftForm.location}
+                                            onChange={handleAvailableShiftChange}
+                                            variant="outlined"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Beskrivelse (valgfritt)"
+                                            name="notes"
+                                            value={availableShiftForm.notes}
+                                            onChange={handleAvailableShiftChange}
+                                            variant="outlined"
+                                            multiline
+                                            rows={3}
+                                            placeholder="F.eks. Ekstra hjelp trengs, bonus for overtid, etc."
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </DialogContent>
+                            <DialogActions sx={{ p: 3, pt: 1 }}>
+                                <Button
+                                    onClick={() => setShowAvailableShiftForm(false)}
+                                    startIcon={<CancelIcon />}
+                                    variant="outlined"
+                                >
+                                    Avbryt
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    color="success"
+                                    startIcon={<AddIcon />}
+                                    sx={{
+                                        backgroundColor: '#667eea',
+                                        '&:hover': {
+                                            backgroundColor: '#1565c0',
+                                        }
+                                    }}
+                                >
+                                    Legg ut ledig skift
                                 </Button>
                             </DialogActions>
                         </form>

@@ -5,5 +5,4 @@ export declare class CreateUserDto {
     role?: string;
     phone?: string;
     hireDate?: string;
-    positionPercentage?: number;
 }

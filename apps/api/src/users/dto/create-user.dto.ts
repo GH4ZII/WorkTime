@@ -5,6 +5,5 @@
   role?: string;
   phone?: string;
   hireDate?: string;
-  // ← Kun stillingsprosent, ikke maks timer
-  positionPercentage?: number;
+  // positionPercentage removed - not in database
 }

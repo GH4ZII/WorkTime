@@ -54,7 +54,7 @@ export class AiController {
         name: emp.name, 
         role: emp.role, 
         preferredShifts: [], 
-        positionPercentage: emp.positionPercentage || 100
+        positionPercentage: 100
       }));
       
       const timeOffRequests = dbTimeOffRequests.map(req => ({
@@ -136,7 +136,7 @@ export class AiController {
         const dbTimeOffRequests = await this.timeOffReqService.findAll();
 
         const employees = dbEmployees.map(emp => ({
-            id: emp.id, name: emp.name, role: emp.role, preferredShifts: [], positionPercentage: emp.positionPercentage || 100
+            id: emp.id, name: emp.name, role: emp.role, preferredShifts: [], positionPercentage: 100
         }));
         const timeOffRequests = dbTimeOffRequests.map(req => ({
             employeeId: req.userId, startDate: req.fromDate, endDate: req.toDate,

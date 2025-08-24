@@ -14,6 +14,7 @@ const shifts_module_1 = require("./shifts/shifts.module");
 const users_module_1 = require("./users/users.module");
 const timeOffReq_module_1 = require("./timeOffReq/timeOffReq.module");
 const shiftSwapReq_module_1 = require("./shiftSwapReq/shiftSwapReq.module");
+const shift_applications_module_1 = require("./shift-applications/shift-applications.module");
 const worklog_module_1 = require("./worklog/worklog.module");
 const notification_module_1 = require("./notifications/notification.module");
 const auth_module_1 = require("./auth/auth.module");
@@ -29,6 +30,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             timeOffReq_module_1.TimeOffReqModule,
             shiftSwapReq_module_1.ShiftSwapReqModule,
+            shift_applications_module_1.ShiftApplicationsModule,
             worklog_module_1.WorklogModule,
             notification_module_1.NotificationModule,
             auth_module_1.AuthModule,

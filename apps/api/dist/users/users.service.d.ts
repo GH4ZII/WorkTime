@@ -13,8 +13,7 @@ export declare class UsersService {
         email: string;
         phone: string | null;
         passwordHash: string;
-        role: string;
-        positionPercentage: number;
+        role: import(".prisma/client").$Enums.Role;
         hireDate: Date;
     }>;
     findAll(): Promise<{
@@ -22,8 +21,7 @@ export declare class UsersService {
         name: string;
         email: string;
         phone: string | null;
-        role: string;
-        positionPercentage: number;
+        role: import(".prisma/client").$Enums.Role;
         hireDate: Date;
     }[]>;
     findOne(id: string): Promise<{
@@ -34,8 +32,7 @@ export declare class UsersService {
         email: string;
         phone: string | null;
         passwordHash: string;
-        role: string;
-        positionPercentage: number;
+        role: import(".prisma/client").$Enums.Role;
         hireDate: Date;
     } | null>;
     update(id: string, data: UpdateUserDto): Promise<{
@@ -46,8 +43,7 @@ export declare class UsersService {
         email: string;
         phone: string | null;
         passwordHash: string;
-        role: string;
-        positionPercentage: number;
+        role: import(".prisma/client").$Enums.Role;
         hireDate: Date;
     }>;
     remove(id: string): Promise<{
@@ -58,8 +54,7 @@ export declare class UsersService {
         email: string;
         phone: string | null;
         passwordHash: string;
-        role: string;
-        positionPercentage: number;
+        role: import(".prisma/client").$Enums.Role;
         hireDate: Date;
     }>;
     findOneByEmail(email: string): Promise<User | null>;
@@ -71,8 +66,7 @@ export declare class UsersService {
         email: string;
         phone: string | null;
         passwordHash: string;
-        role: string;
-        positionPercentage: number;
+        role: import(".prisma/client").$Enums.Role;
         hireDate: Date;
     }>;
 }

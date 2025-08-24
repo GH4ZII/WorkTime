@@ -10,7 +10,20 @@ export class ShiftsService {
 
     // 1) Lage nytt skift
     async create(data: CreateShiftDto) {
-        return this.prisma.shift.create({ data });
+        // Hvis det er et ledig skift, opprett data uten userId
+        if (data.isAvailableShift || !data.userId) {
+            const shiftData = {
+                startTime: data.startTime,
+                endTime: data.endTime,
+                location: data.location,
+                notes: data.notes,
+                createdBy: data.createdBy,
+                isAvailableShift: true
+            } as any;
+            return this.prisma.shift.create({ data: shiftData });
+        }
+        
+        return this.prisma.shift.create({ data: data as any });
     }
 
     // 2) Hente alle skift

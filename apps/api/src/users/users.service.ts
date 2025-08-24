@@ -18,8 +18,7 @@ export class UsersService {
                 phone: data.phone,
                 role: data.role as Role,
                 hireDate: data.hireDate ? new Date(data.hireDate) : new Date(),
-                // ← Kun stillingsprosent, ikke maks timer
-                positionPercentage: data.positionPercentage || 100,
+                // positionPercentage removed - not in database
             },
         });
     }
@@ -34,8 +33,7 @@ export class UsersService {
                 phone: true,
                 role: true,
                 hireDate: true,
-                // ← Kun stillingsprosent, ikke maks timer
-                positionPercentage: true,
+                // positionPercentage removed - not in database
             },
             orderBy: {
                 name: 'asc',

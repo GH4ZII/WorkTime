@@ -18,12 +18,13 @@ const { width } = Dimensions.get('window');
 
 interface Shift {
   id: string;
-  userId: string;
+  userId?: string;
   startTime: string;
   endTime: string;
   location?: string;
   notes?: string;
   status: string;
+  isAvailableShift?: boolean;
   user?: {
     id: string;
     name: string;
@@ -45,12 +46,19 @@ const HomeScreen: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCoworkersList, setShowCoworkersList] = useState(false);
+  
+  // ← Ny: State for ledige skift
+  const [availableShifts, setAvailableShifts] = useState<Shift[]>([]);
+  const [showAvailableShifts, setShowAvailableShifts] = useState(false);
+  const [myApplications, setMyApplications] = useState<any[]>([]);
 
   useEffect(() => {
     // Sjekk om brukeren er logget inn før vi henter data
     if (user && token) {
       fetchShifts();
       fetchEmployees();
+      fetchAvailableShifts();
+      fetchMyApplications();
     } else {
       setLoading(false);
     }
@@ -88,6 +96,42 @@ const HomeScreen: React.FC = () => {
     }
   };
 
+  // ← Ny: Hent ledige skift
+  const fetchAvailableShifts = async () => {
+    if (!token) return;
+    
+    try {
+      const response = await axios.get(API_ENDPOINTS.SHIFTS, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Filtrer ut ledige skift basert på isAvailableShift feltet
+      const available = response.data.filter((shift: Shift) => 
+        shift.isAvailableShift === true
+      );
+      setAvailableShifts(available);
+    } catch (error) {
+      console.error('Error fetching available shifts:', error);
+    }
+  };
+
+  // ← Ny: Hent brukerens egne søknader
+  const fetchMyApplications = async () => {
+    if (!token) return;
+    
+    try {
+      const response = await axios.get(`${API_ENDPOINTS.BASE_URL}/shift-applications/my-applications`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setMyApplications(response.data);
+    } catch (error) {
+      console.error('Error fetching my applications:', error);
+    }
+  };
+
   // Hent kun brukerens egne skift
   const getUserShifts = () => {
     if (!user?.id) {
@@ -109,6 +153,29 @@ const HomeScreen: React.FC = () => {
     });
     
     return Array.from(uniqueDates);
+  };
+
+  // ← Ny: Hent unike datoer med ledige skift
+  const getDatesWithAvailableShifts = () => {
+    const uniqueDates = new Set();
+    
+    availableShifts.forEach(shift => {
+      const dateStr = new Date(shift.startTime).toISOString().split('T')[0];
+      uniqueDates.add(dateStr);
+    });
+    
+    return Array.from(uniqueDates);
+  };
+
+  // ← Ny: Hent ledige skift for valgt dato
+  const getAvailableShiftsForSelectedDate = () => {
+    if (!selectedDate) return [];
+    const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    
+    return availableShifts.filter(shift => {
+      const shiftDateStr = new Date(shift.startTime).toISOString().split('T')[0];
+      return shiftDateStr === selectedDateStr;
+    });
   };
 
   // Hent skift for valgt dato
@@ -170,6 +237,39 @@ const HomeScreen: React.FC = () => {
     const newDate = new Date(selectedDate);
     newDate.setMonth(selectedDate.getMonth() + 1);
     setSelectedDate(newDate);
+  };
+
+  // Håndter søknad om ledig skift
+  const handleApplyForShift = async (shift: Shift) => {
+    try {
+      console.log('Søker om skift:', shift.id);
+      
+      // Send forespørsel til backend
+      const response = await axios.post(
+        `${API_ENDPOINTS.BASE_URL}/shift-applications`,
+        {
+          shiftId: shift.id,
+          message: `Jeg ønsker å jobbe dette skiftet: ${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}`,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (response.status === 201) {
+        alert(`Du har søkt om skiftet ${formatTime(shift.startTime)} - ${formatTime(shift.endTime)}. Vi tar kontakt snart!`);
+        // Fjern skiftet fra listen over ledige skift
+        setAvailableShifts(prev => prev.filter(s => s.id !== shift.id));
+        // Oppdater ledige skift
+        fetchAvailableShifts();
+      }
+      
+    } catch (error) {
+      console.error('Feil ved søknad om skift:', error);
+      alert('Kunne ikke sende søknad. Prøv igjen senere.');
+    }
   };
 
   const getCalendarDays = () => {
@@ -239,7 +339,9 @@ const HomeScreen: React.FC = () => {
   };
 
   const datesWithShifts = getDatesWithShifts();
+  const datesWithAvailableShifts = getDatesWithAvailableShifts();
   const shiftsForSelectedDate = getShiftsForSelectedDate();
+  const availableShiftsForSelectedDate = getAvailableShiftsForSelectedDate();
   const coworkersForSelectedDate = getCoworkersForSelectedDate();
   const totalWorkHours = getTotalWorkHours();
 
@@ -313,7 +415,20 @@ const HomeScreen: React.FC = () => {
                       day.date.toDateString() === selectedDate.toDateString() && 
                       styles.selectedDay
                     ]}
-                    onPress={() => day.date && setSelectedDate(day.date)}
+                    onPress={() => {
+                      if (day.date) {
+                        setSelectedDate(day.date);
+                        // Vis ledige skift automatisk hvis dagen har ledige skift
+                        const dateStr = day.date.toISOString().split('T')[0];
+                        if (datesWithAvailableShifts.includes(dateStr)) {
+                          setShowAvailableShifts(true);
+                          setShowCoworkersList(false);
+                        } else {
+                          setShowAvailableShifts(false);
+                          setShowCoworkersList(false);
+                        }
+                      }
+                    }}
                     disabled={!day.date}
                   >
                     {day.date && (
@@ -327,10 +442,16 @@ const HomeScreen: React.FC = () => {
                         ]}>
                           {day.date.getDate()}
                         </Text>
-                        {/* Vis kun 1 prikk per dag hvis brukeren har skift */}
+                        {/* Vis prikk for egne skift */}
                         {day.date && datesWithShifts.includes(day.date.toISOString().split('T')[0]) && (
                           <View style={styles.shiftDot}>
                             <Text style={{ color: 'white', fontSize: 8 }}>•</Text>
+                          </View>
+                        )}
+                        {/* Vis utropstegn for ledige skift */}
+                        {day.date && datesWithAvailableShifts.includes(day.date.toISOString().split('T')[0]) && (
+                          <View style={styles.availableShiftIndicator}>
+                            <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>!</Text>
                           </View>
                         )}
                       </View>
@@ -341,12 +462,12 @@ const HomeScreen: React.FC = () => {
             </View>
 
             {/* Informasjon under kalenderen - samlet i samme kort */}
-            {selectedDate && (shiftsForSelectedDate.length > 0 || coworkersForSelectedDate.length > 0) && (
+            {selectedDate && (shiftsForSelectedDate.length > 0 || coworkersForSelectedDate.length > 0 || availableShiftsForSelectedDate.length > 0) && (
               <View style={styles.infoSection}>
-                {/* Vis enten arbeidstid ELLER medarbeider-liste, ikke begge samtidig */}
-                {!showCoworkersList ? (
-                  // Vis arbeidstid når medarbeider-listen ikke er synlig
-                  shiftsForSelectedDate.length > 0 && (
+                {/* Vis enten arbeidstid ELLER medarbeider-liste ELLER ledige skift, ikke flere samtidig */}
+                {!showCoworkersList && !showAvailableShifts ? (
+                  // Vis arbeidstid ELLER ledige skift som standard
+                  shiftsForSelectedDate.length > 0 ? (
                     <View style={styles.shiftTimeContainer}>
                       <Text style={styles.shiftTimeText}>
                         {formatTime(shiftsForSelectedDate[0].startTime)} - {formatTime(shiftsForSelectedDate[0].endTime)}
@@ -355,12 +476,45 @@ const HomeScreen: React.FC = () => {
                         🕐 Du jobber i dag
                       </Text>
                     </View>
-                  )
-                ) : (
+                  ) : availableShiftsForSelectedDate.length > 0 ? (
+                    // Vis ledige skift automatisk hvis ingen egne skift
+                    <View style={styles.availableShiftsList}>
+                      <Text style={styles.availableShiftsListTitle}>Ledige skift denne dagen:</Text>
+                      {availableShiftsForSelectedDate
+                        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+                        .map((shift, index) => (
+                          <View key={index} style={styles.availableShiftItem}>
+                            <Text style={styles.availableShiftTime}>
+                              🕐 {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
+                            </Text>
+                            <Text style={styles.availableShiftDuration}>
+                              ({getDuration(shift.startTime, shift.endTime)} timer)
+                            </Text>
+                            {shift.location && (
+                              <Text style={styles.availableShiftLocation}>
+                                🗺️ {shift.location}
+                              </Text>
+                            )}
+                            {shift.notes && (
+                              <Text style={styles.availableShiftNotes}>
+                                📝 {shift.notes}
+                              </Text>
+                            )}
+                            <TouchableOpacity 
+                              style={styles.applyButton}
+                              onPress={() => handleApplyForShift(shift)}
+                            >
+                              <Text style={styles.applyButtonText}>Meld deg på</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                    </View>
+                  ) : null
+                ) : showCoworkersList ? (
                   // Vis medarbeider-liste når knappen er trykket
                   coworkersForSelectedDate.length > 0 && (
                     <View style={styles.coworkersList}>
-                      <Text style={styles.coworkersListTitle}>Medarbeidere denne dagen:</Text>
+                      <Text style={styles.coworkersTitle}>Medarbeidere denne dagen:</Text>
                       {coworkersForSelectedDate
                         .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
                         .map((coworker, index) => (
@@ -378,21 +532,81 @@ const HomeScreen: React.FC = () => {
                         ))}
                     </View>
                   )
+                ) : (
+                  // Vis ledige skift når showAvailableShifts er true
+                  availableShiftsForSelectedDate.length > 0 && (
+                    <View style={styles.availableShiftsList}>
+                      <Text style={styles.availableShiftsListTitle}>Ledige skift denne dagen:</Text>
+                      {availableShiftsForSelectedDate
+                        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+                        .map((shift, index) => (
+                          <View key={index} style={styles.availableShiftItem}>
+                            <Text style={styles.availableShiftTime}>
+                              🕐 {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
+                            </Text>
+                            <Text style={styles.availableShiftDuration}>
+                              ({getDuration(shift.startTime, shift.endTime)} timer)
+                            </Text>
+                            {shift.location && (
+                              <Text style={styles.availableShiftLocation}>
+                                🗺️ {shift.location}
+                              </Text>
+                            )}
+                            {shift.notes && (
+                              <Text style={styles.availableShiftNotes}>
+                                📝 {shift.notes}
+                              </Text>
+                            )}
+                            <TouchableOpacity 
+                              style={styles.applyButton}
+                              onPress={() => handleApplyForShift(shift)}
+                            >
+                              <Text style={styles.applyButtonText}>Meld deg på</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                    </View>
+                  )
                 )}
 
-                {/* Knapp for å vise/skjule medarbeidere */}
-                {coworkersForSelectedDate.length > 0 && (
-                  <View style={styles.coworkersButtonContainer}>
+                {/* Knapper for å vise/skjule medarbeidere og ledige skift */}
+                <View style={styles.buttonContainer}>
+                  {coworkersForSelectedDate.length > 0 && (
                     <TouchableOpacity 
-                      style={styles.coworkersButton}
-                      onPress={() => setShowCoworkersList(!showCoworkersList)}
+                      style={[
+                        styles.actionButton,
+                        showCoworkersList && styles.activeButton
+                      ]}
+                      onPress={() => {
+                        setShowCoworkersList(!showCoworkersList);
+                        setShowAvailableShifts(false);
+                      }}
                     >
-                      <Text style={styles.coworkersButtonText}>
-                        {showCoworkersList ? 'Tilbake til arbeidstid' : 'Se medarbeidere'}
+                      <Text style={[
+                        styles.actionButtonText,
+                        showCoworkersList && styles.activeButtonText
+                      ]}>
+                        👥 Medarbeidere
                       </Text>
                     </TouchableOpacity>
-                  </View>
-                )}
+                  )}
+                  
+
+                  
+                  {(showCoworkersList || showAvailableShifts) && (
+                    <TouchableOpacity 
+                      style={[styles.actionButton, styles.backButton]}
+                      onPress={() => {
+                        setShowCoworkersList(false);
+                        setShowAvailableShifts(false);
+                      }}
+                    >
+                      <Text style={styles.actionButtonText}>
+                        ↩️ Tilbake
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
             )}
           </View>
@@ -495,6 +709,18 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#667eea',
     marginTop: 2,
+  },
+  availableShiftIndicator: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#4caf50',
+    marginTop: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: -8,
+    right: -8,
   },
   summaryCard: {
     marginBottom: 16,
@@ -663,14 +889,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
     // Fjernet paddingTop og borderTopWidth for å unngå doble streker
   },
-  coworkersListTitle: {
+  coworkersListTitleOrig: {
     fontSize: 18,
     fontWeight: '600',
     color: '#667eea',
     marginBottom: 16,
     textAlign: 'center',
   },
-  coworkerItem: {
+  coworkerItemOrig: {
     paddingVertical: 16,
     paddingHorizontal: 20,
     backgroundColor: '#f8f9fa',
@@ -682,20 +908,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  coworkerName: {
+  coworkerNameOrig: {
     fontSize: 18,
     fontWeight: '600',
     color: '#667eea',
     marginBottom: 6,
     textAlign: 'center',
   },
-  coworkerTime: {
+  coworkerTimeOrig: {
     fontSize: 16,
     color: '#667eea',
     marginBottom: 4,
     textAlign: 'center',
   },
-  coworkerLocation: {
+  coworkerLocationOrig: {
     fontSize: 16,
     color: '#667eea',
     textAlign: 'center',
@@ -754,12 +980,119 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',  // Litt lysere linje
   },
-  coworkersListTitle: {
+  
+  // Nye stiler for ledige skift
+  availableShiftsList: {
+    marginTop: 16,
+  },
+  availableShiftsListTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#4caf50',
     marginBottom: 12,
     textAlign: 'center',
+  },
+  availableShiftItem: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: '#e8f5e8',
+    marginBottom: 12,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4caf50',
+    minHeight: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  availableShiftTime: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2e7d32',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  availableShiftDuration: {
+    fontSize: 14,
+    color: '#4caf50',
+    marginBottom: 8,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  availableShiftLocation: {
+    fontSize: 14,
+    color: '#2e7d32',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  availableShiftNotes: {
+    fontSize: 14,
+    color: '#2e7d32',
+    marginBottom: 12,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  applyButton: {
+    backgroundColor: '#4caf50',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    elevation: 3,
+    shadowColor: '#4caf50',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  applyButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  
+  // Nye stiler for knapper
+  buttonContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+    gap: 8,
+  },
+  actionButton: {
+    backgroundColor: '#667eea',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    marginHorizontal: 4,
+    marginVertical: 4,
+    elevation: 2,
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  actionButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  availableShiftButton: {
+    backgroundColor: '#4caf50',
+  },
+  activeButton: {
+    backgroundColor: '#5a6fd8',
+    elevation: 4,
+  },
+  activeAvailableButton: {
+    backgroundColor: '#388e3c',
+    elevation: 4,
+  },
+  activeButtonText: {
+    fontWeight: 'bold',
+  },
+  backButton: {
+    backgroundColor: '#757575',
   },
 });
 

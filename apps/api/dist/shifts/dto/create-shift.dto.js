@@ -8,6 +8,7 @@ class CreateShiftDto {
     location;
     notes;
     createdBy;
+    isAvailableShift;
 }
 exports.CreateShiftDto = CreateShiftDto;
 //# sourceMappingURL=create-shift.dto.js.map

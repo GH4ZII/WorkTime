@@ -38,7 +38,8 @@ import {
     Work as WorkIcon,
     CalendarToday as CalendarIcon,
     Save as SaveIcon,
-    Cancel as CancelIcon
+    Cancel as CancelIcon,
+    Search as SearchIcon
 } from '@mui/icons-material';
 
 interface Employee {
@@ -70,6 +71,7 @@ const CoWorkerPage: NextPage = () => {
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
     const [localError, setLocalError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Form state for ny ansatt
     const [form, setForm] = useState<CreateEmployeeDto>({
@@ -92,6 +94,15 @@ const CoWorkerPage: NextPage = () => {
         // ← Kun stillingsprosent, ikke maks timer
         positionPercentage: 100
     });
+
+    // Filtrer og sorter ansatte
+    const filteredAndSortedEmployees = employees
+        .filter(employee => 
+            employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (employee.phone && employee.phone.includes(searchTerm))
+        )
+        .sort((a, b) => a.name.localeCompare(b.name, 'nb-NO'));
 
     useEffect(() => {
         refreshEmployees();
@@ -237,38 +248,7 @@ const CoWorkerPage: NextPage = () => {
                     </Alert>
                 )}
 
-                {/* Header */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                    <Box>
-                        <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
-                            Medarbeider Administrasjon
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Administrer ansatte og deres roller
-                        </Typography>
-                    </Box>
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => setShowForm(true)}
-                        sx={{
-                            py: 1.5,
-                            px: 3,
-                            borderRadius: 2,
-                            fontSize: '1rem',
-                            fontWeight: 'bold',
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            '&:hover': {
-                                background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
-                                transform: 'translateY(-1px)',
-                                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
-                            },
-                            transition: 'all 0.3s ease',
-                        }}
-                    >
-                        Legg til ny ansatt
-                    </Button>
-                </Box>
+
 
                 {/* Skjema for ny ansatt */}
                 <Dialog 
@@ -430,9 +410,9 @@ const CoWorkerPage: NextPage = () => {
                                 variant="contained"
                                 startIcon={<SaveIcon />}
                                 sx={{
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    background: '#667eea',
                                     '&:hover': {
-                                        background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
+                                        background: '#667eea',
                                     }
                                 }}
                             >
@@ -597,27 +577,71 @@ const CoWorkerPage: NextPage = () => {
                 {/* Oversikt over ansatte */}
                 <Card elevation={2}>
                     <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <WorkIcon sx={{ mr: 1, color: 'primary.main' }} />
-                            <Typography variant="h5" component="h2" fontWeight="bold">
-                                Oversikt over ansatte ({employees.length})
-                            </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <WorkIcon sx={{ mr: 1, color: 'primary.main' }} />
+                                <Typography variant="h5" component="h2" fontWeight="bold">
+                                    Oversikt over ansatte ({filteredAndSortedEmployees.length})
+                                </Typography>
+                            </Box>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                onClick={() => setShowForm(true)}
+                                sx={{
+                                    py: 1.5,
+                                    px: 3,
+                                    borderRadius: 2,
+                                    fontSize: '1rem',
+                                    fontWeight: 'bold',
+                                    backgroundColor: '#667eea',
+                                    '&:hover': {
+                                        backgroundColor: '#1565c0',
+                                        transform: 'translateY(-1px)',
+                                        boxShadow: '0 8px 25px rgba(25, 118, 210, 0.3)',
+                                    },
+                                    transition: 'all 0.3s ease',
+                                }}
+                            >
+                                Legg til ny ansatt
+                            </Button>
                         </Box>
 
-                        {employees.length === 0 ? (
+                        {/* Søkefelt */}
+                        <Box sx={{ mb: 3 }}>
+                            <TextField
+                                fullWidth
+                                placeholder="Søk etter navn, e-post eller telefon..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                variant="outlined"
+                                size="small"
+                                InputProps={{
+                                    startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />,
+                                }}
+                                sx={{
+                                    maxWidth: 400,
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 2,
+                                    }
+                                }}
+                            />
+                        </Box>
+
+                        {filteredAndSortedEmployees.length === 0 ? (
                             <Box sx={{ textAlign: 'center', py: 4 }}>
                                 <PersonIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                                 <Typography variant="h6" color="text.secondary">
-                                    Ingen ansatte funnet
+                                    {searchTerm ? 'Ingen ansatte funnet for søket' : 'Ingen ansatte funnet'}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    Legg til din første ansatt for å komme i gang
+                                    {searchTerm ? 'Prøv å endre søkekriteriene' : 'Legg til din første ansatt for å komme i gang'}
                                 </Typography>
                             </Box>
                         ) : (
-                            <Grid container spacing={3}>
-                                {employees.map(employee => (
-                                    <Grid item xs={12} sm={6} lg={4} key={employee.id}>
+                            <Grid container spacing={2}>
+                                {filteredAndSortedEmployees.map(employee => (
+                                    <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={employee.id}>
                                         <Card 
                                             elevation={1}
                                             sx={{
@@ -629,14 +653,14 @@ const CoWorkerPage: NextPage = () => {
                                                 }
                                             }}
                                         >
-                                            <CardContent>
+                                            <CardContent sx={{ p: 2 }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                                     <Avatar 
                                                         sx={{ 
                                                             bgcolor: 'primary.main', 
                                                             mr: 2,
-                                                            width: 48,
-                                                            height: 48
+                                                            width: 40,
+                                                            height: 40
                                                         }}
                                                     >
                                                         {employee.name.charAt(0)}

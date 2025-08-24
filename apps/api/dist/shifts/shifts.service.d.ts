@@ -6,7 +6,7 @@ export declare class ShiftsService {
     constructor(prisma: PrismaService);
     create(data: CreateShiftDto): Promise<{
         id: string;
-        userId: string;
+        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -15,16 +15,17 @@ export declare class ShiftsService {
         createdBy: string;
         createdAt: Date;
         updatedAt: Date;
+        isAvailableShift: boolean;
     }>;
     findAll(): Promise<({
         user: {
             id: string;
             name: string;
             email: string;
-        };
+        } | null;
     } & {
         id: string;
-        userId: string;
+        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -33,10 +34,11 @@ export declare class ShiftsService {
         createdBy: string;
         createdAt: Date;
         updatedAt: Date;
+        isAvailableShift: boolean;
     })[]>;
     findOne(id: string): Promise<{
         id: string;
-        userId: string;
+        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -45,10 +47,11 @@ export declare class ShiftsService {
         createdBy: string;
         createdAt: Date;
         updatedAt: Date;
+        isAvailableShift: boolean;
     } | null>;
     update(id: string, data: UpdateShiftDto): Promise<{
         id: string;
-        userId: string;
+        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -57,10 +60,11 @@ export declare class ShiftsService {
         createdBy: string;
         createdAt: Date;
         updatedAt: Date;
+        isAvailableShift: boolean;
     }>;
     remove(id: string): Promise<{
         id: string;
-        userId: string;
+        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -69,5 +73,6 @@ export declare class ShiftsService {
         createdBy: string;
         createdAt: Date;
         updatedAt: Date;
+        isAvailableShift: boolean;
     }>;
 }

@@ -11,10 +11,10 @@ export declare class ShiftSwapReqController {
         reason: string | null;
         requestedById: string;
         fromShiftId: string;
-        swapType: import(".prisma/client").$Enums.SwapRequestType;
         swapWithId: string | null;
         toShiftId: string | null;
         requestedAt: Date;
+        swapType: import(".prisma/client").$Enums.SwapRequestType;
     }>;
     findAll(): Promise<{
         id: string;
@@ -23,10 +23,10 @@ export declare class ShiftSwapReqController {
         reason: string | null;
         requestedById: string;
         fromShiftId: string;
-        swapType: import(".prisma/client").$Enums.SwapRequestType;
         swapWithId: string | null;
         toShiftId: string | null;
         requestedAt: Date;
+        swapType: import(".prisma/client").$Enums.SwapRequestType;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
@@ -35,10 +35,10 @@ export declare class ShiftSwapReqController {
         reason: string | null;
         requestedById: string;
         fromShiftId: string;
-        swapType: import(".prisma/client").$Enums.SwapRequestType;
         swapWithId: string | null;
         toShiftId: string | null;
         requestedAt: Date;
+        swapType: import(".prisma/client").$Enums.SwapRequestType;
     } | null>;
     update(id: string, dto: UpdateShiftSwapRequestDto): Promise<{
         id: string;
@@ -47,10 +47,10 @@ export declare class ShiftSwapReqController {
         reason: string | null;
         requestedById: string;
         fromShiftId: string;
-        swapType: import(".prisma/client").$Enums.SwapRequestType;
         swapWithId: string | null;
         toShiftId: string | null;
         requestedAt: Date;
+        swapType: import(".prisma/client").$Enums.SwapRequestType;
     }>;
     remove(id: string): Promise<{
         id: string;
@@ -59,10 +59,10 @@ export declare class ShiftSwapReqController {
         reason: string | null;
         requestedById: string;
         fromShiftId: string;
-        swapType: import(".prisma/client").$Enums.SwapRequestType;
         swapWithId: string | null;
         toShiftId: string | null;
         requestedAt: Date;
+        swapType: import(".prisma/client").$Enums.SwapRequestType;
     }>;
     approve(id: string): Promise<{
         id: string;
@@ -71,10 +71,10 @@ export declare class ShiftSwapReqController {
         reason: string | null;
         requestedById: string;
         fromShiftId: string;
-        swapType: import(".prisma/client").$Enums.SwapRequestType;
         swapWithId: string | null;
         toShiftId: string | null;
         requestedAt: Date;
+        swapType: import(".prisma/client").$Enums.SwapRequestType;
     }>;
     reject(id: string): Promise<{
         id: string;
@@ -83,9 +83,9 @@ export declare class ShiftSwapReqController {
         reason: string | null;
         requestedById: string;
         fromShiftId: string;
-        swapType: import(".prisma/client").$Enums.SwapRequestType;
         swapWithId: string | null;
         toShiftId: string | null;
         requestedAt: Date;
+        swapType: import(".prisma/client").$Enums.SwapRequestType;
     }>;
 }

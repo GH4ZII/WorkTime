@@ -3,7 +3,7 @@ export interface Employee {
     name: string;
     role: string;
     preferredShifts?: string[];
-    positionPercentage: number;
+    positionPercentage?: number;
 }
 export interface TimeOffRequest {
     employeeId: string;

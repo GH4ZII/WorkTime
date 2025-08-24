@@ -27,7 +27,6 @@ let UsersService = class UsersService {
                 phone: data.phone,
                 role: data.role,
                 hireDate: data.hireDate ? new Date(data.hireDate) : new Date(),
-                positionPercentage: data.positionPercentage || 100,
             },
         });
     }
@@ -40,7 +39,6 @@ let UsersService = class UsersService {
                 phone: true,
                 role: true,
                 hireDate: true,
-                positionPercentage: true,
             },
             orderBy: {
                 name: 'asc',

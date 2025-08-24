@@ -27,7 +27,8 @@ import {
     Analytics as AnalyticsIcon,
     Work as WorkIcon,
     ChevronLeft as ChevronLeftIcon,
-    ChevronRight as ChevronRightIcon
+    ChevronRight as ChevronRightIcon,
+    Assignment as AssignmentIcon
 } from '@mui/icons-material'
 
 const menuItems = [
@@ -60,6 +61,12 @@ const menuItems = [
         icon: <EventIcon />, 
         href: '/fravaersforesporsel',
         description: 'Administrer fraværsforespørsler'
+    },
+    { 
+        label: 'Skiftsøknader', 
+        icon: <AssignmentIcon />, 
+        href: '/skiftsoknader',
+        description: 'Håndter søknader om ledige skift'
     },
     { 
         label: 'Meldinger', 

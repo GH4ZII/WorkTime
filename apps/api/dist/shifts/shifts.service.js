@@ -18,7 +18,18 @@ let ShiftsService = class ShiftsService {
         this.prisma = prisma;
     }
     async create(data) {
-        return this.prisma.shift.create({ data });
+        if (data.isAvailableShift || !data.userId) {
+            const shiftData = {
+                startTime: data.startTime,
+                endTime: data.endTime,
+                location: data.location,
+                notes: data.notes,
+                createdBy: data.createdBy,
+                isAvailableShift: true
+            };
+            return this.prisma.shift.create({ data: shiftData });
+        }
+        return this.prisma.shift.create({ data: data });
     }
     async findAll() {
         return this.prisma.shift.findMany({

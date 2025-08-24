@@ -135,7 +135,7 @@ JSON-struktur:
 **START JSON HER:**`;
     }
     formatEmployeesWithPosition(employees) {
-        return employees.map(emp => `- ID: "${emp.id}" | Navn: ${emp.name} | Rolle: ${emp.role} | Stillingsprosent: ${emp.positionPercentage}%`).join('\n');
+        return employees.map(emp => `- ID: "${emp.id}" | Navn: ${emp.name} | Rolle: ${emp.role} | Stillingsprosent: ${emp.positionPercentage || 100}%`).join('\n');
     }
     formatTimeOffRequests(requests, month) {
         const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
