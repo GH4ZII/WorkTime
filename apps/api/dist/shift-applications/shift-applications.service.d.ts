@@ -18,14 +18,14 @@ export declare class ShiftApplicationsService {
             notes: string | null;
         };
     } & {
+        message: string | null;
         id: string;
         userId: string;
-        shiftId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
-        message: string | null;
-        isHidden: boolean;
         createdAt: Date;
         updatedAt: Date;
+        isHidden: boolean;
+        shiftId: string;
     }>;
     findAll(): Promise<({
         user: {
@@ -41,14 +41,14 @@ export declare class ShiftApplicationsService {
             notes: string | null;
         };
     } & {
+        message: string | null;
         id: string;
         userId: string;
-        shiftId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
-        message: string | null;
-        isHidden: boolean;
         createdAt: Date;
         updatedAt: Date;
+        isHidden: boolean;
+        shiftId: string;
     })[]>;
     findOne(id: string): Promise<({
         user: {
@@ -64,14 +64,14 @@ export declare class ShiftApplicationsService {
             notes: string | null;
         };
     } & {
+        message: string | null;
         id: string;
         userId: string;
-        shiftId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
-        message: string | null;
-        isHidden: boolean;
         createdAt: Date;
         updatedAt: Date;
+        isHidden: boolean;
+        shiftId: string;
     }) | null>;
     update(id: string, updateShiftApplicationDto: UpdateShiftApplicationDto): Promise<{
         user: {
@@ -87,34 +87,34 @@ export declare class ShiftApplicationsService {
             notes: string | null;
         };
     } & {
+        message: string | null;
         id: string;
         userId: string;
-        shiftId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
-        message: string | null;
-        isHidden: boolean;
         createdAt: Date;
         updatedAt: Date;
+        isHidden: boolean;
+        shiftId: string;
     }>;
     remove(id: string): Promise<{
+        message: string | null;
         id: string;
         userId: string;
-        shiftId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
-        message: string | null;
-        isHidden: boolean;
         createdAt: Date;
         updatedAt: Date;
+        isHidden: boolean;
+        shiftId: string;
     }>;
     hide(id: string): Promise<{
+        message: string | null;
         id: string;
         userId: string;
-        shiftId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
-        message: string | null;
-        isHidden: boolean;
         createdAt: Date;
         updatedAt: Date;
+        isHidden: boolean;
+        shiftId: string;
     }>;
     findByUser(userId: string): Promise<({
         shift: {
@@ -125,14 +125,14 @@ export declare class ShiftApplicationsService {
             notes: string | null;
         };
     } & {
+        message: string | null;
         id: string;
         userId: string;
-        shiftId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
-        message: string | null;
-        isHidden: boolean;
         createdAt: Date;
         updatedAt: Date;
+        isHidden: boolean;
+        shiftId: string;
     })[]>;
     findByShift(shiftId: string): Promise<({
         user: {
@@ -141,13 +141,13 @@ export declare class ShiftApplicationsService {
             email: string;
         };
     } & {
+        message: string | null;
         id: string;
         userId: string;
-        shiftId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
-        message: string | null;
-        isHidden: boolean;
         createdAt: Date;
         updatedAt: Date;
+        isHidden: boolean;
+        shiftId: string;
     })[]>;
 }
