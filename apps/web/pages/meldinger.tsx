@@ -170,7 +170,7 @@ const MessagesPage: NextPage = () => {
     return (
       <Layout>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <CircularProgress size={60} />
+          <CircularProgress size={60} sx={{ color: '#667eea' }} />
         </Box>
       </Layout>
     );
@@ -180,21 +180,32 @@ const MessagesPage: NextPage = () => {
     <Layout>
       <Box sx={{ p: 3, height: 'calc(100vh - 100px)' }}>
         {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
+          <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>
             {error}
           </Alert>
         )}
 
         <Box sx={{ display: 'flex', height: '100%', gap: 3 }}>
           {/* Sidebar */}
-          <Card elevation={2} sx={{ width: 350, minWidth: 350 }}>
+          <Card elevation={3} sx={{ 
+            width: 350, 
+            minWidth: 350,
+            borderRadius: 3,
+            border: '1px solid rgba(102, 126, 234, 0.1)'
+          }}>
             <CardContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
               {/* Header */}
-              <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider' }}>
+              <Box sx={{ 
+                p: 3, 
+                borderBottom: 1, 
+                borderColor: 'divider',
+                background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
+                color: 'white'
+              }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <ChatIcon color="primary" />
-                    <Typography variant="h6" fontWeight="bold">
+                    <ChatIcon sx={{ color: 'white' }} />
+                    <Typography variant="h6" fontWeight="bold" sx={{ color: 'white' }}>
                       Chatterom
                     </Typography>
                   </Box>
@@ -204,16 +215,23 @@ const MessagesPage: NextPage = () => {
                     onClick={() => setShowNewChatModal(true)}
                     size="small"
                     sx={{
-                      background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      color: 'white',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      backdropFilter: 'blur(10px)',
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 100%)',
-                      }
+                        background: 'rgba(255, 255, 255, 0.3)',
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+                      },
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      borderRadius: 2,
                     }}
                   >
                     Ny Chat
                   </Button>
                 </Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                   {chatRooms.length} aktive chatterom
                 </Typography>
               </Box>
@@ -222,7 +240,7 @@ const MessagesPage: NextPage = () => {
               <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
                 {chatRooms.length === 0 ? (
                   <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <ChatIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                    <ChatIcon sx={{ fontSize: 48, color: '#667eea', mb: 2, opacity: 0.6 }} />
                     <Typography variant="h6" color="text.secondary">
                       Ingen chatterom
                     </Typography>
@@ -242,18 +260,24 @@ const MessagesPage: NextPage = () => {
                           selected={selectedRoom === room.id}
                           onClick={() => handleRoomClick(room.id)}
                           sx={{
-                            borderRadius: 2,
+                            borderRadius: 3,
                             '&.Mui-selected': {
-                              backgroundColor: 'primary.main',
+                              backgroundColor: '#667eea',
                               color: 'white',
                               '&:hover': {
-                                backgroundColor: 'primary.dark',
+                                backgroundColor: '#5a6fd8',
                               }
+                            },
+                            '&:hover': {
+                              backgroundColor: selectedRoom === room.id ? '#5a6fd8' : 'rgba(102, 126, 234, 0.08)',
                             }
                           }}
                         >
                           <ListItemAvatar>
-                            <Avatar sx={{ bgcolor: selectedRoom === room.id ? 'white' : 'primary.main' }}>
+                            <Avatar sx={{ 
+                              bgcolor: selectedRoom === room.id ? 'white' : '#667eea',
+                              color: selectedRoom === room.id ? '#667eea' : 'white'
+                            }}>
                               <GroupIcon color={selectedRoom === room.id ? 'primary' : 'inherit'} />
                             </Avatar>
                           </ListItemAvatar>
@@ -274,7 +298,11 @@ const MessagesPage: NextPage = () => {
           </Card>
 
           {/* Chat Area */}
-          <Card elevation={2} sx={{ flex: 1 }}>
+          <Card elevation={3} sx={{ 
+            flex: 1,
+            borderRadius: 3,
+            border: '1px solid rgba(102, 126, 234, 0.1)'
+          }}>
             <CardContent sx={{ p: 0, height: '100%' }}>
               {selectedRoom && currentUser ? (
                 <Box sx={{ height: '100%' }}>
@@ -289,7 +317,7 @@ const MessagesPage: NextPage = () => {
                   height: '100%',
                   p: 4
                 }}>
-                  <ChatIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <ChatIcon sx={{ fontSize: 64, color: '#667eea', mb: 2, opacity: 0.6 }} />
                   <Typography variant="h5" color="text.secondary" sx={{ mb: 1 }}>
                     Velg et chatterom
                   </Typography>
@@ -323,16 +351,25 @@ const MessagesPage: NextPage = () => {
           onClose={() => setShowNewChatModal(false)}
           maxWidth="sm"
           fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              border: '1px solid rgba(102, 126, 234, 0.1)'
+            }
+          }}
         >
-          <DialogTitle>
+          <DialogTitle sx={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
+            color: 'white'
+          }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <AddIcon color="primary" />
-              <Typography variant="h6" fontWeight="bold">
+              <AddIcon sx={{ color: 'white' }} />
+              <Typography variant="h6" fontWeight="bold" sx={{ color: 'white' }}>
                 Opprett nytt chatterom
               </Typography>
             </Box>
           </DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ pt: 3 }}>
             <Box sx={{ pt: 1 }}>
               <TextField
                 fullWidth
@@ -341,14 +378,36 @@ const MessagesPage: NextPage = () => {
                 onChange={(e) => setNewChatName(e.target.value)}
                 placeholder="Skriv navn på chatterom"
                 variant="outlined"
-                sx={{ mb: 3 }}
+                sx={{ 
+                  mb: 3,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&:hover fieldset': {
+                      borderColor: '#667eea',
+                      borderWidth: '2px',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
+                      borderWidth: '2px',
+                    },
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: '#667eea',
+                  },
+                }}
               />
 
-              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2, color: '#667eea' }}>
                 Velg brukere:
               </Typography>
               
-              <Box sx={{ maxHeight: 300, overflow: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+              <Box sx={{ 
+                maxHeight: 300, 
+                overflow: 'auto', 
+                border: 1, 
+                borderColor: 'rgba(102, 126, 234, 0.2)', 
+                borderRadius: 2 
+              }}>
                 <List>
                   {allUsers
                     .filter(user => user.id !== currentUser?.id)
@@ -356,7 +415,7 @@ const MessagesPage: NextPage = () => {
                       <ListItem key={user.id} disablePadding>
                         <ListItemButton onClick={() => handleUserToggle(user.id)}>
                           <ListItemAvatar>
-                            <Avatar sx={{ bgcolor: 'primary.main' }}>
+                            <Avatar sx={{ bgcolor: '#667eea', color: 'white' }}>
                               {user.name.charAt(0)}
                             </Avatar>
                           </ListItemAvatar>
@@ -367,13 +426,21 @@ const MessagesPage: NextPage = () => {
                           <Chip
                             label={user.role === 'ADMIN' ? 'Administrator' : 'Ansatt'}
                             size="small"
-                            color={user.role === 'ADMIN' ? 'primary' : 'default'}
-                            variant="outlined"
+                            sx={{
+                              bgcolor: user.role === 'ADMIN' ? '#667eea' : 'rgba(102, 126, 234, 0.1)',
+                              color: user.role === 'ADMIN' ? 'white' : '#667eea',
+                              border: user.role === 'ADMIN' ? 'none' : '1px solid #667eea',
+                            }}
                           />
                           <Checkbox
                             checked={selectedUsers.includes(user.id)}
                             onChange={() => handleUserToggle(user.id)}
-                            color="primary"
+                            sx={{ 
+                              color: '#667eea',
+                              '&.Mui-checked': {
+                                color: '#667eea',
+                              },
+                            }}
                           />
                         </ListItemButton>
                       </ListItem>
@@ -387,6 +454,15 @@ const MessagesPage: NextPage = () => {
               onClick={() => setShowNewChatModal(false)}
               startIcon={<CancelIcon />}
               variant="outlined"
+              sx={{
+                borderColor: '#667eea',
+                color: '#667eea',
+                '&:hover': {
+                  borderColor: '#5a6fd8',
+                  backgroundColor: 'rgba(102, 126, 234, 0.04)',
+                },
+                borderRadius: 2,
+              }}
             >
               Avbryt
             </Button>
@@ -395,10 +471,14 @@ const MessagesPage: NextPage = () => {
               startIcon={<CheckIcon />}
               variant="contained"
               sx={{
-                background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)',
-                }
+                  background: 'linear-gradient(135deg, #5a6fd8 0%, #4c5fd6 100%)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                },
+                borderRadius: 2,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
               Opprett

@@ -232,10 +232,6 @@ const HomePage: NextPage = () => {
                         </Alert>
                     )}
 
-                    <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 4, color: 'text.primary' }}>
-                        Dashboard
-                    </Typography>
-
                     {/* Stats Cards */}
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 4 }}>
 

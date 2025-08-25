@@ -229,18 +229,6 @@ const FravaersforesporselPage: NextPage = () => {
                     </Alert>
                 )}
 
-                {/* Header */}
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-                    <EventIcon sx={{ mr: 2, color: 'primary.main', fontSize: 32 }} />
-                    <Box>
-                        <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
-                            Fraværsforespørsler
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                            Administrer forespørsler om fravær
-                        </Typography>
-                    </Box>
-                </Box>
 
                 {/* Ventende forespørsler */}
                 <Card elevation={2} sx={{ mb: 3 }}>

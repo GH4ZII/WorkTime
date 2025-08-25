@@ -11,7 +11,7 @@ import {
   ParallaxCard,
   LoadingSpinner
 } from '../components/ui';
-import { Box, Typography, Chip, Button, Grid } from '@mui/material';
+import { Box, Typography, Chip, Button, Grid, Card, CardContent } from '@mui/material';
 import { 
   Work as WorkIcon, 
   Schedule as ScheduleIcon, 
@@ -111,6 +111,11 @@ const HistoryPage: NextPage = () => {
           label={value}
           color={value === 'completed' ? 'success' : 'warning'}
           size="small"
+          sx={{
+            bgcolor: value === 'completed' ? '#4caf50' : '#ff9800',
+            color: 'white',
+            fontWeight: 'bold',
+          }}
         />
       )
     },
@@ -130,7 +135,7 @@ const HistoryPage: NextPage = () => {
       <ParallaxHero
         height="40vh"
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
           color: 'white',
           textAlign: 'center'
         }}
@@ -155,73 +160,154 @@ const HistoryPage: NextPage = () => {
         {/* Animated Status Cards */}
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
           <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
-            <AnimatedCard
-              title="Total Hours"
-              subtitle="This month"
-              hoverEffect="lift"
-              entranceAnimation="slideUp"
-              delay={0.1}
-              interactive={true}
-              onClick={() => console.log('Total Hours clicked')}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <Box sx={{ textAlign: 'center', py: 2 }}>
-                <Typography variant="h3" component="div" fontWeight="bold" color="primary">
-                  {totalHours}h
-                </Typography>
-                <WorkIcon sx={{ fontSize: 48, color: 'primary.main', mt: 2 }} />
-              </Box>
-            </AnimatedCard>
+              <Card
+                elevation={3}
+                sx={{
+                  borderRadius: 3,
+                  border: '1px solid rgba(102, 126, 234, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    boxShadow: '0 12px 35px rgba(102, 126, 234, 0.2)',
+                    borderColor: 'rgba(102, 126, 234, 0.3)',
+                  }
+                }}
+                onClick={() => console.log('Total Hours clicked')}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    Total Hours
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    This month
+                  </Typography>
+                  <Box sx={{ textAlign: 'center', py: 2 }}>
+                    <Typography variant="h3" component="div" fontWeight="bold" sx={{ color: '#667eea' }}>
+                      {totalHours}h
+                    </Typography>
+                    <WorkIcon sx={{ fontSize: 48, color: '#667eea', mt: 2, opacity: 0.8 }} />
+                  </Box>
+                </CardContent>
+              </Card>
+            </motion.div>
           </Box>
           
           <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
-            <AnimatedCard
-              title="Average Hours"
-              subtitle="Per day"
-              hoverEffect="glow"
-              entranceAnimation="slideUp"
-              delay={0.2}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <Box sx={{ textAlign: 'center', py: 2 }}>
-                <Typography variant="h3" component="div" fontWeight="bold" color="success.main">
-                  {averageHours.toFixed(1)}h
-                </Typography>
-                <ScheduleIcon sx={{ fontSize: 48, color: 'success.main', mt: 2 }} />
-              </Box>
-            </AnimatedCard>
+              <Card
+                elevation={3}
+                sx={{
+                  borderRadius: 3,
+                  border: '1px solid rgba(102, 126, 234, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    boxShadow: '0 12px 35px rgba(102, 126, 234, 0.2)',
+                    borderColor: 'rgba(102, 126, 234, 0.3)',
+                  }
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    Average Hours
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Per day
+                  </Typography>
+                  <Box sx={{ textAlign: 'center', py: 2 }}>
+                    <Typography variant="h3" component="div" fontWeight="bold" sx={{ color: '#5a6fd8' }}>
+                      {averageHours.toFixed(1)}h
+                    </Typography>
+                    <ScheduleIcon sx={{ fontSize: 48, color: '#5a6fd8', mt: 2, opacity: 0.8 }} />
+                  </Box>
+                </CardContent>
+              </Card>
+            </motion.div>
           </Box>
           
           <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
-            <AnimatedCard
-              title="Completion Rate"
-              subtitle="Tasks completed"
-              hoverEffect="scale"
-              entranceAnimation="slideUp"
-              delay={0.3}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <Box sx={{ textAlign: 'center', py: 2 }}>
-                <Typography variant="h3" component="div" fontWeight="bold" color="info.main">
-                  85%
-                </Typography>
-                <TrendingUpIcon sx={{ fontSize: 48, color: 'info.main', mt: 2 }} />
-              </Box>
-            </AnimatedCard>
+              <Card
+                elevation={3}
+                sx={{
+                  borderRadius: 3,
+                  border: '1px solid rgba(102, 126, 234, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    boxShadow: '0 12px 35px rgba(102, 126, 234, 0.2)',
+                    borderColor: 'rgba(102, 126, 234, 0.3)',
+                  }
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    Completion Rate
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Tasks completed
+                  </Typography>
+                  <Box sx={{ textAlign: 'center', py: 2 }}>
+                    <Typography variant="h3" component="div" fontWeight="bold" sx={{ color: '#4c5fd6' }}>
+                      85%
+                    </Typography>
+                    <TrendingUpIcon sx={{ fontSize: 48, color: '#4c5fd6', mt: 2, opacity: 0.8 }} />
+                  </Box>
+                </CardContent>
+              </Card>
+            </motion.div>
           </Box>
         </Box>
 
-        {/* Search Section with Parallax */}
-        <ParallaxCard sx={{ mb: 4 }}>
-          <Box sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Search Work Logs
-            </Typography>
-            <SearchInput
-              placeholder="Search work logs..."
-              onSearch={handleSearch}
-              debounceMs={300}
-              loading={isLoading}
-            />
-          </Box>
-        </ParallaxCard>
+        {/* Search Section */}
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+        >
+          <Card
+            elevation={3}
+            sx={{
+              mb: 4,
+              borderRadius: 3,
+              border: '1px solid rgba(102, 126, 234, 0.1)',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.15)',
+                borderColor: 'rgba(102, 126, 234, 0.2)',
+              }
+            }}
+          >
+            <Box sx={{ p: 3, bgcolor: 'transparent' }}>
+              <Typography variant="h6" gutterBottom sx={{ color: '#667eea', fontWeight: 'bold' }}>
+                Search Work Logs
+              </Typography>
+              <SearchInput
+                placeholder="Search work logs..."
+                onSearch={handleSearch}
+                debounceMs={300}
+                loading={isLoading}
+              />
+            </Box>
+          </Card>
+        </motion.div>
 
         {/* Data Table with Loading State */}
         {isLoading ? (
@@ -230,56 +316,119 @@ const HistoryPage: NextPage = () => {
               variant="orbit"
               size="large"
               text="Refreshing data..."
-              color="primary.main"
+              color="primary"
             />
           </Box>
         ) : (
-          <ParallaxContainer
-            speed={0.1}
-            direction="up"
-            opacity={true}
-            scale={true}
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <DataTable
-              columns={columns}
-              data={filteredData}
-              title="Work Log History"
-              defaultRowsPerPage={10}
-            />
-          </ParallaxContainer>
+            <Card
+              elevation={3}
+              sx={{
+                borderRadius: 3,
+                border: '1px solid rgba(102, 126, 234, 0.1)',
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.15)',
+                  borderColor: 'rgba(102, 126, 234, 0.2)',
+                }
+              }}
+            >
+              <DataTable
+                columns={columns}
+                data={filteredData}
+                title="Work Log History"
+                defaultRowsPerPage={10}
+              />
+            </Card>
+          </motion.div>
         )}
 
         {/* Action Buttons */}
         <Box sx={{ display: 'flex', gap: 2, mt: 4, justifyContent: 'center' }}>
-          <AnimatedCard
-            hoverEffect="tilt"
-            entranceAnimation="bounce"
-            delay={0.4}
-            interactive={true}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <Button
-              variant="contained"
-              startIcon={<RefreshIcon />}
-              onClick={handleRefresh}
-              disabled={isLoading}
+            <Card
+              elevation={3}
+              sx={{
+                borderRadius: 3,
+                border: '1px solid rgba(102, 126, 234, 0.1)',
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.2)',
+                  borderColor: 'rgba(102, 126, 234, 0.3)',
+                }
+              }}
             >
-              Refresh Data
-            </Button>
-          </AnimatedCard>
+              <Button
+                variant="contained"
+                startIcon={<RefreshIcon />}
+                onClick={handleRefresh}
+                disabled={isLoading}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a6fd8 0%, #4c5fd6 100%)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                  },
+                  '&:disabled': {
+                    background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
+                    opacity: 0.7,
+                  },
+                  borderRadius: 2,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              >
+                Refresh Data
+              </Button>
+            </Card>
+          </motion.div>
           
-          <AnimatedCard
-            hoverEffect="tilt"
-            entranceAnimation="bounce"
-            delay={0.5}
-            interactive={true}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <Button
-              variant="outlined"
-              startIcon={<DownloadIcon />}
+            <Card
+              elevation={3}
+              sx={{
+                borderRadius: 3,
+                border: '1px solid rgba(102, 126, 234, 0.1)',
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.2)',
+                  borderColor: 'rgba(102, 126, 234, 0.3)',
+                }
+              }}
             >
-              Export Data
-            </Button>
-          </AnimatedCard>
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                sx={{
+                  borderColor: '#667eea',
+                  color: '#667eea',
+                  '&:hover': {
+                    borderColor: '#5a6fd8',
+                    backgroundColor: 'rgba(102, 126, 234, 0.04)',
+                  },
+                  borderRadius: 2,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              >
+                Export Data
+              </Button>
+            </Card>
+          </motion.div>
         </Box>
       </Box>
 
