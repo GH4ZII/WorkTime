@@ -13,6 +13,7 @@ import { useAuth } from '../context/AuthContext';
 import ScreenHeader from '../components/ScreenHeader';
 import { API_ENDPOINTS } from '../config/api-simple';
 import axios from 'axios';
+import PushNotificationTest from '../components/PushNotificationTest';
 
 const { width } = Dimensions.get('window');
 
@@ -611,6 +612,15 @@ const HomeScreen: React.FC = () => {
             )}
           </View>
         </View>
+
+        {/* Push Notification Test Section */}
+        <View style={styles.testSection}>
+          <Text style={styles.testSectionTitle}>🧪 Push Notification Testing</Text>
+          <Text style={styles.testSectionSubtitle}>
+            Test lokale notifikasjoner og push token status
+          </Text>
+          <PushNotificationTest />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -1093,6 +1103,30 @@ const styles = StyleSheet.create({
   },
   backButton: {
     backgroundColor: '#757575',
+  },
+  testSection: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  testSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  testSectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
+    textAlign: 'center',
   },
 });
 

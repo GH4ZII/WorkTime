@@ -21,6 +21,7 @@ model User {
   chatMemberships   ChatMember[]
   messages          Message[]          @relation("SentMessages")
   notifications     Notification[]
+  pushTokens        PushToken[]
   shifts            Shift[]
   shiftSwapRequests ShiftSwapRequest[] @relation("RequestedBy")
   shiftSwapsWith    ShiftSwapRequest[] @relation("SwapWith")
@@ -116,6 +117,18 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model PushToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  deviceId  String?
+  platform  Platform @default(ANDROID)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model ChatRoom {
   id        String       @id @default(uuid())
   name      String
@@ -169,4 +182,10 @@ enum TimeOffType {
   VACATION
   SICK
   OTHER
+}
+
+enum Platform {
+  ANDROID
+  IOS
+  WEB
 }

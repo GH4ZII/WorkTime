@@ -1,22 +1,12 @@
 import { PrismaService } from '../prisma.service';
 import { CreateShiftDto } from './dto/create-shift.dto';
 import { UpdateShiftDto } from './dto/update-shift.dto';
+import { PushNotificationsService } from '../push-notifications/push-notifications.service';
 export declare class ShiftsService {
     private prisma;
-    constructor(prisma: PrismaService);
-    create(data: CreateShiftDto): Promise<{
-        id: string;
-        startTime: Date;
-        endTime: Date;
-        location: string | null;
-        notes: string | null;
-        status: import(".prisma/client").$Enums.ShiftStatus;
-        createdBy: string;
-        createdAt: Date;
-        updatedAt: Date;
-        isAvailableShift: boolean;
-        userId: string | null;
-    }>;
+    private pushNotificationsService;
+    constructor(prisma: PrismaService, pushNotificationsService: PushNotificationsService);
+    create(data: CreateShiftDto): Promise<any>;
     findAll(): Promise<({
         user: {
             id: string;
@@ -25,54 +15,80 @@ export declare class ShiftsService {
         } | null;
     } & {
         id: string;
+        userId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         startTime: Date;
         endTime: Date;
         location: string | null;
         notes: string | null;
         status: import(".prisma/client").$Enums.ShiftStatus;
         createdBy: string;
-        createdAt: Date;
-        updatedAt: Date;
         isAvailableShift: boolean;
-        userId: string | null;
     })[]>;
     findOne(id: string): Promise<{
         id: string;
+        userId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         startTime: Date;
         endTime: Date;
         location: string | null;
         notes: string | null;
         status: import(".prisma/client").$Enums.ShiftStatus;
         createdBy: string;
-        createdAt: Date;
-        updatedAt: Date;
         isAvailableShift: boolean;
-        userId: string | null;
     } | null>;
     update(id: string, data: UpdateShiftDto): Promise<{
         id: string;
+        userId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         startTime: Date;
         endTime: Date;
         location: string | null;
         notes: string | null;
         status: import(".prisma/client").$Enums.ShiftStatus;
         createdBy: string;
-        createdAt: Date;
-        updatedAt: Date;
         isAvailableShift: boolean;
-        userId: string | null;
     }>;
     remove(id: string): Promise<{
         id: string;
+        userId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         startTime: Date;
         endTime: Date;
         location: string | null;
         notes: string | null;
         status: import(".prisma/client").$Enums.ShiftStatus;
         createdBy: string;
+        isAvailableShift: boolean;
+    }>;
+    assignShift(shiftId: string, userId: string): Promise<{
+        id: string;
+        userId: string | null;
         createdAt: Date;
         updatedAt: Date;
+        startTime: Date;
+        endTime: Date;
+        location: string | null;
+        notes: string | null;
+        status: import(".prisma/client").$Enums.ShiftStatus;
+        createdBy: string;
         isAvailableShift: boolean;
+    }>;
+    makeAvailable(shiftId: string): Promise<{
+        id: string;
         userId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        startTime: Date;
+        endTime: Date;
+        location: string | null;
+        notes: string | null;
+        status: import(".prisma/client").$Enums.ShiftStatus;
+        createdBy: string;
+        isAvailableShift: boolean;
     }>;
 }

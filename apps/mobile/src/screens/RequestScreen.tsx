@@ -150,18 +150,18 @@ const RequestScreen: React.FC = () => {
 
   // Hent kun brukerens egne vakter
   const getUserShifts = () => {
-    if (!currentUser) return [];
-    return shifts.filter(shift => shift.user.id === currentUser.id);
+    if (!currentUser?.id) return [];
+    return shifts.filter(shift => shift.user?.id === currentUser.id);
   };
 
   // Hent vakter for en spesifikk bruker (for bytte)
   const getUserShiftsForSwap = (userId: string) => {
-    return shifts.filter(shift => shift.user.id === userId);
+    return shifts.filter(shift => shift.user?.id === userId);
   };
 
   // Hent alle andre brukere (ikke den nåværende)
   const getOtherUsers = () => {
-    if (!currentUser) return [];
+    if (!currentUser?.id) return [];
     return users.filter(user => user.id !== currentUser.id);
   };
 

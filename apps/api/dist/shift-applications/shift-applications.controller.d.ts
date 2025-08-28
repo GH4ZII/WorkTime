@@ -20,12 +20,12 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     }>;
     findAll(): Promise<({
         user: {
@@ -43,12 +43,12 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     })[]>;
     findMyApplications(req: any): Promise<({
         shift: {
@@ -61,12 +61,12 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     })[]>;
     findOne(id: string): Promise<({
         user: {
@@ -84,12 +84,12 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     }) | null>;
     update(id: string, updateShiftApplicationDto: UpdateShiftApplicationDto): Promise<{
         user: {
@@ -107,22 +107,22 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     }>;
     remove(id: string): Promise<{
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     }>;
     approve(id: string): Promise<{
         user: {
@@ -140,12 +140,12 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     }>;
     reject(id: string): Promise<{
         user: {
@@ -163,31 +163,31 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     }>;
     hide(id: string): Promise<{
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     }>;
     hidePatch(id: string): Promise<{
         message: string | null;
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isHidden: boolean;
         shiftId: string;
+        status: import(".prisma/client").$Enums.RequestStatus;
+        isHidden: boolean;
     }>;
 }

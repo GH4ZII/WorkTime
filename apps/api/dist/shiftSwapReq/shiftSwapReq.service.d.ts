@@ -6,8 +6,8 @@ export declare class ShiftSwapReqService {
     constructor(prisma: PrismaService);
     create(dto: CreateShiftSwapRequestDto): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.RequestStatus;
         reason: string | null;
         isHidden: boolean;
         requestedAt: Date;
@@ -19,8 +19,8 @@ export declare class ShiftSwapReqService {
     }>;
     findAll(): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.RequestStatus;
         reason: string | null;
         isHidden: boolean;
         requestedAt: Date;
@@ -32,8 +32,8 @@ export declare class ShiftSwapReqService {
     }[]>;
     findOne(id: string): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.RequestStatus;
         reason: string | null;
         isHidden: boolean;
         requestedAt: Date;
@@ -45,8 +45,8 @@ export declare class ShiftSwapReqService {
     } | null>;
     update(id: string, dto: UpdateShiftSwapRequestDto): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.RequestStatus;
         reason: string | null;
         isHidden: boolean;
         requestedAt: Date;
@@ -58,8 +58,8 @@ export declare class ShiftSwapReqService {
     }>;
     remove(id: string): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.RequestStatus;
         reason: string | null;
         isHidden: boolean;
         requestedAt: Date;
@@ -71,8 +71,8 @@ export declare class ShiftSwapReqService {
     }>;
     approve(id: string): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.RequestStatus;
         reason: string | null;
         isHidden: boolean;
         requestedAt: Date;
@@ -84,8 +84,8 @@ export declare class ShiftSwapReqService {
     }>;
     reject(id: string): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.RequestStatus;
         reason: string | null;
         isHidden: boolean;
         requestedAt: Date;
@@ -97,8 +97,8 @@ export declare class ShiftSwapReqService {
     }>;
     hide(id: string): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.RequestStatus;
         updatedAt: Date;
+        status: import(".prisma/client").$Enums.RequestStatus;
         reason: string | null;
         isHidden: boolean;
         requestedAt: Date;

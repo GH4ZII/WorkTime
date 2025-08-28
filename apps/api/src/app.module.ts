@@ -11,6 +11,8 @@ import { NotificationModule} from "./notifications/notification.module";
 import { AuthModule } from "./auth/auth.module";
 import { ChatModule } from "./chat/chat.module";
 import { AiModule } from "./ai/ai.module";
+import { PushTokensModule } from "./push-tokens/push-tokens.module";
+import { PushNotificationsModule } from "./push-notifications/push-notifications.module";
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { AiModule } from "./ai/ai.module";
     AuthModule, 
     ChatModule,
     AiModule,
+    PushTokensModule,
+    PushNotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

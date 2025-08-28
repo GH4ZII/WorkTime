@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const shifts_controller_1 = require("./shifts.controller");
 const shifts_service_1 = require("./shifts.service");
 const prisma_service_1 = require("../prisma.service");
+const push_notifications_module_1 = require("../push-notifications/push-notifications.module");
 let ShiftsModule = class ShiftsModule {
 };
 exports.ShiftsModule = ShiftsModule;
 exports.ShiftsModule = ShiftsModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
+        imports: [push_notifications_module_1.PushNotificationsModule],
         controllers: [shifts_controller_1.ShiftsController],
         providers: [shifts_service_1.ShiftsService, prisma_service_1.PrismaService],
         exports: [shifts_service_1.ShiftsService],

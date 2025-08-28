@@ -20,6 +20,8 @@ const notification_module_1 = require("./notifications/notification.module");
 const auth_module_1 = require("./auth/auth.module");
 const chat_module_1 = require("./chat/chat.module");
 const ai_module_1 = require("./ai/ai.module");
+const push_tokens_module_1 = require("./push-tokens/push-tokens.module");
+const push_notifications_module_1 = require("./push-notifications/push-notifications.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -36,6 +38,8 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             chat_module_1.ChatModule,
             ai_module_1.AiModule,
+            push_tokens_module_1.PushTokensModule,
+            push_notifications_module_1.PushNotificationsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

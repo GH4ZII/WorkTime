@@ -6,32 +6,32 @@ export declare class NotificationService {
     create(data: CreateNotificationDto): Promise<{
         message: string;
         id: string;
-        createdAt: Date;
         userId: string;
+        createdAt: Date;
         title: string;
         read: boolean;
     }>;
     findAllForUser(userId: string): Promise<{
         message: string;
         id: string;
-        createdAt: Date;
         userId: string;
+        createdAt: Date;
         title: string;
         read: boolean;
     }[]>;
     updateReadStatus(id: string, read: boolean): Promise<{
         message: string;
         id: string;
-        createdAt: Date;
         userId: string;
+        createdAt: Date;
         title: string;
         read: boolean;
     }>;
     remove(id: string): Promise<{
         message: string;
         id: string;
-        createdAt: Date;
         userId: string;
+        createdAt: Date;
         title: string;
         read: boolean;
     }>;
