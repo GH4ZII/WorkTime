@@ -10,6 +10,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/config-plugins": "^10.1.2",
     "@react-navigation/bottom-tabs": "^7.4.2",
     "@react-navigation/drawer": "^7.5.3",
     "@react-navigation/native": "^7.1.14",
@@ -22,7 +23,6 @@
     "react": "19.0.0",
     "react-native": "0.79.5",
     "react-native-gesture-handler": "^2.24.0",
-    "react-native-reanimated": "^3.17.5",
     "types": "file:../../packages/types",
     "typescript": "~5.8.3",
     "ui": "file:../../packages/ui"

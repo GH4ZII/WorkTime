@@ -6,10 +6,10 @@ export declare class TimeOffReqService {
     constructor(prisma: PrismaService);
     create(data: CreateTimeOffRequestDto): Promise<{
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
@@ -18,10 +18,10 @@ export declare class TimeOffReqService {
     }>;
     findAll(): Promise<{
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
@@ -30,10 +30,10 @@ export declare class TimeOffReqService {
     }[]>;
     findOne(id: string): Promise<{
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
@@ -42,10 +42,10 @@ export declare class TimeOffReqService {
     } | null>;
     update(id: string, data: UpdateTimeOffRequestDto): Promise<{
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
@@ -54,10 +54,10 @@ export declare class TimeOffReqService {
     }>;
     remove(id: string): Promise<{
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
@@ -66,10 +66,10 @@ export declare class TimeOffReqService {
     }>;
     approve(id: string): Promise<{
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
@@ -78,10 +78,10 @@ export declare class TimeOffReqService {
     }>;
     reject(id: string): Promise<{
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;
@@ -90,10 +90,10 @@ export declare class TimeOffReqService {
     }>;
     hide(id: string): Promise<{
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         fromDate: Date;
         toDate: Date;
         type: import(".prisma/client").$Enums.TimeOffType;

@@ -6,7 +6,6 @@ export declare class ShiftsService {
     constructor(prisma: PrismaService);
     create(data: CreateShiftDto): Promise<{
         id: string;
-        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -16,6 +15,7 @@ export declare class ShiftsService {
         createdAt: Date;
         updatedAt: Date;
         isAvailableShift: boolean;
+        userId: string | null;
     }>;
     findAll(): Promise<({
         user: {
@@ -25,7 +25,6 @@ export declare class ShiftsService {
         } | null;
     } & {
         id: string;
-        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -35,10 +34,10 @@ export declare class ShiftsService {
         createdAt: Date;
         updatedAt: Date;
         isAvailableShift: boolean;
+        userId: string | null;
     })[]>;
     findOne(id: string): Promise<{
         id: string;
-        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -48,10 +47,10 @@ export declare class ShiftsService {
         createdAt: Date;
         updatedAt: Date;
         isAvailableShift: boolean;
+        userId: string | null;
     } | null>;
     update(id: string, data: UpdateShiftDto): Promise<{
         id: string;
-        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -61,10 +60,10 @@ export declare class ShiftsService {
         createdAt: Date;
         updatedAt: Date;
         isAvailableShift: boolean;
+        userId: string | null;
     }>;
     remove(id: string): Promise<{
         id: string;
-        userId: string | null;
         startTime: Date;
         endTime: Date;
         location: string | null;
@@ -74,5 +73,6 @@ export declare class ShiftsService {
         createdAt: Date;
         updatedAt: Date;
         isAvailableShift: boolean;
+        userId: string | null;
     }>;
 }

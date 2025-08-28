@@ -4,17 +4,6 @@ Denne filen kombinerer utviklingsplanen og funksjonalitetsoversikten for WorkTim
 
 ## 📱 M3 – Mobilapp for Ansatte
 
-### 3.1 Ansattfunksjonalitet
-- [ ] Den ansatte skal kunne se ledige vakter og søke på de
-- [ ] Søke på ledige vakter
-- [ ] Sende forespørsler for skiftbytter og fravær
-
-### 3.2 Medarbeideroversikt
-- [ ] Se liste over kollegaer
-- [ ] Søk etter ansatte
-- [ ] Vis profil (navn, e-post, telefon)
-- [ ] Mulighet for å sende direktemelding
-
 ### 3.3 Notifikasjoner
 - [ ] Push-varsler for godkjenning/avvisning av forespørsler
 - [ ] Varsler for kommende skift
@@ -31,15 +20,6 @@ Denne filen kombinerer utviklingsplanen og funksjonalitetsoversikten for WorkTim
 - [ ] Push-varsler med Expo
 
 ## 🖥️ M4 – Adminportal (Web)
-
-### 4.1 Adminfunksjonalitet
-- [ ] Admin skal kunne sette fravær på ansatte
-- [ ] Admin skal kunne legge ut en vakt for ansatte å søke på
-- [ ] Godkjenne/avvise forespørsler
-
-### 4.2 Brukeradministrasjon
-- [ ] Liste & søk ansatte
-- [ ] Administrere brukerrettigheter
 
 ### 4.3 Rapporter & Statistikk
 - [ ] Timer per ansatt/avdeling/periode

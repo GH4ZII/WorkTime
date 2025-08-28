@@ -20,10 +20,10 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     }>;
@@ -43,10 +43,10 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     })[]>;
@@ -61,10 +61,10 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     })[]>;
@@ -84,10 +84,10 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     }) | null>;
@@ -107,20 +107,20 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     }>;
     remove(id: string): Promise<{
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     }>;
@@ -140,10 +140,10 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     }>;
@@ -163,30 +163,30 @@ export declare class ShiftApplicationsController {
     } & {
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     }>;
     hide(id: string): Promise<{
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     }>;
     hidePatch(id: string): Promise<{
         message: string | null;
         id: string;
-        userId: string;
         status: import(".prisma/client").$Enums.RequestStatus;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         isHidden: boolean;
         shiftId: string;
     }>;

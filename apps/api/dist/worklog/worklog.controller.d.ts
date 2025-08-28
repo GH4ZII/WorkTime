@@ -6,52 +6,52 @@ export declare class WorklogController {
     constructor(worklogService: WorklogService);
     create(dto: CreateWorklogDto): Promise<{
         id: string;
-        userId: string;
         startTime: Date;
         endTime: Date;
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         shiftId: string;
     }>;
     findAll(): Promise<{
         id: string;
-        userId: string;
         startTime: Date;
         endTime: Date;
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         shiftId: string;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
-        userId: string;
         startTime: Date;
         endTime: Date;
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         shiftId: string;
     }>;
     update(id: string, dto: UpdateWorklogDto): Promise<{
         id: string;
-        userId: string;
         startTime: Date;
         endTime: Date;
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         shiftId: string;
     }>;
     remove(id: string): Promise<{
         id: string;
-        userId: string;
         startTime: Date;
         endTime: Date;
         notes: string | null;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         shiftId: string;
     }>;
 }
