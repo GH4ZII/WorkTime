@@ -9,25 +9,27 @@ datasource db {
 }
 
 model User {
-  id                String             @id @default(uuid())
-  name              String
-  email             String             @unique
-  phone             String?
-  passwordHash      String
-  role              Role               @default(EMPLOYEE)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  hireDate          DateTime           @default(now())
-  chatMemberships   ChatMember[]
-  messages          Message[]          @relation("SentMessages")
-  notifications     Notification[]
-  pushTokens        PushToken[]
-  shifts            Shift[]
-  shiftSwapRequests ShiftSwapRequest[] @relation("RequestedBy")
-  shiftSwapsWith    ShiftSwapRequest[] @relation("SwapWith")
-  timeOffRequests   TimeOffRequest[]
-  workLogs          WorkLog[]
-  shiftApplications ShiftApplication[]
+  id                    String             @id @default(uuid())
+  name                  String
+  email                 String             @unique
+  phone                 String?
+  passwordHash          String
+  role                  Role               @default(EMPLOYEE)
+  passwordResetToken    String?
+  passwordResetExpires  DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  hireDate              DateTime           @default(now())
+  chatMemberships       ChatMember[]
+  messages              Message[]          @relation("SentMessages")
+  notifications         Notification[]
+  pushTokens            PushToken[]
+  shifts                Shift[]
+  shiftSwapRequests     ShiftSwapRequest[] @relation("RequestedBy")
+  shiftSwapsWith        ShiftSwapRequest[] @relation("SwapWith")
+  timeOffRequests       TimeOffRequest[]
+  workLogs              WorkLog[]
+  shiftApplications     ShiftApplication[]
 }
 
 model Shift {

@@ -4,6 +4,8 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -31,5 +33,17 @@ export class AuthController {
         await this.authService.changePassword(userId, currentPassword, newPassword);
         
         return { message: 'Passord endret vellykket' };
+    }
+
+    @Post('forgot-password')
+    async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+        const { email } = forgotPasswordDto;
+        return await this.authService.requestPasswordReset(email);
+    }
+
+    @Post('reset-password')
+    async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+        const { token, newPassword } = resetPasswordDto;
+        return await this.authService.resetPassword(token, newPassword);
     }
 }

@@ -16,4 +16,11 @@ export declare class AuthService {
     }>;
     changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean>;
     verifyToken(token: string): any;
+    requestPasswordReset(email: string): Promise<{
+        message: string;
+        token?: string;
+    }>;
+    resetPassword(token: string, newPassword: string): Promise<{
+        message: string;
+    }>;
 }

@@ -14,6 +14,8 @@ export declare class UsersService {
         phone: string | null;
         passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
         hireDate: Date;
     }>;
     findAll(): Promise<{
@@ -33,6 +35,8 @@ export declare class UsersService {
         phone: string | null;
         passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
         hireDate: Date;
     } | null>;
     update(id: string, data: UpdateUserDto): Promise<{
@@ -44,6 +48,8 @@ export declare class UsersService {
         phone: string | null;
         passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
         hireDate: Date;
     }>;
     remove(id: string): Promise<{
@@ -55,6 +61,8 @@ export declare class UsersService {
         phone: string | null;
         passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
         hireDate: Date;
     }>;
     findOneByEmail(email: string): Promise<User | null>;
@@ -67,6 +75,35 @@ export declare class UsersService {
         phone: string | null;
         passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
+        hireDate: Date;
+    }>;
+    savePasswordResetToken(id: string, token: string, expires: Date): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        name: string;
+        email: string;
+        phone: string | null;
+        passwordHash: string;
+        role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
+        hireDate: Date;
+    }>;
+    findByPasswordResetToken(token: string): Promise<User | null>;
+    clearPasswordResetToken(id: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        name: string;
+        email: string;
+        phone: string | null;
+        passwordHash: string;
+        role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
         hireDate: Date;
     }>;
 }

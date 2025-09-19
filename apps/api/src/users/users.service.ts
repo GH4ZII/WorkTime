@@ -83,4 +83,38 @@ export class UsersService {
             },
         });
     }
+
+    // 8) Lagre password reset token
+    async savePasswordResetToken(id: string, token: string, expires: Date) {
+        return this.prisma.user.update({
+            where: { id },
+            data: {
+                passwordResetToken: token,
+                passwordResetExpires: expires,
+            },
+        });
+    }
+
+    // 9) Finn bruker basert på password reset token
+    async findByPasswordResetToken(token: string): Promise<User | null> {
+        return this.prisma.user.findFirst({
+            where: {
+                passwordResetToken: token,
+                passwordResetExpires: {
+                    gt: new Date(), // Token må være gyldig
+                },
+            },
+        });
+    }
+
+    // 10) Fjern password reset token
+    async clearPasswordResetToken(id: string) {
+        return this.prisma.user.update({
+            where: { id },
+            data: {
+                passwordResetToken: null,
+                passwordResetExpires: null,
+            },
+        });
+    }
 }

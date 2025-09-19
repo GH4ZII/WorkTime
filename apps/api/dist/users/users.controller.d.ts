@@ -21,6 +21,8 @@ export declare class UsersController {
         phone: string | null;
         passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
         hireDate: Date;
     } | null>;
     create(dto: CreateUserDto): Promise<{
@@ -32,6 +34,8 @@ export declare class UsersController {
         phone: string | null;
         passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
         hireDate: Date;
     }>;
     update(id: string, dto: UpdateUserDto): Promise<{
@@ -43,6 +47,8 @@ export declare class UsersController {
         phone: string | null;
         passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
         hireDate: Date;
     }>;
     remove(id: string): Promise<{
@@ -54,6 +60,8 @@ export declare class UsersController {
         phone: string | null;
         passwordHash: string;
         role: import(".prisma/client").$Enums.Role;
+        passwordResetToken: string | null;
+        passwordResetExpires: Date | null;
         hireDate: Date;
     }>;
 }

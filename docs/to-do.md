@@ -4,11 +4,6 @@ Denne filen kombinerer utviklingsplanen og funksjonalitetsoversikten for WorkTim
 
 ## 📱 M3 – Mobilapp for Ansatte
 
-### 3.3 Notifikasjoner
-- [ ] Push-varsler for godkjenning/avvisning av forespørsler
-- [ ] Varsler for kommende skift
-- [ ] Påminnelser om kommende skift
-
 ### 3.4 Innstillinger
 - [ ] Endre passord
 - [ ] Logg ut

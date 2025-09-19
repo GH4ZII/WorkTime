@@ -74,6 +74,34 @@ let UsersService = class UsersService {
             },
         });
     }
+    async savePasswordResetToken(id, token, expires) {
+        return this.prisma.user.update({
+            where: { id },
+            data: {
+                passwordResetToken: token,
+                passwordResetExpires: expires,
+            },
+        });
+    }
+    async findByPasswordResetToken(token) {
+        return this.prisma.user.findFirst({
+            where: {
+                passwordResetToken: token,
+                passwordResetExpires: {
+                    gt: new Date(),
+                },
+            },
+        });
+    }
+    async clearPasswordResetToken(id) {
+        return this.prisma.user.update({
+            where: { id },
+            data: {
+                passwordResetToken: null,
+                passwordResetExpires: null,
+            },
+        });
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

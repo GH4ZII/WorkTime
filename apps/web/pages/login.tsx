@@ -13,7 +13,8 @@ import {
     InputAdornment,
     IconButton,
     CircularProgress,
-    Paper
+    Paper,
+    Link
 } from "@mui/material";
 import { 
     Email as EmailIcon, 
@@ -22,6 +23,7 @@ import {
     VisibilityOff,
     Login as LoginIcon
 } from '@mui/icons-material';
+import ForgotPassword from '../components/ForgotPassword';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -29,6 +31,7 @@ const Login: React.FC = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
     const router = useRouter();
 
     // Sjekk for feilmelding fra URL
@@ -88,6 +91,18 @@ const Login: React.FC = () => {
 
     const handleTogglePasswordVisibility = () => {
         setShowPassword(!showPassword);
+    };
+
+    const handleForgotPasswordClick = () => {
+        setShowForgotPassword(true);
+    };
+
+    const handleForgotPasswordClose = () => {
+        setShowForgotPassword(false);
+    };
+
+    const handleBackToLogin = () => {
+        setShowForgotPassword(false);
     };
 
     return (
@@ -354,6 +369,26 @@ const Login: React.FC = () => {
                                 )}
                             </Button>
 
+                            <Box sx={{ textAlign: 'center', mt: 2 }}>
+                                <Link
+                                    component="button"
+                                    type="button"
+                                    variant="body2"
+                                    onClick={handleForgotPasswordClick}
+                                    sx={{
+                                        color: '#667eea',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold',
+                                        '&:hover': {
+                                            textDecoration: 'underline',
+                                            color: '#5a6fd8',
+                                        },
+                                    }}
+                                >
+                                    Glemt passord?
+                                </Link>
+                            </Box>
+
                             <Typography 
                                 variant="body2" 
                                 color="text.secondary" 
@@ -380,6 +415,13 @@ const Login: React.FC = () => {
                     50% { transform: scale(1.2) rotate(180deg); opacity: 0.2; }
                 }
             `}</style>
+
+            {/* Forgot Password Dialog */}
+            <ForgotPassword
+                open={showForgotPassword}
+                onClose={handleForgotPasswordClose}
+                onBackToLogin={handleBackToLogin}
+            />
         </Box>
     );
 };

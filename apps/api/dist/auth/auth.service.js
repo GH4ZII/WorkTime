@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const users_service_1 = require("../users/users.service");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 let AuthService = class AuthService {
     usersService;
     jwtService;
@@ -62,6 +63,33 @@ let AuthService = class AuthService {
     }
     verifyToken(token) {
         return this.jwtService.verify(token);
+    }
+    async requestPasswordReset(email) {
+        const user = await this.usersService.findOneByEmail(email);
+        if (!user) {
+            return { message: 'Hvis e-posten eksisterer, vil du motta en lenke for å tilbakestille passordet.' };
+        }
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpires = new Date(Date.now() + 3600000);
+        await this.usersService.savePasswordResetToken(user.id, resetToken, resetTokenExpires);
+        console.log(`Password reset token for ${email}: ${resetToken}`);
+        return {
+            message: 'Hvis e-posten eksisterer, vil du motta en lenke for å tilbakestille passordet.',
+            token: resetToken
+        };
+    }
+    async resetPassword(token, newPassword) {
+        const user = await this.usersService.findByPasswordResetToken(token);
+        if (!user || !user.passwordResetToken || !user.passwordResetExpires) {
+            throw new Error('Ugyldig eller utløpt reset token');
+        }
+        if (user.passwordResetExpires < new Date()) {
+            throw new Error('Reset token har utløpt');
+        }
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+        await this.usersService.updatePassword(user.id, newPasswordHash);
+        await this.usersService.clearPasswordResetToken(user.id);
+        return { message: 'Passordet har blitt tilbakestilt vellykket' };
     }
 };
 exports.AuthService = AuthService;

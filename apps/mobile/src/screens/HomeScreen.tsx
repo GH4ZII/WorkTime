@@ -13,7 +13,6 @@ import { useAuth } from '../context/AuthContext';
 import ScreenHeader from '../components/ScreenHeader';
 import { API_ENDPOINTS } from '../config/api-simple';
 import axios from 'axios';
-import PushNotificationTest from '../components/PushNotificationTest';
 
 const { width } = Dimensions.get('window');
 
@@ -221,7 +220,16 @@ const HomeScreen: React.FC = () => {
       if (shiftDate.getMonth() === currentMonth && shiftDate.getFullYear() === currentYear) {
         const start = new Date(shift.startTime);
         const end = new Date(shift.endTime);
-        const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        
+        // Håndter skift som går over midnatt
+        let hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        
+        // Hvis endTime er tidligere enn startTime, betyr det at skiftet går over midnatt
+        if (hours < 0) {
+          // Legg til 24 timer for å få riktig varighet
+          hours += 24;
+        }
+        
         return total + hours;
       }
       return total;
@@ -323,13 +331,24 @@ const HomeScreen: React.FC = () => {
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' });
+    // Bruk UTC for å unngå timezone-problemer
+    return date.toLocaleTimeString('nb-NO', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      timeZone: 'UTC'
+    });
   };
 
   const getDuration = (startTime: string, endTime: string) => {
     const start = new Date(startTime);
     const end = new Date(endTime);
-    const diffMs = end.getTime() - start.getTime();
+    let diffMs = end.getTime() - start.getTime();
+    
+    // Håndter skift som går over midnatt
+    if (diffMs < 0) {
+      diffMs += 24 * 60 * 60 * 1000; // Legg til 24 timer i millisekunder
+    }
+    
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     return diffHours;
   };
@@ -613,14 +632,7 @@ const HomeScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Push Notification Test Section */}
-        <View style={styles.testSection}>
-          <Text style={styles.testSectionTitle}>🧪 Push Notification Testing</Text>
-          <Text style={styles.testSectionSubtitle}>
-            Test lokale notifikasjoner og push token status
-          </Text>
-          <PushNotificationTest />
-        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -1103,30 +1115,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     backgroundColor: '#757575',
-  },
-  testSection: {
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  testSectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  testSectionSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 16,
-    textAlign: 'center',
   },
 });
 
