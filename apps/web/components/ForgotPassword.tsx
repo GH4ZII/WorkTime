@@ -18,17 +18,15 @@ import {
     Lock as LockIcon,
     Visibility,
     VisibilityOff,
-    ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
 
 interface ForgotPasswordProps {
     open: boolean;
     onClose: () => void;
-    onBackToLogin: () => void;
 }
 
-const ForgotPassword: React.FC<ForgotPasswordProps> = ({ open, onClose, onBackToLogin }) => {
+const ForgotPassword: React.FC<ForgotPasswordProps> = ({ open, onClose }) => {
     const [email, setEmail] = useState('');
     const [token, setToken] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -90,7 +88,6 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ open, onClose, onBackTo
             setSuccess(response.data.message);
             setTimeout(() => {
                 onClose();
-                onBackToLogin();
                 // Reset form
                 setStep('email');
                 setEmail('');
@@ -120,10 +117,6 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ open, onClose, onBackTo
         setSuccess('');
     };
 
-    const handleBackToLogin = () => {
-        onBackToLogin();
-        handleClose();
-    };
 
     return (
         <Dialog 
@@ -390,22 +383,6 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ open, onClose, onBackTo
             </DialogContent>
 
             <DialogActions sx={{ padding: 3, pt: 1 }}>
-                <Button
-                    onClick={handleBackToLogin}
-                    startIcon={<ArrowBackIcon />}
-                    sx={{
-                        color: '#667eea',
-                        fontWeight: 'bold',
-                        '&:hover': {
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        },
-                    }}
-                >
-                    Tilbake til innlogging
-                </Button>
-                
-                <Box sx={{ flex: 1 }} />
-                
                 <Button
                     onClick={handleClose}
                     sx={{

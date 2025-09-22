@@ -420,7 +420,6 @@ const Login: React.FC = () => {
             <ForgotPassword
                 open={showForgotPassword}
                 onClose={handleForgotPasswordClose}
-                onBackToLogin={handleBackToLogin}
             />
         </Box>
     );
