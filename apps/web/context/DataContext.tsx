@@ -74,7 +74,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get<Employee[]>('http://localhost:3001/users', {
+            const response = await axios.get<Employee[]>('http://10.129.48.163:3001/users', {
                 withCredentials: true
             });
             setEmployees(response.data);
@@ -86,7 +86,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
     const fetchShifts = async () => {
         try {
-            const response = await axios.get<Shift[]>('http://localhost:3001/shifts', {
+            const response = await axios.get<Shift[]>('http://10.129.48.163:3001/shifts', {
                 withCredentials: true
             });
             setShifts(response.data);
@@ -98,7 +98,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
     const fetchTimeOffRequests = async () => {
         try {
-            const response = await axios.get<TimeOffRequest[]>('http://localhost:3001/time-off-requests', {
+            const response = await axios.get<TimeOffRequest[]>('http://10.129.48.163:3001/time-off-requests', {
                 withCredentials: true
             });
             setTimeOffRequests(response.data);
@@ -110,7 +110,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
     const fetchSwapRequests = async () => {
         try {
-            const response = await axios.get<SwapRequest[]>('http://localhost:3001/shift-swap-requests', {
+            const response = await axios.get<SwapRequest[]>('http://10.129.48.163:3001/shift-swap-requests', {
                 withCredentials: true
             });
             setSwapRequests(response.data);
