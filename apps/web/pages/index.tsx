@@ -7,6 +7,7 @@ import {
     Box,
     Card,
     CardContent,
+    CardHeader,
     Typography,
     Grid,
     Table,
@@ -90,15 +91,18 @@ type StatCardProps = {
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => (
     <Card
-        elevation={2}
+        elevation={0}
         sx={{
             height: '100%',
-            background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
-            border: `1px solid ${color}20`,
-            transition: 'all 0.3s ease',
+            background: '#ffffff',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 3,
+            boxShadow: '0 10px 30px rgba(16, 24, 40, 0.12)',
+            transition: 'all 0.25s ease',
             '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: `0 8px 25px ${color}20`,
+                transform: 'translateY(-3px)',
+                boxShadow: '0 16px 40px rgba(16, 24, 40, 0.18)'
             }
         }}
     >
@@ -128,6 +132,67 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => (
             </Box>
         </CardContent>
     </Card>
+);
+
+type SectionCardProps = {
+    title: string;
+    icon: React.ReactNode;
+    action?: React.ReactNode;
+    children: React.ReactNode;
+};
+
+const SectionCard: React.FC<SectionCardProps> = ({ title, icon, action, children }) => (
+    <Card
+        elevation={0}
+        sx={{
+            height: '100%',
+            borderRadius: 3,
+            border: '1px solid',
+            borderColor: 'divider',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(249,250,251,0.9) 100%)',
+            boxShadow:
+                '0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.10)'
+        }}
+    >
+        <CardHeader
+            title={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box
+                        sx={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: (theme) => theme.palette.primary.main + '1A',
+                            color: 'primary.main'
+                        }}
+                    >
+                        {icon}
+                    </Box>
+                    <Typography variant="h6" component="h2" fontWeight="bold">
+                        {title}
+                    </Typography>
+                </Box>
+            }
+            action={action}
+            sx={{
+                pb: 0.5,
+                '& .MuiCardHeader-action': { alignSelf: 'center' }
+            }}
+        />
+        <CardContent sx={{ pt: 2 }}>
+            {children}
+        </CardContent>
+    </Card>
+);
+
+const EmptyState: React.FC<{ icon: React.ReactNode; text: string }> = ({ icon, text }) => (
+    <Box sx={{ py: 6, textAlign: 'center', color: 'text.secondary' }}>
+        <Box sx={{ mb: 1, '& svg': { fontSize: 32, opacity: 0.6 } }}>{icon}</Box>
+        <Typography>{text}</Typography>
+    </Box>
 );
 
 const HomePage: NextPage = () => {
@@ -265,210 +330,190 @@ const HomePage: NextPage = () => {
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, 1fr)' }, gap: 3 }}>
                         {/* Skiftsøknader - kun ventende */}
                         <Box>
-                            <Card elevation={2} sx={{ height: '100%' }}>
-                                <CardContent>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                                        <ScheduleIcon sx={{ mr: 1, color: 'primary.main' }} />
-                                        <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Skiftsøknader
-                                        </Typography>
-                                    </Box>
-                                    <TableContainer component={Paper} elevation={0}>
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Ansatt</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Skift</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Melding</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {pendingShiftApplications.length > 0 ? (
-                                                    pendingShiftApplications.map(app => (
-                                                        <TableRow key={app.id} hover>
-                                                            <TableCell>
-                                                                <Typography variant="body2" fontWeight="medium">
-                                                                    {app.user.name}
-                                                                </Typography>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Typography variant="body2">
-                                                                    {formatTime(app.shift.startTime)} - {formatTime(app.shift.endTime)}
-                                                                </Typography>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
-                                                                    {app.message || 'Ingen melding'}
-                                                                </Typography>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Chip
-                                                                    label="Venter"
-                                                                    color="warning"
-                                                                    size="small"
-                                                                />
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                ) : (
-                                                    <TableRow>
-                                                        <TableCell colSpan={4} align="center">
-                                                            <Typography color="text.secondary">
-                                                                Ingen ventende skiftsøknader
+                            <SectionCard title="Skiftsøknader" icon={<ScheduleIcon />}>
+                                <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
+                                    <Table
+                                        sx={{
+                                            '& th': { fontWeight: 'bold', bgcolor: 'grey.50' },
+                                            '& tr:hover td': { backgroundColor: 'grey.50' },
+                                            '& td, & th': { borderBottomColor: 'divider' }
+                                        }}
+                                    >
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Ansatt</TableCell>
+                                                <TableCell>Skift</TableCell>
+                                                <TableCell>Melding</TableCell>
+                                                <TableCell>Status</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {pendingShiftApplications.length > 0 ? (
+                                                pendingShiftApplications.map(app => (
+                                                    <TableRow key={app.id} hover>
+                                                        <TableCell>
+                                                            <Typography variant="body2" fontWeight="medium">
+                                                                {app.user.name}
                                                             </Typography>
                                                         </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="body2">
+                                                                {formatTime(app.shift.startTime)} - {formatTime(app.shift.endTime)}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+                                                                {app.message || 'Ingen melding'}
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Chip label="Venter" color="warning" size="small" />
+                                                        </TableCell>
                                                     </TableRow>
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                </CardContent>
-                            </Card>
+                                                ))
+                                            ) : (
+                                                <TableRow>
+                                                    <TableCell colSpan={4}>
+                                                        <EmptyState icon={<ScheduleIcon />} text="Ingen ventende skiftsøknader" />
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </SectionCard>
                         </Box>
 
                         {/* Bytteforespørsler - kun ventende */}
                         <Box>
-                            <Card elevation={2} sx={{ height: '100%' }}>
-                                <CardContent>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                                        <SwapIcon sx={{ mr: 1, color: 'primary.main' }} />
-                                        <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Bytteforespørsler
-                                        </Typography>
-                                    </Box>
-                                    <TableContainer component={Paper} elevation={0}>
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Ansatt</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Bytte med</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Dato</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {pendingSwapRequests.length > 0 ? (
-                                                    pendingSwapRequests.map(sr => {
-                                                        const requester = employees.find(e => e.id === sr.requestedById)?.name;
-                                                        const swapWith = employees.find(e => e.id === sr.swapWithId)?.name;
-                                                        const dateFrom = shiftDateById[sr.fromShiftId];
-                                                        const dateTo = shiftDateById[sr.toShiftId];
+                            <SectionCard title="Bytteforespørsler" icon={<SwapIcon />}>
+                                <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
+                                    <Table
+                                        sx={{
+                                            '& th': { fontWeight: 'bold', bgcolor: 'grey.50' },
+                                            '& tr:hover td': { backgroundColor: 'grey.50' },
+                                            '& td, & th': { borderBottomColor: 'divider' }
+                                        }}
+                                    >
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Ansatt</TableCell>
+                                                <TableCell>Bytte med</TableCell>
+                                                <TableCell>Dato</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {pendingSwapRequests.length > 0 ? (
+                                                pendingSwapRequests.map(sr => {
+                                                    const requester = employees.find(e => e.id === sr.requestedById)?.name;
+                                                    const swapWith = employees.find(e => e.id === sr.swapWithId)?.name;
+                                                    const dateFrom = shiftDateById[sr.fromShiftId];
+                                                    const dateTo = shiftDateById[sr.toShiftId];
 
-                                                        return (
-                                                            <TableRow key={sr.id} hover>
-                                                                <TableCell>
-                                                                    <Typography variant="body2" fontWeight="medium">
-                                                                        {requester || sr.requestedById}
+                                                    return (
+                                                        <TableRow key={sr.id} hover>
+                                                            <TableCell>
+                                                                <Typography variant="body2" fontWeight="medium">
+                                                                    {requester || sr.requestedById}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2">
+                                                                    {swapWith || sr.swapWithId}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Box>
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        Fra: {dateFrom ? formatDate(dateFrom) : 'N/A'}
                                                                     </Typography>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Typography variant="body2">
-                                                                        {swapWith || sr.swapWithId}
+                                                                    <Typography variant="body2" color="text.secondary">
+                                                                        Til: {dateTo ? formatDate(dateTo) : 'N/A'}
                                                                     </Typography>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Box>
-                                                                        <Typography variant="body2" color="text.secondary">
-                                                                            Fra: {dateFrom ? formatDate(dateFrom) : 'N/A'}
-                                                                        </Typography>
-                                                                        <Typography variant="body2" color="text.secondary">
-                                                                            Til: {dateTo ? formatDate(dateTo) : 'N/A'}
-                                                                        </Typography>
-                                                                    </Box>
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        );
-                                                    })
-                                                ) : (
-                                                    <TableRow>
-                                                        <TableCell colSpan={3} align="center">
-                                                            <Typography color="text.secondary">
-                                                                Ingen ventende bytteforespørsler
-                                                            </Typography>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                </CardContent>
-                            </Card>
+                                                                </Box>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })
+                                            ) : (
+                                                <TableRow>
+                                                    <TableCell colSpan={3}>
+                                                        <EmptyState icon={<SwapIcon />} text="Ingen ventende bytteforespørsler" />
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </SectionCard>
                         </Box>
 
                         {/* Fraværsforespørsler - kun ventende */}
                         <Box sx={{ mt: 3 }}>
-                            <Card elevation={2}>
-                                <CardContent>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                                        <EventIcon sx={{ mr: 1, color: 'primary.main' }} />
-                                        <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Fraværsforespørsler
-                                        </Typography>
-                                    </Box>
-                                    <TableContainer component={Paper} elevation={0}>
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Ansatt</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Fra</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Til</TableCell>
-                                                    <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {pendingTimeOffRequests.length > 0 ? (
-                                                    pendingTimeOffRequests.map(sr => {
-                                                        const requester = employees.find(e => e.id === sr.userId)?.name;
+                            <SectionCard title="Fraværsforespørsler" icon={<EventIcon />}>
+                                <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
+                                    <Table
+                                        sx={{
+                                            '& th': { fontWeight: 'bold', bgcolor: 'grey.50' },
+                                            '& tr:hover td': { backgroundColor: 'grey.50' },
+                                            '& td, & th': { borderBottomColor: 'divider' }
+                                        }}
+                                    >
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Ansatt</TableCell>
+                                                <TableCell>Type</TableCell>
+                                                <TableCell>Fra</TableCell>
+                                                <TableCell>Til</TableCell>
+                                                <TableCell>Status</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {pendingTimeOffRequests.length > 0 ? (
+                                                pendingTimeOffRequests.map(sr => {
+                                                    const requester = employees.find(e => e.id === sr.userId)?.name;
 
-                                                        return (
-                                                            <TableRow key={sr.id} hover>
-                                                                <TableCell>
-                                                                    <Typography variant="body2" fontWeight="medium">
-                                                                        {requester || sr.userId}
-                                                                    </Typography>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Chip
-                                                                        label={getRequestTypeLabel(sr.type)}
-                                                                        color={getRequestTypeColor(sr.type) as any}
-                                                                        size="small"
-                                                                    />
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Typography variant="body2">
-                                                                        {formatDate(sr.fromDate)}
-                                                                    </Typography>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Typography variant="body2">
-                                                                        {formatDate(sr.toDate)}
-                                                                    </Typography>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Chip
-                                                                        label="Venter"
-                                                                        color="warning"
-                                                                        size="small"
-                                                                    />
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        );
-                                                    })
-                                                ) : (
-                                                    <TableRow>
-                                                        <TableCell colSpan={5} align="center">
-                                                            <Typography color="text.secondary">
-                                                                Ingen ventende fraværsforespørsler
-                                                            </Typography>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                </CardContent>
-                            </Card>
+                                                    return (
+                                                        <TableRow key={sr.id} hover>
+                                                            <TableCell>
+                                                                <Typography variant="body2" fontWeight="medium">
+                                                                    {requester || sr.userId}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Chip
+                                                                    label={getRequestTypeLabel(sr.type)}
+                                                                    color={getRequestTypeColor(sr.type) as any}
+                                                                    size="small"
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2">
+                                                                    {formatDate(sr.fromDate)}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Typography variant="body2">
+                                                                    {formatDate(sr.toDate)}
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Chip label="Venter" color="warning" size="small" />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })
+                                            ) : (
+                                                <TableRow>
+                                                    <TableCell colSpan={5}>
+                                                        <EmptyState icon={<EventIcon />} text="Ingen ventende fraværsforespørsler" />
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </SectionCard>
                         </Box>
                     </Box>
                 </Box>

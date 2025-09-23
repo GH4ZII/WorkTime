@@ -116,7 +116,7 @@ export const Sidebar: React.FC = () => {
                 display: 'flex', 
                 flexDirection: 'column', 
                 height: 'auto',
-                backgroundColor: '#667eea !important',
+                backgroundColor: '#764ba2 !important',
                 borderRadius: '0 0 16px 0',
                 marginBottom: 2,
                 boxShadow: 'none !important',
@@ -145,7 +145,7 @@ export const Sidebar: React.FC = () => {
                                  bgcolor: 'primary.main',
                                  width: isCollapsed ? 40 : 48,
                                  height: isCollapsed ? 40 : 48,
-                                 backgroundColor: '#667eea',
+                                 backgroundColor: '#764ba2',
                                  transition: 'all 0.3s ease'
                              }}
                          >
