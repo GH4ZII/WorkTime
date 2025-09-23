@@ -23,10 +23,11 @@ import {
     DialogActions,
     Alert,
     CircularProgress,
-    Grid,
     Divider,
     Tooltip,
-    Paper
+    Paper,
+    InputAdornment,
+    Grid
 } from '@mui/material';
 import {
     Add as AddIcon,
@@ -62,6 +63,7 @@ interface CreateEmployeeDto {
     hireDate?: string;
     // ← Kun stillingsprosent, ikke maks timer
     positionPercentage?: number;
+    maxHoursPerWeek?: number;
 }
 
 const CoWorkerPage: NextPage = () => {
@@ -108,11 +110,11 @@ const CoWorkerPage: NextPage = () => {
         refreshEmployees();
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: any) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleEditChange = (e: any) => {
         setEditForm({ ...editForm, [e.target.name]: e.target.value });
     };
 
@@ -383,7 +385,7 @@ const CoWorkerPage: NextPage = () => {
                                         label="Maks timer per uke"
                                         name="maxHoursPerWeek"
                                         type="number"
-                                        value={form.maxHoursPerWeek}
+                                        value={form.maxHoursPerWeek || ''}
                                         onChange={handleChange}
                                         InputProps={{
                                             inputProps: { min: 0, max: 40 },
@@ -574,62 +576,55 @@ const CoWorkerPage: NextPage = () => {
                     </form>
                 </Dialog>
 
-                {/* Oversikt over ansatte */}
-                <Card elevation={2}>
-                    <CardContent>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <WorkIcon sx={{ mr: 1, color: 'primary.main' }} />
-                                <Typography variant="h5" component="h2" fontWeight="bold">
-                                    Oversikt over ansatte ({filteredAndSortedEmployees.length})
-                                </Typography>
-                            </Box>
-                            <Button
-                                variant="contained"
-                                startIcon={<AddIcon />}
-                                onClick={() => setShowForm(true)}
-                                sx={{
-                                    py: 1.5,
-                                    px: 3,
-                                    borderRadius: 2,
-                                    fontSize: '1rem',
-                                    fontWeight: 'bold',
-                                    backgroundColor: '#667eea',
-                                    '&:hover': {
-                                        backgroundColor: '#1565c0',
-                                        transform: 'translateY(-1px)',
-                                        boxShadow: '0 8px 25px rgba(25, 118, 210, 0.3)',
-                                    },
-                                    transition: 'all 0.3s ease',
-                                }}
-                            >
-                                Legg til ny ansatt
-                            </Button>
-                        </Box>
+                {/* Oversikt over ansatte header + actions */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5, gap: 2 }}>
+                    <Typography variant="h5" component="h2" fontWeight="bold">
+                        Oversikt over ansatte ({filteredAndSortedEmployees.length})
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <TextField
+                            placeholder="Søk etter navn, e-post eller telefon..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{ color: 'text.secondary' }} />
+                                    </InputAdornment>
+                                )
+                            }}
+                            sx={{
+                                width: { xs: 220, sm: 300, md: 360 },
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: 999,
+                                    bgcolor: 'grey.50',
+                                    height: 40
+                                }
+                            }}
+                        />
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={() => setShowForm(true)}
+                            sx={{
+                                height: 40,
+                                px: 3,
+                                borderRadius: 999,
+                                fontWeight: 'bold',
+                                backgroundColor: '#2563eb',
+                                boxShadow: 'none',
+                                '&:hover': { backgroundColor: '#1d4ed8' }
+                            }}
+                        >
+                            Legg til ny ansatt
+                        </Button>
+                    </Box>
+                </Box>
 
-                        {/* Søkefelt */}
-                        <Box sx={{ mb: 3 }}>
-                            <TextField
-                                fullWidth
-                                placeholder="Søk etter navn, e-post eller telefon..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                variant="outlined"
-                                size="small"
-                                InputProps={{
-                                    startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />,
-                                }}
-                                sx={{
-                                    maxWidth: 400,
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: 2,
-                                    }
-                                }}
-                            />
-                        </Box>
-
-                        {filteredAndSortedEmployees.length === 0 ? (
-                            <Box sx={{ textAlign: 'center', py: 4 }}>
+                {filteredAndSortedEmployees.length === 0 ? (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
                                 <PersonIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                                 <Typography variant="h6" color="text.secondary">
                                     {searchTerm ? 'Ingen ansatte funnet for søket' : 'Ingen ansatte funnet'}
@@ -637,50 +632,64 @@ const CoWorkerPage: NextPage = () => {
                                 <Typography variant="body2" color="text.secondary">
                                     {searchTerm ? 'Prøv å endre søkekriteriene' : 'Legg til din første ansatt for å komme i gang'}
                                 </Typography>
-                            </Box>
-                        ) : (
-                            <Grid container spacing={2}>
+                    </Box>
+                ) : (
+                    <Grid container spacing={2.5}>
                                 {filteredAndSortedEmployees.map(employee => (
                                     <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={employee.id}>
                                         <Card 
-                                            elevation={1}
+                                            elevation={0}
                                             sx={{
                                                 height: '100%',
-                                                transition: 'all 0.3s ease',
+                                                borderRadius: 3,
+                                                backgroundColor: 'grey.50',
+                                                border: '1px solid',
+                                                borderColor: 'grey.200',
+                                                boxShadow: 'none',
+                                                transition: 'all 0.2s ease',
                                                 '&:hover': {
                                                     transform: 'translateY(-2px)',
-                                                    boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                                                    boxShadow: '0 8px 18px rgba(16,24,40,0.12)'
                                                 }
                                             }}
                                         >
-                                            <CardContent sx={{ p: 2 }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                            <CardContent sx={{ p: 2.25 }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                                                     <Avatar 
                                                         sx={{ 
-                                                            bgcolor: 'primary.main', 
+                                                            bgcolor: '#fff',
+                                                            color: 'text.primary',
+                                                            border: '1px solid',
+                                                            borderColor: 'divider',
                                                             mr: 2,
-                                                            width: 40,
-                                                            height: 40
+                                                            width: 44,
+                                                            height: 44
                                                         }}
                                                     >
                                                         {employee.name.charAt(0)}
                                                     </Avatar>
                                                     <Box sx={{ flexGrow: 1 }}>
-                                                        <Typography variant="h6" fontWeight="bold">
+                                                        <Typography variant="subtitle1" fontWeight="bold">
                                                             {employee.name}
                                                         </Typography>
                                                         <Chip
                                                             label={getRoleDisplayName(employee.role)}
-                                                            color={getRoleColor(employee.role) as any}
+                                                            color="default"
                                                             size="small"
+                                                            sx={{ borderRadius: 999, height: 22, bgcolor: 'grey.100' }}
                                                         />
                                                     </Box>
-                                                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                    <Box sx={{ display: 'flex', gap: 1.5, ml: 4 }}>
                                                         <Tooltip title="Rediger">
                                                             <IconButton
                                                                 size="small"
                                                                 onClick={() => startEdit(employee)}
-                                                                sx={{ color: 'primary.main' }}
+                                                                sx={{ 
+                                                                    color: 'text.primary', 
+                                                                    bgcolor: '#fff',
+                                                                    border: '1px solid',
+                                                                    borderColor: 'divider'
+                                                                }}
                                                             >
                                                                 <EditIcon />
                                                             </IconButton>
@@ -689,7 +698,12 @@ const CoWorkerPage: NextPage = () => {
                                                             <IconButton
                                                                 size="small"
                                                                 onClick={() => handleDelete(employee.id, employee.name)}
-                                                                sx={{ color: 'error.main' }}
+                                                                sx={{ 
+                                                                    color: 'text.primary', 
+                                                                    bgcolor: '#fff',
+                                                                    border: '1px solid',
+                                                                    borderColor: 'divider'
+                                                                }}
                                                             >
                                                                 <DeleteIcon />
                                                             </IconButton>
@@ -697,27 +711,27 @@ const CoWorkerPage: NextPage = () => {
                                                     </Box>
                                                 </Box>
 
-                                                <Divider sx={{ my: 2 }} />
+                                                <Divider sx={{ my: 1.5 }} />
 
                                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <EmailIcon fontSize="small" color="action" />
+                                                        <EmailIcon fontSize="small" sx={{ color: 'grey.500' }} />
                                                         <Typography variant="body2" color="text.secondary">
                                                             {employee.email}
                                                         </Typography>
                                                     </Box>
                                                     
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <PhoneIcon fontSize="small" color="action" />
+                                                        <PhoneIcon fontSize="small" sx={{ color: 'grey.500' }} />
                                                         <Typography variant="body2" color="text.secondary">
                                                             {employee.phone || 'Ikke satt'}
                                                         </Typography>
                                                     </Box>
                                                     
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <CalendarIcon fontSize="small" color="action" />
+                                                        <CalendarIcon fontSize="small" sx={{ color: 'grey.500' }} />
                                                         <Typography variant="body2" color="text.secondary">
-                                                            {formatDate(employee.hireDate)}
+                                                            {formatDate((employee as any).hireDate)}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -725,10 +739,8 @@ const CoWorkerPage: NextPage = () => {
                                         </Card>
                                     </Grid>
                                 ))}
-                            </Grid>
-                        )}
-                    </CardContent>
-                </Card>
+                    </Grid>
+                )}
             </Box>
         </Layout>
     );
