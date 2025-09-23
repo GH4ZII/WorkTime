@@ -19,7 +19,8 @@ import {
     Visibility,
     VisibilityOff,
 } from '@mui/icons-material';
-import axios from 'axios';
+import axios from 'axios'
+import { apiUrl } from '../utils/api';
 
 interface ForgotPasswordProps {
     open: boolean;
@@ -45,7 +46,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ open, onClose }) => {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:3001/auth/forgot-password', {
+            const response = await axios.post(apiUrl('/auth/forgot-password'), {
                 email,
             });
 
@@ -80,7 +81,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ open, onClose }) => {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:3001/auth/reset-password', {
+            const response = await axios.post(apiUrl('/auth/reset-password'), {
                 token,
                 newPassword,
             });

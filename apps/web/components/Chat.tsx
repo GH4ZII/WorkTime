@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../context/ChatContext';
-import axios from 'axios';
+import axios from 'axios'
+import { apiUrl } from '../utils/api';
 
 interface Message {
   id: string;
@@ -80,7 +81,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) =
       setIsLoading(true);
       setError(null);
       
-      const response = await axios.get(`http://localhost:3001/chatrooms/${roomId}/messages`, {
+      const response = await axios.get(apiUrl(`/chatrooms/${roomId}/messages`), {
         withCredentials: true,
       });
       

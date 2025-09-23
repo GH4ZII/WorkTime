@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { apiUrl } from '../utils/api';
 
 interface ChatContextType {
   socket: Socket | null;
@@ -22,7 +23,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:3001', {
+    const newSocket = io(apiUrl(), {
       withCredentials: true,
     });
 

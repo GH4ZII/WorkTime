@@ -2,6 +2,7 @@
 import {NextPage} from "next";
 import { Layout } from '../components/Layout';
 import axios from 'axios';
+import { apiUrl } from '../utils/api';
 import {
     Box,
     Card,
@@ -82,13 +83,13 @@ const ShiftSwapPage: NextPage = () => {
         try {
             setLoading(true);
             const [swapResponse, usersResponse, shiftsResponse] = await Promise.all([
-                axios.get<ShiftSwapRequest[]>('http://localhost:3001/shift-swap-requests', {
+                axios.get<ShiftSwapRequest[]>(apiUrl('/shift-swap-requests'), {
                     withCredentials: true
                 }),
-                axios.get<User[]>('http://localhost:3001/users', {
+                axios.get<User[]>(apiUrl('/users'), {
                     withCredentials: true
                 }),
-                axios.get<Shift[]>('http://localhost:3001/shifts', {
+                axios.get<Shift[]>(apiUrl('/shifts'), {
                     withCredentials: true
                 })
             ]);
@@ -164,7 +165,7 @@ const ShiftSwapPage: NextPage = () => {
 
     const handleApprove = async (requestId: string) => {
         try {
-            await axios.post(`http://localhost:3001/shift-swap-requests/${requestId}/approve`, {}, {
+            await axios.post(apiUrl(`/shift-swap-requests/${requestId}/approve`), {}, {
                 withCredentials: true
             });
             fetchData();
@@ -175,7 +176,7 @@ const ShiftSwapPage: NextPage = () => {
 
     const handleReject = async (requestId: string) => {
         try {
-            await axios.post(`http://localhost:3001/shift-swap-requests/${requestId}/reject`, {}, {
+            await axios.post(apiUrl(`/shift-swap-requests/${requestId}/reject`), {}, {
                 withCredentials: true
             });
             setSuccess('Forespørsel avvist!');
@@ -189,7 +190,7 @@ const ShiftSwapPage: NextPage = () => {
     const handleRemove = async (requestId: string) => {
         try {
             // Send forespørsel til backend for å markere som fjernet
-            await axios.patch(`http://localhost:3001/shift-swap-requests/${requestId}/remove`, {}, {
+            await axios.patch(apiUrl(`/shift-swap-requests/${requestId}/remove`), {}, {
                 withCredentials: true
             });
             

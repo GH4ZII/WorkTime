@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import type { NextPage } from 'next'
 import axios from 'axios'
 import { Layout } from '../components/Layout'
+import { apiUrl } from '../utils/api'
 import {
     Box,
     Card,
@@ -65,7 +66,7 @@ const FravaersforesporselPage: NextPage = () => {
 
     const fetchTimeOffRequests = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/time-off-requests', { withCredentials: true })
+            const response = await axios.get(apiUrl('/time-off-requests'), { withCredentials: true })
             setTimeOffRequests(response.data)
         } catch (err: any) {
             setError('Kunne ikke hente fraværsforespørsler')
@@ -74,7 +75,7 @@ const FravaersforesporselPage: NextPage = () => {
 
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/users', { withCredentials: true })
+            const response = await axios.get(apiUrl('/users'), { withCredentials: true })
             setEmployees(response.data)
         } catch (err: any) {
             setError('Kunne ikke hente ansatte')
@@ -85,7 +86,7 @@ const FravaersforesporselPage: NextPage = () => {
 
     const handleApprove = async (requestId: string) => {
         try {
-            await axios.patch(`http://localhost:3001/time-off-requests/${requestId}/approve`, {}, { withCredentials: true })
+            await axios.patch(apiUrl(`/time-off-requests/${requestId}/approve`), {}, { withCredentials: true })
             setSuccess('Forespørsel godkjent!')
             fetchTimeOffRequests()
             setTimeout(() => setSuccess(null), 3000)
@@ -96,7 +97,7 @@ const FravaersforesporselPage: NextPage = () => {
 
     const handleReject = async (requestId: string) => {
         try {
-            await axios.patch(`http://localhost:3001/time-off-requests/${requestId}/reject`, {}, { withCredentials: true })
+            await axios.patch(apiUrl(`/time-off-requests/${requestId}/reject`), {}, { withCredentials: true })
             setSuccess('Forespørsel avvist!')
             fetchTimeOffRequests()
             setTimeout(() => setSuccess(null), 3000)
@@ -108,7 +109,7 @@ const FravaersforesporselPage: NextPage = () => {
     const handleRemove = async (requestId: string) => {
         try {
             // Send forespørsel til backend for å markere som fjernet
-            await axios.patch(`http://localhost:3001/time-off-requests/${requestId}/remove`, {}, {
+            await axios.patch(apiUrl(`/time-off-requests/${requestId}/remove`), {}, {
                 withCredentials: true
             });
             

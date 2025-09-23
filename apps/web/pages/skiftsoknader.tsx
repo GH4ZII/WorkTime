@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { Layout } from '../components/Layout';
+import { apiUrl } from '../utils/api';
 import {
   Box,
   Typography,
@@ -84,7 +85,7 @@ const SkiftsoknaderPage: NextPage = () => {
 
   const handleApprove = async (applicationId: string) => {
     try {
-      await axios.post(`http://localhost:3001/shift-applications/${applicationId}/approve`, {}, {
+      await axios.post(apiUrl(`/shift-applications/${applicationId}/approve`), {}, {
         withCredentials: true,
       });
       
@@ -100,7 +101,7 @@ const SkiftsoknaderPage: NextPage = () => {
 
   const handleReject = async (applicationId: string, message?: string) => {
     try {
-      await axios.post(`http://localhost:3001/shift-applications/${applicationId}/reject`, {
+      await axios.post(apiUrl(`/shift-applications/${applicationId}/reject`), {
         message: message || 'Søknad avvist',
       }, {
         withCredentials: true,
@@ -122,7 +123,7 @@ const SkiftsoknaderPage: NextPage = () => {
   const handleRemove = async (applicationId: string) => {
     try {
       // Send forespørsel til backend for å markere som fjernet
-      await axios.patch(`http://localhost:3001/shift-applications/${applicationId}/remove`, {}, {
+      await axios.patch(apiUrl(`/shift-applications/${applicationId}/remove`), {}, {
         withCredentials: true,
       });
       

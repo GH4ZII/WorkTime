@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import axios from 'axios';
+import axios from 'axios'
+import { apiUrl } from '../utils/api';
 import { 
     Container, 
     Box, 
@@ -63,7 +64,7 @@ const Login: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:3001/auth/login', {
+            const response = await axios.post(apiUrl('/auth/login'), {
                 email,
                 password,
             });

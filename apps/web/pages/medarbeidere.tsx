@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { NextPage } from "next";
-import axios from 'axios';
+import axios from 'axios'
+import { apiUrl } from '../utils/api';
 import { Layout } from '../components/Layout';
 import { useData } from '../context/DataContext';
 import {
@@ -122,7 +123,7 @@ const CoWorkerPage: NextPage = () => {
         e.preventDefault();
         
         try {
-            await axios.post('http://localhost:3001/users', form, { 
+            await axios.post(apiUrl('/users'), form, { 
                 withCredentials: true 
             });
             
@@ -149,7 +150,7 @@ const CoWorkerPage: NextPage = () => {
                 delete updateData.password;
             }
 
-            await axios.put(`http://localhost:3001/users/${editingEmployee.id}`, updateData, { 
+            await axios.put(apiUrl(`/users/${editingEmployee.id}`), updateData, { 
                 withCredentials: true 
             });
             
@@ -171,7 +172,7 @@ const CoWorkerPage: NextPage = () => {
         }
 
         try {
-            await axios.delete(`http://localhost:3001/users/${employeeId}`, { 
+            await axios.delete(apiUrl(`/users/${employeeId}`), { 
                 withCredentials: true 
             });
             

@@ -3,7 +3,8 @@ import { NextPage } from 'next';
 import { Layout } from '../components/Layout';
 import Chat from '../components/Chat';
 import { useChat } from '../context/ChatContext';
-import axios from 'axios';
+import axios from 'axios'
+import { apiUrl } from '../utils/api';
 import {
     Box,
     Card,
@@ -81,7 +82,7 @@ const MessagesPage: NextPage = () => {
   const fetchChatRooms = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3001/chatrooms', {
+      const response = await axios.get(apiUrl('/chatrooms'), {
         withCredentials: true,
       });
       setChatRooms(response.data);
@@ -95,7 +96,7 @@ const MessagesPage: NextPage = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/auth/me', {
+      const response = await axios.get(apiUrl('/auth/me'), {
         withCredentials: true,
       });
       
@@ -117,7 +118,7 @@ const MessagesPage: NextPage = () => {
 
   const fetchAllUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/users', {
+      const response = await axios.get(apiUrl('/users'), {
         withCredentials: true,
       });
       setAllUsers(response.data);
@@ -134,7 +135,7 @@ const MessagesPage: NextPage = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3001/chatrooms', {
+      const response = await axios.post(apiUrl('/chatrooms'), {
         name: newChatName,
         memberIds: selectedUsers,
       }, {

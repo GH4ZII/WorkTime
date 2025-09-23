@@ -14,53 +14,53 @@ export declare class ShiftsController {
     } & {
         id: string;
         userId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         startTime: Date;
         endTime: Date;
         location: string | null;
         notes: string | null;
         status: import(".prisma/client").$Enums.ShiftStatus;
         createdBy: string;
-        createdAt: Date;
-        updatedAt: Date;
         isAvailableShift: boolean;
     })[]>;
     findOne(id: string): Promise<{
         id: string;
         userId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         startTime: Date;
         endTime: Date;
         location: string | null;
         notes: string | null;
         status: import(".prisma/client").$Enums.ShiftStatus;
         createdBy: string;
-        createdAt: Date;
-        updatedAt: Date;
         isAvailableShift: boolean;
     } | null>;
     update(id: string, dto: UpdateShiftDto): Promise<{
         id: string;
         userId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         startTime: Date;
         endTime: Date;
         location: string | null;
         notes: string | null;
         status: import(".prisma/client").$Enums.ShiftStatus;
         createdBy: string;
-        createdAt: Date;
-        updatedAt: Date;
         isAvailableShift: boolean;
     }>;
     remove(id: string): Promise<{
         id: string;
         userId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         startTime: Date;
         endTime: Date;
         location: string | null;
         notes: string | null;
         status: import(".prisma/client").$Enums.ShiftStatus;
         createdBy: string;
-        createdAt: Date;
-        updatedAt: Date;
         isAvailableShift: boolean;
     }>;
 }

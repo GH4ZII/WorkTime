@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
-
-// Supported backend base URLs (primary first). Keep both for easy switching.
-const BASE_URLS = ['http://10.229.18.144:3001', 'http://10.129.48.163:3001'];
-const BASE_URL = BASE_URLS[0];
+import { apiUrl } from '../utils/api';
 
 interface Employee {
     id: string;
@@ -78,7 +75,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
     const fetchEmployees = async () => {
         try {
-            const response = await axios.get<Employee[]>(`${BASE_URL}/users`, {
+            const response = await axios.get<Employee[]>(apiUrl('/users'), {
                 withCredentials: true
             });
             setEmployees(response.data);
@@ -90,7 +87,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
     const fetchShifts = async () => {
         try {
-            const response = await axios.get<Shift[]>(`${BASE_URL}/shifts`, {
+            const response = await axios.get<Shift[]>(apiUrl('/shifts'), {
                 withCredentials: true
             });
             setShifts(response.data);
@@ -102,7 +99,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
     const fetchTimeOffRequests = async () => {
         try {
-            const response = await axios.get<TimeOffRequest[]>(`${BASE_URL}/time-off-requests`, {
+            const response = await axios.get<TimeOffRequest[]>(apiUrl('/time-off-requests'), {
                 withCredentials: true
             });
             setTimeOffRequests(response.data);
@@ -114,7 +111,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
     const fetchSwapRequests = async () => {
         try {
-            const response = await axios.get<SwapRequest[]>(`${BASE_URL}/shift-swap-requests`, {
+            const response = await axios.get<SwapRequest[]>(apiUrl('/shift-swap-requests'), {
                 withCredentials: true
             });
             setSwapRequests(response.data);

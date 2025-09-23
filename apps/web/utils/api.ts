@@ -10,12 +10,12 @@ function resolveApiBase(): string {
   if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_BASE) {
     return process.env.NEXT_PUBLIC_API_BASE;
   }
-  // Match current host in browser
+  // Match current host in browser - this will automatically use whatever IP you're on!
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
-    const host = window.location.hostname; // e.g. 10.229.18.144
+    const host = window.location.hostname; // Automatically detects current IP
     return `http://${host}:3001`;
   }
-  // Fallback to first configured base
+  // Fallback - try both IPs in order
   return API_BASE_URLS[0];
 }
 
