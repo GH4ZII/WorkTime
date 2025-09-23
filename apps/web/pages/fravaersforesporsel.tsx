@@ -16,7 +16,9 @@ import {
     Alert,
     CircularProgress,
     IconButton,
-    Tooltip
+    Tooltip,
+    TextField,
+    InputAdornment
 } from '@mui/material';
 import {
     Event as EventIcon,
@@ -24,8 +26,9 @@ import {
     Close as CloseIcon,
     CalendarToday as CalendarIcon,
     AccessTime as TimeIcon,
-    CheckCircle as CheckCircleIcon,
-    Cancel as CancelIcon,
+    CheckCircleOutline as CheckCircleIcon,
+    HighlightOff as CancelIcon,
+    Search as SearchIcon,
     Clear as ClearIcon
 } from '@mui/icons-material';
 
@@ -53,6 +56,7 @@ const FravaersforesporselPage: NextPage = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
+    const [search, setSearch] = useState('')
 
     useEffect(() => {
         fetchTimeOffRequests()
@@ -121,9 +125,14 @@ const FravaersforesporselPage: NextPage = () => {
     }
 
     // Filtrer forespørsler etter status og skjul skjulte
-    const pendingRequests = timeOffRequests.filter(req => req.status === 'PENDING' && !req.isHidden)
-    const approvedRequests = timeOffRequests.filter(req => req.status === 'APPROVED' && !req.isHidden)
-    const rejectedRequests = timeOffRequests.filter(req => req.status === 'REJECTED' && !req.isHidden)
+    const matchesSearch = (req: TimeOffRequest) => {
+        const who = getUserName(req.userId).toLowerCase()
+        const reason = (req.reason || '').toLowerCase()
+        return who.includes(search.toLowerCase()) || reason.includes(search.toLowerCase())
+    }
+    const pendingRequests = timeOffRequests.filter(req => req.status === 'PENDING' && !req.isHidden && matchesSearch(req))
+    const approvedRequests = timeOffRequests.filter(req => req.status === 'APPROVED' && !req.isHidden && matchesSearch(req))
+    const rejectedRequests = timeOffRequests.filter(req => req.status === 'REJECTED' && !req.isHidden && matchesSearch(req))
 
     // Hjelpefunksjoner
     const getUserName = (userId: string) => {
@@ -228,17 +237,33 @@ const FravaersforesporselPage: NextPage = () => {
                         {success}
                     </Alert>
                 )}
-
+                {/* Header */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
+                    <Typography variant="h4" fontWeight="bold">Fraværsforespørsler</Typography>
+                    <TextField
+                        placeholder="Søk"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        size="small"
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon sx={{ color: 'text.secondary' }} />
+                                </InputAdornment>
+                            )
+                        }}
+                        sx={{ width: { xs: 180, sm: 260, md: 320 }, '& .MuiOutlinedInput-root': { borderRadius: 999, bgcolor: 'grey.50' } }}
+                    />
+                </Box>
 
                 {/* Ventende forespørsler */}
-                <Card elevation={2} sx={{ mb: 3 }}>
-                    <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <EventIcon sx={{ mr: 1, color: 'warning.main' }} />
-                            <Typography variant="h5" component="h2" fontWeight="bold">
-                                Ventende forespørsler ({pendingRequests.length})
-                            </Typography>
-                        </Box>
+                <Box sx={{ mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 3, bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(16,24,40,0.08)' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1.5 }}>
+                        <EventIcon sx={{ color: 'warning.main' }} />
+                        <Typography variant="h6" fontWeight="bold">Ventende forespørsler</Typography>
+                        <Chip label={pendingRequests.length} size="small" sx={{ ml: 1, bgcolor: 'grey.100' }} />
+                    </Box>
+                    <Box sx={{ p: 2.5 }}>
                         
                         {pendingRequests.length === 0 ? (
                             <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -380,18 +405,17 @@ const FravaersforesporselPage: NextPage = () => {
                                 })}
                             </Grid>
                         )}
-                    </CardContent>
-                </Card>
+                    </Box>
+                </Box>
 
                 {/* Arkiv - Godkjente forespørsler */}
-                <Card elevation={2} sx={{ mb: 3 }}>
-                    <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <CheckCircleIcon sx={{ mr: 1, color: 'success.main' }} />
-                            <Typography variant="h5" component="h2" fontWeight="bold">
-                                Godkjente forespørsler ({approvedRequests.length})
-                            </Typography>
-                        </Box>
+                <Box sx={{ mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 3, bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(16,24,40,0.08)' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1.5 }}>
+                        <CheckCircleIcon sx={{ color: 'success.main' }} />
+                        <Typography variant="h6" fontWeight="bold">Godkjente forespørsler</Typography>
+                        <Chip label={approvedRequests.length} size="small" sx={{ ml: 1, bgcolor: 'grey.100' }} />
+                    </Box>
+                    <Box sx={{ p: 2.5 }}>
                         
                         {approvedRequests.length === 0 ? (
                             <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -482,18 +506,17 @@ const FravaersforesporselPage: NextPage = () => {
                                 ))}
                             </Grid>
                         )}
-                    </CardContent>
-                </Card>
+                    </Box>
+                </Box>
 
                 {/* Arkiv - Avviste forespørsler */}
-                <Card elevation={2} sx={{ mb: 3 }}>
-                    <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <CancelIcon sx={{ mr: 1, color: 'error.main' }} />
-                            <Typography variant="h5" component="h2" fontWeight="bold">
-                                Avviste forespørsler ({rejectedRequests.length})
-                            </Typography>
-                        </Box>
+                <Box sx={{ mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 3, bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(16,24,40,0.08)' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1.5 }}>
+                        <CancelIcon sx={{ color: 'error.main' }} />
+                        <Typography variant="h6" fontWeight="bold">Avviste forespørsler</Typography>
+                        <Chip label={rejectedRequests.length} size="small" sx={{ ml: 1, bgcolor: 'grey.100' }} />
+                    </Box>
+                    <Box sx={{ p: 2.5 }}>
                         
                         {rejectedRequests.length === 0 ? (
                             <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -584,8 +607,8 @@ const FravaersforesporselPage: NextPage = () => {
                                 ))}
                             </Grid>
                         )}
-                    </CardContent>
-                </Card>
+                    </Box>
+                </Box>
             </Box>
         </Layout>
     );

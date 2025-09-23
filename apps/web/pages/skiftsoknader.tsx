@@ -13,6 +13,7 @@ import {
   TableRow,
   Button,
   Chip,
+  Avatar,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -23,13 +24,12 @@ import {
   Tooltip,
 } from '@mui/material';
 import {
-  CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
-  Visibility as ViewIcon,
+  Check as CheckIcon,
+  Close as CloseIcon,
   Refresh as RefreshIcon,
-  Clear as ClearIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
+import { apiUrl } from '../utils/api';
 
 interface ShiftApplication {
   id: string;
@@ -69,7 +69,7 @@ const SkiftsoknaderPage: NextPage = () => {
   const fetchApplications = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3001/shift-applications', {
+      const response = await axios.get(apiUrl('/shift-applications'), {
         withCredentials: true,
       });
       setApplications(response.data);
@@ -208,8 +208,9 @@ const SkiftsoknaderPage: NextPage = () => {
   return (
     <Layout>
       <Box sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        </Box>
+        <Typography variant="h4" fontWeight="bold" sx={{ mb: 2.5 }}>
+          Skiftsøknader
+        </Typography>
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -230,8 +231,17 @@ const SkiftsoknaderPage: NextPage = () => {
            </Typography>
          </Paper>
        ) : (
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer component={Paper} sx={{
+          borderRadius: 3,
+          border: '1px solid',
+          borderColor: 'divider',
+          boxShadow: '0 10px 30px rgba(16,24,40,0.08)'
+        }}>
+          <Table sx={{
+            '& th': { bgcolor: 'grey.50', fontWeight: 'bold' },
+            '& td, & th': { borderBottomColor: 'divider', py: 2 },
+            '& tbody tr:hover': { bgcolor: 'grey.50' }
+          }}>
             <TableHead>
               <TableRow>
                 <TableCell>Ansatt</TableCell>
@@ -242,19 +252,21 @@ const SkiftsoknaderPage: NextPage = () => {
                 <TableCell>Handlinger</TableCell>
               </TableRow>
             </TableHead>
-                         <TableBody>
-               {applications.filter(app => !app.isHidden).map((application) => (
-                <TableRow key={application.id}>
-                  <TableCell>
-                    <Box>
-                      <Typography variant="body1" fontWeight="medium">
-                        {application.user.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {application.user.email}
-                      </Typography>
-                    </Box>
-                  </TableCell>
+            <TableBody>
+              {applications.filter(app => !app.isHidden).map((application) => (
+               <TableRow key={application.id} hover>
+                 <TableCell>
+                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                     <Avatar sx={{ bgcolor: 'grey.200', color: 'text.primary', border: '1px solid', borderColor: 'divider', width: 32, height: 32 }}>
+                       {application.user.name?.charAt(0) || '?'}
+                     </Avatar>
+                     <Box>
+                       <Typography variant="body1" fontWeight="medium">
+                         {application.user.name}
+                       </Typography>
+                     </Box>
+                   </Box>
+                 </TableCell>
                   <TableCell>
                     <Box>
                       <Typography variant="body2">
@@ -273,11 +285,17 @@ const SkiftsoknaderPage: NextPage = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={getStatusLabel(application.status)}
-                      color={getStatusColor(application.status) as any}
-                      size="small"
-                    />
+                   <Chip
+                     label={getStatusLabel(application.status)}
+                     size="small"
+                     sx={{
+                       bgcolor: application.status === 'PENDING' ? 'transparent' : (application.status === 'APPROVED' ? 'success.light' : 'error.light'),
+                       color: application.status === 'PENDING' ? 'warning.main' : (application.status === 'APPROVED' ? 'success.darker' : 'error.darker'),
+                       border: application.status === 'PENDING' ? 'none' : '1px solid',
+                       borderColor: application.status === 'PENDING' ? 'transparent' : 'divider',
+                       fontWeight: application.status === 'PENDING' ? 600 : undefined
+                     }}
+                   />
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2">
@@ -285,53 +303,42 @@ const SkiftsoknaderPage: NextPage = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Tooltip title="Se detaljer">
-                        <IconButton
-                          size="small"
-                          onClick={() => openDetailsDialog(application)}
-                          color="primary"
-                        >
-                          <ViewIcon />
-                        </IconButton>
-                      </Tooltip>
-                      
+                   <Box sx={{ display: 'flex', gap: 1 }}>
                       {application.status === 'PENDING' && (
                         <>
                           <Tooltip title="Godkjenn">
-                            <IconButton
+                             <IconButton
                               size="small"
                               onClick={() => handleApprove(application.id)}
-                              color="success"
+                               sx={{
+                                 bgcolor: 'transparent',
+                                 border: 'none',
+                                 color: 'success.main',
+                                 filter: 'drop-shadow(0 1px 2px rgba(16,24,40,0.25))',
+                                 '&:hover': { transform: 'translateY(-1px)' }
+                               }}
                             >
                               <CheckIcon />
                             </IconButton>
                           </Tooltip>
                           
                           <Tooltip title="Avvis">
-                            <IconButton
+                             <IconButton
                               size="small"
                               onClick={() => openDetailsDialog(application)}
-                              color="error"
+                               sx={{
+                                 bgcolor: 'transparent',
+                                 border: 'none',
+                                 color: 'error.main',
+                                 filter: 'drop-shadow(0 1px 2px rgba(16,24,40,0.25))',
+                                 '&:hover': { transform: 'translateY(-1px)' }
+                               }}
                             >
-                              <CancelIcon />
+                               <CloseIcon />
                             </IconButton>
                           </Tooltip>
                         </>
                       )}
-                      
-                      <Tooltip title="Fjern fra skjermen">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleRemove(application.id)}
-                          sx={{ 
-                            color: 'text.secondary',
-                            '&:hover': { color: 'error.main' }
-                          }}
-                        >
-                          <ClearIcon />
-                        </IconButton>
-                      </Tooltip>
                     </Box>
                   </TableCell>
                 </TableRow>

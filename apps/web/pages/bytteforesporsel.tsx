@@ -16,7 +16,9 @@ import {
     Grid,
     Divider,
     Tooltip,
-    Paper
+    Paper,
+    TextField,
+    InputAdornment
 } from '@mui/material';
 import {
     SwapHoriz as SwapIcon,
@@ -28,8 +30,9 @@ import {
     CalendarToday as CalendarIcon,
     ArrowForward as ArrowIcon,
     SwapHoriz as SwapHorizIcon,
-    CheckCircle as CheckCircleIcon,
-    Cancel as CancelIcon,
+    CheckCircleOutline as CheckCircleIcon,
+    HighlightOff as CancelIcon,
+    Search as SearchIcon,
     Clear as ClearIcon
 } from '@mui/icons-material';
 
@@ -69,6 +72,7 @@ const ShiftSwapPage: NextPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         fetchData();
@@ -239,9 +243,14 @@ const ShiftSwapPage: NextPage = () => {
     };
 
     // Filtrer forespørsler etter status og skjul skjulte
-    const pendingRequests = swapRequests.filter(req => req.status === 'PENDING' && !req.isHidden)
-    const approvedRequests = swapRequests.filter(req => req.status === 'APPROVED' && !req.isHidden)
-    const rejectedRequests = swapRequests.filter(req => req.status === 'REJECTED' && !req.isHidden)
+    const matchesSearch = (req: ShiftSwapRequest) => {
+        const title = getRequestTitle(req).toLowerCase();
+        const desc = getRequestDescription(req).toLowerCase();
+        return title.includes(search.toLowerCase()) || desc.includes(search.toLowerCase());
+    };
+    const pendingRequests = swapRequests.filter(req => req.status === 'PENDING' && !req.isHidden && matchesSearch(req))
+    const approvedRequests = swapRequests.filter(req => req.status === 'APPROVED' && !req.isHidden && matchesSearch(req))
+    const rejectedRequests = swapRequests.filter(req => req.status === 'REJECTED' && !req.isHidden && matchesSearch(req))
 
     if (loading) {
         return (
@@ -267,17 +276,38 @@ const ShiftSwapPage: NextPage = () => {
                         {success}
                     </Alert>
                 )}
-
+                {/* Header */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
+                    <Typography variant="h4" fontWeight="bold">Bytteforespørsler</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <TextField
+                            placeholder="Søk"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            size="small"
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{ color: 'text.secondary' }} />
+                                    </InputAdornment>
+                                )
+                            }}
+                            sx={{
+                                width: { xs: 180, sm: 260, md: 320 },
+                                '& .MuiOutlinedInput-root': { borderRadius: 999, bgcolor: 'grey.50' }
+                            }}
+                        />
+                    </Box>
+                </Box>
 
                 {/* Ventende forespørsler */}
-                <Card elevation={2} sx={{ mb: 3 }}>
-                    <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <SwapHorizIcon sx={{ mr: 1, color: 'warning.main' }} />
-                            <Typography variant="h5" component="h2" fontWeight="bold">
-                                Ventende forespørsler ({pendingRequests.length})
-                            </Typography>
-                        </Box>
+                <Box sx={{ mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 3, bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(16,24,40,0.08)' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1.5 }}>
+                        <SwapHorizIcon sx={{ color: 'warning.main' }} />
+                        <Typography variant="h6" fontWeight="bold">Ventende forespørsler</Typography>
+                        <Chip label={pendingRequests.length} size="small" sx={{ ml: 1, bgcolor: 'grey.100' }} />
+                    </Box>
+                    <Box sx={{ p: 2.5 }}>
                         
                         {pendingRequests.length === 0 ? (
                             <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -510,18 +540,17 @@ const ShiftSwapPage: NextPage = () => {
                                 })}
                             </Grid>
                         )}
-                    </CardContent>
-                </Card>
+                    </Box>
+                </Box>
 
                 {/* Arkiv - Godkjente forespørsler */}
-                <Card elevation={2} sx={{ mb: 3 }}>
-                    <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <CheckCircleIcon sx={{ mr: 1, color: 'success.main' }} />
-                            <Typography variant="h5" component="h2" fontWeight="bold">
-                                Godkjente forespørsler ({approvedRequests.length})
-                            </Typography>
-                        </Box>
+                <Box sx={{ mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 3, bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(16,24,40,0.08)' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1.5 }}>
+                        <CheckCircleIcon sx={{ color: 'success.main' }} />
+                        <Typography variant="h6" fontWeight="bold">Godkjente forespørsler</Typography>
+                        <Chip label={approvedRequests.length} size="small" sx={{ ml: 1, bgcolor: 'grey.100' }} />
+                    </Box>
+                    <Box sx={{ p: 2.5 }}>
                         
                         {approvedRequests.length === 0 ? (
                             <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -672,18 +701,17 @@ const ShiftSwapPage: NextPage = () => {
                                 })}
                             </Grid>
                         )}
-                    </CardContent>
-                </Card>
+                    </Box>
+                </Box>
 
                 {/* Arkiv - Avviste forespørsler */}
-                <Card elevation={2} sx={{ mb: 3 }}>
-                    <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <CancelIcon sx={{ mr: 1, color: 'error.main' }} />
-                            <Typography variant="h5" component="h2" fontWeight="bold">
-                                Avviste forespørsler ({rejectedRequests.length})
-                            </Typography>
-                        </Box>
+                <Box sx={{ mb: 3, border: '1px solid', borderColor: 'divider', borderRadius: 3, bgcolor: 'background.paper', boxShadow: '0 1px 3px rgba(16,24,40,0.08)' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1.5 }}>
+                        <CancelIcon sx={{ color: 'error.main' }} />
+                        <Typography variant="h6" fontWeight="bold">Avviste forespørsler</Typography>
+                        <Chip label={rejectedRequests.length} size="small" sx={{ ml: 1, bgcolor: 'grey.100' }} />
+                    </Box>
+                    <Box sx={{ p: 2.5 }}>
                         
                         {rejectedRequests.length === 0 ? (
                             <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -835,8 +863,8 @@ const ShiftSwapPage: NextPage = () => {
                                 })}
                             </Grid>
                         )}
-                    </CardContent>
-                </Card>
+                    </Box>
+                </Box>
             </Box>
         </Layout>
     );
