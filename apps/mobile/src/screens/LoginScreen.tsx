@@ -10,8 +10,11 @@ import {
     KeyboardAvoidingView, 
     Platform,
     ScrollView,
-    Dimensions
+    Dimensions,
+    Modal
 } from 'react-native';
+import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api-simple';
 import { useAuth } from '../context/AuthContext';
 import * as SecureStore from 'expo-secure-store';
 
@@ -22,6 +25,12 @@ const LoginScreen: React.FC = () => {
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [forgotVisible, setForgotVisible] = useState(false);
+    const [forgotStage, setForgotStage] = useState<'request' | 'reset'>('request');
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetToken, setResetToken] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [submittingReset, setSubmittingReset] = useState(false);
 
     const { signIn } = useAuth();
 
@@ -74,6 +83,54 @@ const LoginScreen: React.FC = () => {
             Alert.alert("Innlogging feilet", error.message || "Kunne ikke logge inn");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleForgotPasswordRequest = async () => {
+        if (!resetEmail.trim()) {
+            Alert.alert('Feil', 'Skriv inn e-posten din');
+            return;
+        }
+        try {
+            setSubmittingReset(true);
+            const response = await axios.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email: resetEmail });
+            const msg = response.data?.message || 'Hvis e-posten eksisterer, mottar du en lenke/kode.';
+            const tokenFromServer = response.data?.token;
+            if (tokenFromServer) {
+                setResetToken(tokenFromServer);
+                Alert.alert('Token mottatt (dev)', `${msg}\n\nToken: ${tokenFromServer}`);
+            } else {
+                Alert.alert('Sjekk e-post', msg);
+            }
+            setForgotStage('reset');
+        } catch (error: any) {
+            Alert.alert('Feil', error.response?.data?.message || 'Kunne ikke sende forespørsel');
+        } finally {
+            setSubmittingReset(false);
+        }
+    };
+
+    const handleResetPassword = async () => {
+        if (!resetToken.trim() || !newPassword.trim()) {
+            Alert.alert('Feil', 'Skriv inn koden/lenken og nytt passord');
+            return;
+        }
+        try {
+            setSubmittingReset(true);
+            const response = await axios.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
+                token: resetToken.trim(),
+                newPassword: newPassword.trim(),
+            });
+            Alert.alert('Suksess', response.data?.message || 'Passordet er oppdatert');
+            setForgotVisible(false);
+            setForgotStage('request');
+            setResetEmail('');
+            setResetToken('');
+            setNewPassword('');
+        } catch (error: any) {
+            Alert.alert('Feil', error.response?.data?.message || 'Kunne ikke tilbakestille passord');
+        } finally {
+            setSubmittingReset(false);
         }
     };
 
@@ -150,6 +207,14 @@ const LoginScreen: React.FC = () => {
                             <Text style={styles.loginButtonText}>Logg inn</Text>
                         )}
                     </TouchableOpacity>
+                                        {/* Forgot Password */}
+                                        <TouchableOpacity
+                        onPress={() => setForgotVisible(true)}
+                        style={{ marginTop: 12, alignSelf: 'flex-end' }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={{ color: '#667eea', fontWeight: '600' }}>Glemt passord?</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Footer Section */}
@@ -159,6 +224,82 @@ const LoginScreen: React.FC = () => {
                     </Text>
                 </View>
             </ScrollView>
+            {/* Forgot Password Modal */}
+            <Modal
+                visible={forgotVisible}
+                animationType="slide"
+                transparent
+                onRequestClose={() => setForgotVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Tilbakestill passord</Text>
+                        {forgotStage === 'request' ? (
+                            <>
+                                <Text style={styles.modalLabel}>E-post</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Din e-post"
+                                    value={resetEmail}
+                                    onChangeText={setResetEmail}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    placeholderTextColor="#999"
+                                />
+                                <TouchableOpacity
+                                    style={[styles.loginButton, submittingReset && styles.loginButtonDisabled]}
+                                    onPress={handleForgotPasswordRequest}
+                                    disabled={submittingReset}
+                                >
+                                    {submittingReset ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <Text style={styles.loginButtonText}>Send kode/lenke</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </>
+                        ) : (
+                            <>
+                                <Text style={styles.modalDescription}>Sjekk e-posten din for kode/lenke og skriv den inn her sammen med nytt passord.</Text>
+                                <Text style={styles.modalLabel}>Kode/Token</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Reset kode eller token"
+                                    value={resetToken}
+                                    onChangeText={setResetToken}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    placeholderTextColor="#999"
+                                />
+                                <Text style={styles.modalLabel}>Nytt passord</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Nytt passord"
+                                    value={newPassword}
+                                    onChangeText={setNewPassword}
+                                    secureTextEntry
+                                    placeholderTextColor="#999"
+                                />
+                                <TouchableOpacity
+                                    style={[styles.loginButton, submittingReset && styles.loginButtonDisabled]}
+                                    onPress={handleResetPassword}
+                                    disabled={submittingReset}
+                                >
+                                    {submittingReset ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <Text style={styles.loginButtonText}>Oppdater passord</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </>
+                        )}
+                        <TouchableOpacity onPress={() => { setForgotVisible(false); setForgotStage('request'); }} style={{ marginTop: 16 }}>
+                            <Text style={{ textAlign: 'center', color: '#6b7280' }}>Lukk</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </KeyboardAvoidingView>
     );
 };
@@ -295,6 +436,38 @@ const styles = StyleSheet.create({
     footerText: {
         fontSize: 14,
         color: '#6b7280',
+        textAlign: 'center',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        width: width * 0.9,
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 20,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#374151',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    modalLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#374151',
+        marginBottom: 8,
+        marginTop: 8,
+    },
+    modalDescription: {
+        color: '#6b7280',
+        marginBottom: 8,
         textAlign: 'center',
     },
 });

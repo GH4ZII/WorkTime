@@ -110,7 +110,7 @@ const ChatScreen: React.FC = () => {
       socketRef.current.close();
     }
 
-    const newSocket = io('http://10.129.48.163:3001', {
+    const newSocket = io(API_ENDPOINTS.BASE_URL, {
       transports: ['websocket'],
       timeout: 5000,
     });
