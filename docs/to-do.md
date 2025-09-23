@@ -1,15 +1,5 @@
 # 🚀 WorkTime - Utviklingsplan & Funksjonalitet
 
-Denne filen kombinerer utviklingsplanen og funksjonalitetsoversikten for WorkTime-applikasjonen. Den beskriver både **hvilke funksjoner** som skal implementeres og **hvordan** de skal utvikles.
-
-## 📱 M3 – Mobilapp for Ansatte
-
-### 3.5 Sanntidsoppdateringer
-- [ ] Oppdater UI live ved skift- og forespørselsendringer
-- [ ] Når admin legger til, endrer eller sletter skift, oppdateres appen automatisk
-- [ ] Chat-meldinger oppdateres i sanntid
-- [ ] Push-varsler med Expo
-
 ## 🖥️ M4 – Adminportal (Web)
 
 ### 4.3 Rapporter & Statistikk

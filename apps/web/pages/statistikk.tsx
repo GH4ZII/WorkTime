@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { NextPage } from 'next';
 import { Layout } from '../components/Layout';
 import { 
@@ -44,46 +44,16 @@ import {
   ShowChart as LineChartIcon
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import { useData } from '../context/DataContext';
 
-// Sample data for demonstration
-const sampleData = {
-  currentMonth: {
-    totalHours: 168,
-    averageHoursPerDay: 8.4,
-    overtimeHours: 12,
-    lateArrivals: 3,
-    earlyDepartures: 2,
-    sickDays: 1,
-    vacationDays: 3,
-    productivityScore: 87,
-    completionRate: 92,
-    topPerformers: [
-      { name: 'Ola Nordmann', hours: 180, productivity: 94 },
-      { name: 'Kari Hansen', hours: 175, productivity: 91 },
-      { name: 'Per Olsen', hours: 172, productivity: 89 }
-    ],
-    departmentStats: [
-      { name: 'IT', avgHours: 8.6, productivity: 89 },
-      { name: 'HR', avgHours: 8.2, productivity: 85 },
-      { name: 'Sales', avgHours: 8.8, productivity: 92 },
-      { name: 'Marketing', avgHours: 8.4, productivity: 87 }
-    ]
-  },
-  previousMonth: {
-    totalHours: 160,
-    averageHoursPerDay: 8.0,
-    overtimeHours: 8,
-    lateArrivals: 5,
-    earlyDepartures: 3,
-    sickDays: 2,
-    vacationDays: 2,
-    productivityScore: 84,
-    completionRate: 89
-  }
-};
+// Tids-hjelpere
+const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
+const endOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+const addMonths = (date: Date, n: number) => new Date(date.getFullYear(), date.getMonth() + n, 1);
 
 const StatisticsPage: NextPage = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('current');
+  const { employees, shifts, timeOffRequests } = useData();
+  const [selectedPeriod, setSelectedPeriod] = useState<'current' | 'previous'>('current');
   const [selectedTab, setSelectedTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -92,8 +62,96 @@ const StatisticsPage: NextPage = () => {
     setTimeout(() => setIsLoading(false), 2000);
   };
 
-  const currentData = selectedPeriod === 'current' ? sampleData.currentMonth : sampleData.previousMonth;
-  const previousData = selectedPeriod === 'current' ? sampleData.previousMonth : sampleData.currentMonth;
+  // Datarammer for valgt måned og forrige måned
+  const now = new Date();
+  const rangeCurrent = useMemo(() => {
+    const base = selectedPeriod === 'current' ? now : addMonths(now, -1);
+    return { from: startOfMonth(base), to: endOfMonth(base) };
+  }, [selectedPeriod]);
+
+  const rangePrevious = useMemo(() => {
+    const base = selectedPeriod === 'current' ? addMonths(now, -1) : addMonths(now, -2);
+    return { from: startOfMonth(base), to: endOfMonth(base) };
+  }, [selectedPeriod]);
+
+  const hoursForShifts = (items: any[]) => items.reduce((sum, s) => {
+    const start = new Date(s.startTime).getTime();
+    const end = new Date(s.endTime).getTime();
+    if (isNaN(start) || isNaN(end) || end <= start) return sum;
+    return sum + (end - start) / (1000 * 60 * 60);
+  }, 0);
+
+  const filterByRange = (items: any[], from: Date, to: Date, getter: (x: any) => string) => {
+    const fromMs = from.getTime();
+    const toMs = to.getTime();
+    return items.filter(x => {
+      const t = new Date(getter(x)).getTime();
+      return !isNaN(t) && t >= fromMs && t <= toMs;
+    });
+  };
+
+  const statsCurrent = useMemo(() => {
+    const monthShifts = filterByRange(shifts, rangeCurrent.from, rangeCurrent.to, s => s.startTime);
+    const totalHours = Math.round(hoursForShifts(monthShifts));
+    const daysInMonth = endOfMonth(rangeCurrent.from).getDate();
+    const averageHoursPerDay = +(totalHours / daysInMonth).toFixed(1);
+    const baseline = 160;
+    const overtimeHours = Math.max(totalHours - baseline, 0);
+    const sickDays = filterByRange(timeOffRequests, rangeCurrent.from, rangeCurrent.to, r => r.fromDate).filter(r => r.type === 'SICK').length;
+    const vacationDays = filterByRange(timeOffRequests, rangeCurrent.from, rangeCurrent.to, r => r.fromDate).filter(r => r.type === 'VACATION').length;
+
+    const hoursByUser: Record<string, number> = {};
+    monthShifts.forEach((s: any) => {
+      const userId = s.user?.id || s.userId;
+      if (!userId) return;
+      const h = hoursForShifts([s]);
+      hoursByUser[userId] = (hoursByUser[userId] || 0) + h;
+    });
+    const topPerformers = Object.entries(hoursByUser)
+      .map(([userId, hours]) => ({
+        name: employees.find(e => e.id === userId)?.name || userId,
+        hours: Math.round(hours as number),
+        productivity: 100
+      }))
+      .sort((a, b) => b.hours - a.hours)
+      .slice(0, 3);
+
+    return {
+      totalHours,
+      averageHoursPerDay,
+      overtimeHours,
+      lateArrivals: 0,
+      earlyDepartures: 0,
+      sickDays,
+      vacationDays,
+      productivityScore: 0,
+      completionRate: 0,
+      topPerformers,
+      departmentStats: [] as any[],
+    };
+  }, [shifts, timeOffRequests, employees, rangeCurrent.from, rangeCurrent.to]);
+
+  const statsPrevious = useMemo(() => {
+    const monthShifts = filterByRange(shifts, rangePrevious.from, rangePrevious.to, s => s.startTime);
+    const totalHours = Math.round(hoursForShifts(monthShifts));
+    const daysInMonth = endOfMonth(rangePrevious.from).getDate();
+    const averageHoursPerDay = +(totalHours / daysInMonth).toFixed(1);
+    const baseline = 160;
+    const overtimeHours = Math.max(totalHours - baseline, 0);
+    const sickDays = filterByRange(timeOffRequests, rangePrevious.from, rangePrevious.to, r => r.fromDate).filter(r => r.type === 'SICK').length;
+    const vacationDays = filterByRange(timeOffRequests, rangePrevious.from, rangePrevious.to, r => r.fromDate).filter(r => r.type === 'VACATION').length;
+    return {
+      totalHours,
+      averageHoursPerDay,
+      overtimeHours,
+      lateArrivals: 0,
+      earlyDepartures: 0,
+      sickDays,
+      vacationDays,
+      productivityScore: 0,
+      completionRate: 0,
+    };
+  }, [shifts, timeOffRequests, rangePrevious.from, rangePrevious.to]);
 
   const calculateChange = (current: number, previous: number) => {
     if (previous === 0) return 0;
@@ -210,13 +268,13 @@ const StatisticsPage: NextPage = () => {
           ) : (
             <Box sx={{ textAlign: 'center', py: 2 }}>
               <Typography variant="h4" component="div" fontWeight="bold" sx={{ color: '#667eea' }}>
-                {data.avgHours}h
+                {(data?.avgHours ?? 0)}h
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Gjennomsnitt per dag
               </Typography>
               <Typography variant="h6" sx={{ color: '#5a6fd8', mt: 1 }}>
-                Produktivitet: {data.productivity}%
+                Produktivitet: {data?.productivity ?? 0}%
               </Typography>
             </Box>
           )}
@@ -224,6 +282,9 @@ const StatisticsPage: NextPage = () => {
       </Card>
     </motion.div>
   );
+
+  const currentData = selectedPeriod === 'current' ? statsCurrent : statsPrevious;
+  const previousData = selectedPeriod === 'current' ? statsPrevious : statsCurrent;
 
   return (
     <Layout>
