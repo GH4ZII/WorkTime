@@ -84,12 +84,10 @@ cd apps/api && npm run dev
 * **Historikk**: Oversikt over alle forespørsler og deres status
 
 ###  Live Chat
-* **WebSocket**: Sanntids kommunikasjon med Socket.IO
-* **Direktemeldinger**: Ansatt-til-ansatt og admin-til-ansatt
-* **Gruppechat**: Flere deltakere i samme chat
-* **Typing indicators**: Viser når noen skriver
-* **Persistent**: Meldinger lagres i database
-* **Real-time**: Umiddelbar oppdatering av chat
+* **WebSocket (Socket.IO)**: Sanntids chat
+* **Direktemeldinger & grupper**: En-til-en og gruppechat
+* **Typing indicators** og vedvarende historikk
+* Merk: Realtime oppdateringer for skift/forespørsler er ikke i bruk – kun chat er sanntid
 
 ###  Statistikk & Rapporter
 * **Timeregistrering**: Logg arbeidstimer med start/stopp
@@ -111,7 +109,7 @@ cd apps/api && npm run dev
 * **Framework**: NestJS 11 med TypeScript 5.7
 * **Database**: PostgreSQL med Prisma 6 ORM
 * **Authentication**: JWT + Passport.js
-* **Real-time**: Socket.IO for WebSocket-kommunikasjon
+* **Real-time (chat)**: Socket.IO for WebSocket-kommunikasjon (kun chat)
 * **AI Integration**: OpenAI GPT API for skiftplanlegging
 
 ---
@@ -138,7 +136,8 @@ PORT=3001
 OPENAI_API_KEY="your-openai-key"
 
 # Web (.env.local)
-NEXT_PUBLIC_API_URL="http://localhost:3001"
+# Valgfri. Hvis ikke satt, bruker web automatisk samme host som nettleseren på port 3001
+NEXT_PUBLIC_API_BASE="http://localhost:3001"
 ```
 
 ### Database
@@ -155,3 +154,18 @@ npx prisma generate
 ```
 
 ---
+
+##  Nettverksoppsett og CORS
+
+- API kjører som standard på `http://localhost:3001`.
+- Web kjører på `http://localhost:3000`.
+- CORS i `apps/api/src/main.ts` tillater localhost samt LAN-IP-er (f.eks. `10.x.x.x`).
+- Web bruker en dynamisk base-URL (se `apps/web/utils/api.ts`). I produksjon/annet nett kan du sette `NEXT_PUBLIC_API_BASE`.
+
+---
+
+##  Glemt passord (dev-prosess)
+
+- Endepunkter: `POST /auth/forgot-password` og `POST /auth/reset-password`.
+- I utvikling logger API en reset-token i konsollen og kan returnere token i responsen.
+- Mobilappen har en «Glemt passord?»-dialog: be om kode → lim inn token → sett nytt passord.
