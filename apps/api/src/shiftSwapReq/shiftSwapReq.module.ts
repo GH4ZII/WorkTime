@@ -4,6 +4,7 @@ import {ShiftSwapReqService} from './shiftSwapReq.service';
 import {PrismaService} from '../prisma.service';
 
 @Module({
+    imports: [],
     controllers: [ShiftSwapReqController],
     providers: [ShiftSwapReqService, PrismaService]
 })

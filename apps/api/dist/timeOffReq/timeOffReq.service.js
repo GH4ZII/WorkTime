@@ -52,7 +52,7 @@ let TimeOffReqService = class TimeOffReqService {
         });
     }
     async remove(id) {
-        await this.findOne(id);
+        const existing = await this.findOne(id);
         return this.prisma.timeOffRequest.update({
             where: { id },
             data: { isHidden: true }

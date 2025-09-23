@@ -9,7 +9,7 @@ import { PushNotificationsService } from '../push-notifications/push-notificatio
 export class ShiftsService {
     constructor(
         private prisma: PrismaService,
-        private pushNotificationsService: PushNotificationsService
+        private pushNotificationsService: PushNotificationsService,
     ) {}
 
     // 1) Lage nytt skift

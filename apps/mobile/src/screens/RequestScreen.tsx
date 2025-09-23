@@ -99,6 +99,8 @@ const RequestScreen: React.FC = () => {
     }
   }, [activeTab, currentUser]);
 
+  // Removed realtime subscription per request
+
   const fetchData = async () => {
     try {
       setIsLoadingData(true);
@@ -604,8 +606,8 @@ const RequestScreen: React.FC = () => {
                     <View style={styles.requestTypeContainer}>
                       <Ionicons 
                         name={
-                          request.type === 'VACATION' ? 'beach-outline' : 
-                          request.type === 'SICK' ? 'medical-outline' : 
+                          request.type === 'VACATION' ? 'calendar-outline' : 
+                          request.type === 'SICK' ? 'medkit-outline' : 
                           'help-outline'
                         } 
                         size={20} 

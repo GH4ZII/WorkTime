@@ -6,19 +6,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ShiftSwapReqModule = void 0;
+exports.RealtimeModule = void 0;
 const common_1 = require("@nestjs/common");
-const shiftSwapReq_controller_1 = require("./shiftSwapReq.controller");
-const shiftSwapReq_service_1 = require("./shiftSwapReq.service");
-const prisma_service_1 = require("../prisma.service");
-let ShiftSwapReqModule = class ShiftSwapReqModule {
+const realtime_gateway_1 = require("./realtime.gateway");
+const realtime_service_1 = require("./realtime.service");
+let RealtimeModule = class RealtimeModule {
 };
-exports.ShiftSwapReqModule = ShiftSwapReqModule;
-exports.ShiftSwapReqModule = ShiftSwapReqModule = __decorate([
+exports.RealtimeModule = RealtimeModule;
+exports.RealtimeModule = RealtimeModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
-        controllers: [shiftSwapReq_controller_1.ShiftSwapReqController],
-        providers: [shiftSwapReq_service_1.ShiftSwapReqService, prisma_service_1.PrismaService]
+        providers: [realtime_gateway_1.RealtimeGateway, realtime_service_1.RealtimeService],
+        exports: [realtime_service_1.RealtimeService],
     })
-], ShiftSwapReqModule);
-//# sourceMappingURL=shiftSwapReq.module.js.map
+], RealtimeModule);
+//# sourceMappingURL=realtime.module.js.map

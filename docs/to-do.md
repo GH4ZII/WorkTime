@@ -4,10 +4,6 @@ Denne filen kombinerer utviklingsplanen og funksjonalitetsoversikten for WorkTim
 
 ## 📱 M3 – Mobilapp for Ansatte
 
-### 3.4 Innstillinger
-- [ ] Endre passord
-- [ ] Logg ut
-
 ### 3.5 Sanntidsoppdateringer
 - [ ] Oppdater UI live ved skift- og forespørselsendringer
 - [ ] Når admin legger til, endrer eller sletter skift, oppdateres appen automatisk

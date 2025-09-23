@@ -47,7 +47,7 @@ export class TimeOffReqService {
 
     async remove(id: string) {
         // Sjekk at forespørselen finnes
-        await this.findOne(id);
+        const existing = await this.findOne(id);
 
         // Bruk hide i stedet for delete - dette bevarer data men skjuler den
         return this.prisma.timeOffRequest.update({

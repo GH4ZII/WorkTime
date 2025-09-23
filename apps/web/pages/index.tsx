@@ -21,6 +21,7 @@ import {
     Alert,
     Divider
 } from '@mui/material';
+import { apiUrl } from '../utils/api';
 import {
     Schedule as ScheduleIcon,
     SwapHoriz as SwapIcon,
@@ -150,7 +151,7 @@ const HomePage: NextPage = () => {
     // Hent skiftsøknader
     const fetchShiftApplications = async () => {
         try {
-            const response = await fetch('http://localhost:3001/shift-applications', {
+            const response = await fetch(apiUrl('/shift-applications'), {
                 credentials: 'include'
             });
             if (response.ok) {

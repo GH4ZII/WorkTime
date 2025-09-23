@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { API_ENDPOINTS } from '../config/api-simple';
 import axios from 'axios';
 import ScreenHeader from '../components/ScreenHeader';
+import { useAuth } from '../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -21,20 +22,23 @@ const MyShiftsScreen: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedFilter, setSelectedFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+    const { user: currentUser } = useAuth();
 
     useEffect(() => {
         fetchMyShifts();
     }, []);
+
+    // Removed realtime subscription per request
 
     const fetchMyShifts = async () => {
         try {
             setIsLoading(true);
             setError(null);
             
-            // Her ville du normalt hente kun brukerens egne vakter
             const response = await axios.get(API_ENDPOINTS.SHIFTS);
-            const userShifts = response.data.slice(0, 5); // Simulerer brukerens vakter
-            
+            const allShifts = response.data as any[];
+            const userId = currentUser?.id;
+            const userShifts = userId ? allShifts.filter((s: any) => s.user?.id === userId || s.userId === userId) : [];
             setShifts(userShifts);
         } catch (err: any) {
             console.error('Error fetching shifts:', err);
