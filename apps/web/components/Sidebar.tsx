@@ -108,16 +108,19 @@ export const Sidebar: React.FC = () => {
                 width: sidebarWidth,
                 flexShrink: 0,
                 transition: 'width 0.3s ease',
-                position: 'relative',
+                position: 'sticky',
+                top: 0,
+                alignSelf: 'stretch',
+                height: '100vh',
                 zIndex: 1200
             }}
         >
             <Box sx={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                height: 'auto',
+                height: '100vh',
                 backgroundColor: '#764ba2 !important',
-                borderRadius: '0 0 16px 0',
+                borderRadius: 0,
                 marginBottom: 2,
                 boxShadow: 'none !important',
                 outline: 'none !important',
@@ -201,7 +204,16 @@ export const Sidebar: React.FC = () => {
                 </Box>
 
                 {/* Navigation Menu */}
-                <Box sx={{ flex: 1, overflow: 'auto', py: 2 }}>
+                <Box sx={{ 
+                    flex: 1, 
+                    overflow: 'auto', 
+                    py: 2,
+                    scrollbarWidth: 'none',        // Firefox
+                    msOverflowStyle: 'none',       // IE/Edge
+                    '&::-webkit-scrollbar': {      // Chrome/Safari
+                        display: 'none'
+                    }
+                }}>
                     <List sx={{ px: isCollapsed ? 1 : 2 }}>
                         {menuItems.map((item, index) => (
                             <ListItem 

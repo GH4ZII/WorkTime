@@ -249,19 +249,6 @@ const SkiftPage: NextPage = () => {
         setSelectedMonth(newMonth);
     };
 
-    // ← Ny: Hent skift for spesifikk måned
-    const fetchShiftsByMonth = async (month: Date) => {
-        try {
-            const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
-            const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
-            
-            const response = await axios.get(`http://localhost:3001/shifts?startDate=${startOfMonth.toISOString()}&endDate=${endOfMonth.toISOString()}`);
-            setShifts(response.data);
-        } catch (error) {
-            console.error('Feil ved henting av månedlige skift:', error);
-        }
-    };
-
     // ← Sjekk om en ansatt har AI-skift på en dato
     const hasAiShiftOnDate = (employeeId: string, date: Date) => {
         if (!aiGeneratedSchedule || !aiGeneratedSchedule.shifts) return false
@@ -1335,25 +1322,19 @@ const getDuration = (startTime: string, endTime: string) => {
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Button
                                         variant="contained"
-                                        startIcon={<AddIcon />}
                                         onClick={startAvailableShiftForm}
                                         sx={{
-                                            backgroundColor: '#667eea',
-                                            '&:hover': {
-                                                backgroundColor: '#1565c0',
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
-                                            },
+                                            backgroundColor: '#2563eb',
+                                            '&:hover': { backgroundColor: '#1d4ed8' },
                                             px: 3,
                                             py: 1,
                                             borderRadius: 2,
-                                            fontWeight: 600,
-                                            fontSize: '0.9rem',
-                                            transition: 'all 0.3s ease',
-                                            boxShadow: '0 2px 8px rgba(25, 118, 210, 0.2)'
+                                            fontWeight: 700,
+                                            fontSize: '0.95rem',
+                                            boxShadow: 'none'
                                         }}
                                     >
-                                        Legg ut ledig skift
+                                        + Legg ut ledig skift
                                     </Button>
                                     <IconButton onClick={goToToday}>
                                         <CalendarIcon />
@@ -1408,7 +1389,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                 }}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                                         <Avatar sx={{ 
-                                                            bgcolor: 'primary.main',
+                                                            bgcolor: 'light-grey',
                                                             width: 32,
                                                             height: 32,
                                                             fontSize: '0.875rem'
@@ -2291,31 +2272,8 @@ const getDuration = (startTime: string, endTime: string) => {
                         borderBottomLeftRadius: 16,
                         borderBottomRightRadius: 16
                     }}>
-                                <Box sx={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: 2, 
-                                    mb: 4
-                                }}>
-                                    <Box sx={{
-                                        backgroundColor: '#667eea',
-                                        borderRadius: '50%',
-                                        width: 48,
-                                        height: 48,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-                                    }}>
-                                        <AiIcon sx={{ color: 'white', fontSize: 28 }} />
-                                    </Box>
-                                    <Typography 
-                                        variant="h4" 
-                                        fontWeight="bold" 
-                                        sx={{
-                                            color: '#667eea'
-                                        }}
-                                    >
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                                    <Typography variant="h4" fontWeight="bold" sx={{ color: '#black' }}>
                                         AI Skiftplanlegging
                                     </Typography>
                                 </Box>
@@ -2325,6 +2283,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                     display: 'flex', 
                                     gap: 3, 
                                     alignItems: 'center', 
+                                    justifyContent: 'space-between',
                                     mb: 3,
                                     p: 3,
                                     bgcolor: 'white',
@@ -2338,8 +2297,8 @@ const getDuration = (startTime: string, endTime: string) => {
                                         gap: 1,
                                         minWidth: 140 
                                     }}>
-                                        <Typography variant="subtitle1" fontWeight="600" color="#667eea">
-                                            📅 Månedlig:
+                                        <Typography variant="subtitle1" fontWeight="600" color="text.primary">
+                                            Månedlig:
                                         </Typography>
                                     </Box>
                                     <TextField
@@ -2365,35 +2324,28 @@ const getDuration = (startTime: string, endTime: string) => {
                                     
                                     <Button
                                         variant="contained"
-                                        startIcon={<AiIcon />}
                                         onClick={handleAiGenerateSchedule}
                                         disabled={isGeneratingSchedule}
                                         sx={{
-                                            backgroundColor: '#667eea',
-                                            '&:hover': {
-                                                backgroundColor: '#5a6fd8',
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
-                                            },
-                                            '&:disabled': {
-                                                backgroundColor: '#b0b7c4',
-                                            },
+                                            backgroundColor: '#2563eb',
+                                            '&:hover': { backgroundColor: '#1d4ed8' },
+                                            '&:disabled': { backgroundColor: '#b0b7c4' },
                                             px: 4,
                                             py: 1.5,
                                             borderRadius: 2,
-                                            fontWeight: 600,
+                                            fontWeight: 700,
                                             fontSize: '1rem',
-                                            transition: 'all 0.3s ease',
-                                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                                            boxShadow: 'none',
+                                            ml: 'auto'
                                         }}
                                     >
                                         {isGeneratingSchedule ? (
                                             <>
-                                                <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                                                <CircularProgress size={20} sx={{ ml: 70, color: 'white' }} />
                                                 Genererer...
                                             </>
                                         ) : (
-                                            'Generer månedlig plan'
+                                            '+ Generer månedlig plan'
                                         )}
                                     </Button>
                                 </Box>
@@ -2403,6 +2355,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                     display: 'flex', 
                                     gap: 3, 
                                     alignItems: 'center',
+                                    justifyContent: 'space-between',
                                     p: 3,
                                     bgcolor: 'white',
                                     borderRadius: 2,
@@ -2415,8 +2368,8 @@ const getDuration = (startTime: string, endTime: string) => {
                                         gap: 1,
                                         minWidth: 140 
                                     }}>
-                                        <Typography variant="subtitle1" fontWeight="600" color="#667eea">
-                                            📅 Ukentlig:
+                                        <Typography variant="subtitle1" fontWeight="600" color="text.primary">
+                                            Ukentlig:
                                         </Typography>
                                     </Box>
                                     <TextField
@@ -2446,26 +2399,19 @@ const getDuration = (startTime: string, endTime: string) => {
                                     
                                     <Button
                                         variant="contained"
-                                        startIcon={<AiIcon />}
                                         onClick={handleAiGenerateWeeklySchedule}
                                         disabled={isGeneratingWeeklySchedule}
                                         sx={{
-                                            backgroundColor: '#667eea',
-                                            '&:hover': {
-                                                backgroundColor: '#5a6fd8',
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
-                                            },
-                                            '&:disabled': {
-                                                backgroundColor: '#b0b7c4',
-                                            },
+                                            backgroundColor: '#2563eb',
+                                            '&:hover': { backgroundColor: '#1d4ed8' },
+                                            '&:disabled': { backgroundColor: '#b0b7c4' },
                                             px: 4,
                                             py: 1.5,
                                             borderRadius: 2,
-                                            fontWeight: 600,
+                                            fontWeight: 700,
                                             fontSize: '1rem',
-                                            transition: 'all 0.3s ease',
-                                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                                            boxShadow: 'none',
+                                            ml: 'auto'
                                         }}
                                     >
                                         {isGeneratingWeeklySchedule ? (
@@ -2474,7 +2420,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                 Genererer...
                                             </>
                                         ) : (
-                                            'Generer ukentlig plan'
+                                            '+ Generer ukentlig plan'
                                         )}
                                     </Button>
                                 </Box>
