@@ -1,11 +1,11 @@
-# 📱 WorkTime
+# WorkTime
 
 **WorkTime** er en komplett skift- og timeregistreringsapp for ansatte og administratorer.
 Prosjektet består av web (adminpanel), mobilapp (ansatte), og et API, med delt kodebase via Turborepo.
 
 ---
 
-## 🧱 Prosjektstruktur
+## Prosjektstruktur
 
 ```
 WorkTime/
@@ -25,7 +25,7 @@ WorkTime/
 
 ---
 
-## 🚀 Kom i gang
+## Kom i gang
 
 ```bash
 # Installer alle workspaces
@@ -50,40 +50,40 @@ cd apps/api && npm run dev
 
 ---
 
-## 📌 Funksjoner
+##  Funksjoner
 
-### 🤖 AI-drevet Skiftplanlegging
+###  AI-drevet Skiftplanlegging
 * **Automatisk Skiftgenerering**: Bruker OpenAI GPT til å lage optimale skiftplaner
 * **Uke- og Månedsplaner**: AI genererer skift basert på ansatte og fraværsforespørsler
 * **Intelligent Planlegging**: Tar hensyn til stillingsprosent, tilgjengelighet og preferanser
 * **Feilhåndtering**: Automatisk retry med forbedret prompt-håndtering
 
-### 🔐 Autentisering & Sikkerhet
+###  Autentisering & Sikkerhet
 * **JWT + Cookie-basert**: Sikker autentisering med httpOnly cookies
 * **Rollebasert**: `ADMIN` vs. `EMPLOYEE` med forskjellige tilganger
 * **CORS-konfigurert**: Sikker kommunikasjon mellom frontend og backend
 * **Middleware**: Beskyttede ruter og automatisk redirect
 
-### 💾 Ansattstyring
+###  Ansattstyring
 * **CRUD-operasjoner**: Legg til, rediger, slett ansatte
 * **Ansettelsesdato**: Manuell setting med dagens dato som standard
 * **Stillingsprosent**: Fleksibel arbeidstid basert på stillingsprosent
 * **Avdeling & rolle**: Organisering av ansatte
 
-### 📅 Skiftstyring
+###  Skiftstyring
 * **Kalender-visning**: Dag, uke, måned med tabs
 * **CRUD-operasjoner**: Opprett, rediger, slett skift
 * **Ansatt-tildeling**: Koble skift til spesifikke ansatte
 * **Admin-kontroll**: Full kontroll over alle skift
 * **AI-assistert**: Automatisk generering av skiftplaner
 
-### 📬 Forespørsler
+###  Forespørsler
 * **Fraværsforespørsler**: Ferie, sykdom, annet med godkjenning
 * **Skiftbytte**: Ansatte kan bytte skift med hverandre
 * **Godkjenning**: Admin godkjenner/avslår forespørsler
 * **Historikk**: Oversikt over alle forespørsler og deres status
 
-### 💬 Live Chat
+###  Live Chat
 * **WebSocket**: Sanntids kommunikasjon med Socket.IO
 * **Direktemeldinger**: Ansatt-til-ansatt og admin-til-ansatt
 * **Gruppechat**: Flere deltakere i samme chat
@@ -91,7 +91,7 @@ cd apps/api && npm run dev
 * **Persistent**: Meldinger lagres i database
 * **Real-time**: Umiddelbar oppdatering av chat
 
-### 📊 Statistikk & Rapporter
+###  Statistikk & Rapporter
 * **Timeregistrering**: Logg arbeidstimer med start/stopp
 * **Rapporter**: Timer per bruker/avdeling/periode
 * **Oversikt**: Dashboard med viktig informasjon
@@ -99,7 +99,7 @@ cd apps/api && npm run dev
 
 ---
 
-## 🛠️ Teknisk Stack
+##  Teknisk Stack
 
 ### Frontend
 * **Web**: Next.js 15, React 19, MUI 7, Framer Motion
@@ -116,7 +116,7 @@ cd apps/api && npm run dev
 
 ---
 
-## 📚 Dokumentasjon
+##  Dokumentasjon
 
 * **[Arkitektur](docs/architecture.md)** - Systemarkitektur og design
 * **[AI Workflow](docs/ai-workflow-explained.md)** - AI-drevet skiftplanlegging
@@ -127,7 +127,7 @@ cd apps/api && npm run dev
 
 ---
 
-## 🚀 Utvikling
+##  Utvikling
 
 ### Miljøvariabler
 ```bash
