@@ -76,24 +76,30 @@ export const DataTable: React.FC<DataTableProps> = ({
   );
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+    <Paper elevation={0} sx={{ width: '100%', overflow: 'hidden', background: 'transparent', boxShadow: 'none' }}>
       {title && (
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ p: 2, borderBottom: '1px solid #eee', backgroundColor: '#fafafa' }}>
           <Typography variant="h6" component="h2">
             {title}
           </Typography>
         </Box>
       )}
       
-      <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader>
+      <TableContainer sx={{ maxHeight: 440, backgroundColor: 'transparent' }}>
+        <Table stickyHeader sx={{ backgroundColor: 'transparent' }}>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ backgroundColor: '#f5f7fa' }}>
               {columns.map((column) => (
                 <TableCell
                   key={column.id}
                   align={column.align || 'left'}
                   sortDirection={orderBy === column.id ? order : false}
+                  sx={{
+                    bgcolor: '#f5f7fa',
+                    color: '#4b5563',
+                    fontWeight: 600,
+                    borderBottom: '1px solid #e5e7eb'
+                  }}
                 >
                   {column.sortable ? (
                     <TableSortLabel
@@ -114,10 +120,18 @@ export const DataTable: React.FC<DataTableProps> = ({
             {paginatedData.map((row, index) => (
               <TableRow
                 key={index}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                sx={{
+                  '&:last-child td, &:last-child th': { border: 0 },
+                  bgcolor: index % 2 === 0 ? '#ffffff' : '#fbfbfd',
+                  '&:hover': { bgcolor: '#f3f4f6' }
+                }}
               >
                 {columns.map((column) => (
-                  <TableCell key={column.id} align={column.align || 'left'}>
+                  <TableCell
+                    key={column.id}
+                    align={column.align || 'left'}
+                    sx={{ borderBottom: '1px solid #f0f0f2', color: '#111827' }}
+                  >
                     {column.render ? column.render(row[column.id]) : row[column.id]}
                   </TableCell>
                 ))}
@@ -135,6 +149,12 @@ export const DataTable: React.FC<DataTableProps> = ({
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        sx={{
+          borderTop: '1px solid #eee',
+          backgroundColor: 'transparent',
+          '.MuiTablePagination-toolbar': { color: '#6b7280' },
+          '.MuiTablePagination-displayedRows, .MuiTablePagination-selectLabel': { color: '#6b7280' }
+        }}
       />
     </Paper>
   );
