@@ -30,7 +30,6 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
-import { apiUrl } from '../utils/api';
 
 interface ShiftApplication {
   id: string;

@@ -179,156 +179,245 @@ const MessagesPage: NextPage = () => {
 
   return (
     <Layout>
-      <Box sx={{ p: 3, height: 'calc(100vh - 100px)' }}>
+      <Box sx={{ height: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column' }}>
         {error && (
-          <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>
+          <Alert severity="error" sx={{ m: 3, borderRadius: 3 }}>
             {error}
           </Alert>
         )}
 
-        <Box sx={{ display: 'flex', height: '100%', gap: 3 }}>
-          {/* Sidebar */}
-          <Card elevation={3} sx={{ 
+        {/* Top Header with Search */}
+        <Box sx={{ 
+          p: 3, 
+          borderBottom: '1px solid #e0e0e0',
+          background: 'white'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, maxWidth: '1200px', mx: 'auto' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <ChatIcon sx={{ color: '#1976d2', fontSize: 28 }} />
+              <Typography variant="h5" fontWeight="bold" sx={{ color: '#1976d2' }}>
+                Chatter
+              </Typography>
+            </Box>
+            
+            <TextField
+              placeholder="Søk i chatter..."
+              variant="outlined"
+              size="small"
+              sx={{
+                flex: 1,
+                maxWidth: 400,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                  backgroundColor: '#f5f5f5',
+                  '& fieldset': {
+                    borderColor: 'transparent',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#e0e0e0',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1976d2',
+                  },
+                },
+              }}
+            />
+            
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setShowNewChatModal(true)}
+              sx={{
+                backgroundColor: '#1976d2',
+                borderRadius: 3,
+                px: 3,
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#1565c0',
+                },
+              }}
+            >
+              Ny chat
+            </Button>
+          </Box>
+        </Box>
+
+        <Box sx={{ flex: 1, display: 'flex' }}>
+          {/* Left Sidebar */}
+          <Box sx={{ 
             width: 350, 
             minWidth: 350,
-            borderRadius: 3,
-            border: '1px solid rgba(102, 126, 234, 0.1)'
+            borderRight: '1px solid #e0e0e0',
+            background: 'white',
+            display: 'flex',
+            flexDirection: 'column'
           }}>
-            <CardContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
-              {/* Header */}
-              <Box sx={{ 
-                p: 3, 
-                borderBottom: 1, 
-                borderColor: 'divider',
-                background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
-                color: 'white'
-              }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <ChatIcon sx={{ color: 'white' }} />
-                    <Typography variant="h6" fontWeight="bold" sx={{ color: 'white' }}>
-                      Chatterom
-                    </Typography>
-                  </Box>
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => setShowNewChatModal(true)}
-                    size="small"
-                    sx={{
-                      background: 'rgba(255, 255, 255, 0.2)',
-                      color: 'white',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      backdropFilter: 'blur(10px)',
-                      '&:hover': {
-                        background: 'rgba(255, 255, 255, 0.3)',
-                        transform: 'translateY(-1px)',
-                        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
-                      },
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      borderRadius: 2,
-                    }}
-                  >
-                    Ny Chat
-                  </Button>
+            {/* Sidebar Header */}
+            <Box sx={{ p: 3, borderBottom: '1px solid #e0e0e0' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <ChatIcon sx={{ color: '#1976d2', fontSize: 20 }} />
+                  <Typography variant="h6" fontWeight="bold" sx={{ color: '#1976d2' }}>
+                    Chatterom
+                  </Typography>
                 </Box>
-                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-                  {chatRooms.length} aktive chatterom
-                </Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowNewChatModal(true)}
+                  sx={{
+                    backgroundColor: '#1976d2',
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor: '#1565c0',
+                    },
+                  }}
+                >
+                  NY CHAT
+                </Button>
               </Box>
+              <Typography variant="body2" sx={{ color: '#666' }}>
+                {chatRooms.length} aktive chatterom
+              </Typography>
+            </Box>
 
-              {/* Room List */}
-              <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-                {chatRooms.length === 0 ? (
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <ChatIcon sx={{ fontSize: 48, color: '#667eea', mb: 2, opacity: 0.6 }} />
-                    <Typography variant="h6" color="text.secondary">
-                      Ingen chatterom
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Opprett ditt første chatterom for å komme i gang
-                    </Typography>
-                  </Box>
-                ) : (
-                  <List sx={{ p: 0 }}>
-                    {chatRooms.map((room) => (
-                      <ListItem 
-                        key={room.id} 
-                        disablePadding 
-                        sx={{ mb: 1 }}
-                      >
-                        <ListItemButton
-                          selected={selectedRoom === room.id}
-                          onClick={() => handleRoomClick(room.id)}
-                          sx={{
-                            borderRadius: 3,
-                            '&.Mui-selected': {
-                              backgroundColor: '#667eea',
-                              color: 'white',
-                              '&:hover': {
-                                backgroundColor: '#5a6fd8',
-                              }
-                            },
-                            '&:hover': {
-                              backgroundColor: selectedRoom === room.id ? '#5a6fd8' : 'rgba(102, 126, 234, 0.08)',
-                            }
-                          }}
-                        >
-                          <ListItemAvatar>
-                            <Avatar sx={{ 
-                              bgcolor: selectedRoom === room.id ? 'white' : '#667eea',
-                              color: selectedRoom === room.id ? '#667eea' : 'white'
-                            }}>
-                              <GroupIcon color={selectedRoom === room.id ? 'primary' : 'inherit'} />
-                            </Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={room.name}
-                            secondary={`${room.members.length} medlemmer`}
-                            primaryTypographyProps={{
-                              fontWeight: selectedRoom === room.id ? 'bold' : 'normal'
-                            }}
-                          />
-                        </ListItemButton>
-                      </ListItem>
-                    ))}
-                  </List>
-                )}
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Chat Area */}
-          <Card elevation={3} sx={{ 
-            flex: 1,
-            borderRadius: 3,
-            border: '1px solid rgba(102, 126, 234, 0.1)'
-          }}>
-            <CardContent sx={{ p: 0, height: '100%' }}>
-              {selectedRoom && currentUser ? (
-                <Box sx={{ height: '100%' }}>
-                  <Chat roomId={selectedRoom} currentUserId={currentUser.id} />
+            {/* Room List */}
+            <Box sx={{ flex: 1, overflow: 'auto' }}>
+              {chatRooms.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 4, px: 3 }}>
+                  <ChatIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    Ingen chatterom
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Opprett ditt første chatterom for å komme i gang
+                  </Typography>
                 </Box>
               ) : (
+                <List sx={{ p: 0 }}>
+                  {chatRooms.map((room) => (
+                    <ListItem 
+                      key={room.id} 
+                      disablePadding 
+                      sx={{ px: 2, mb: 1 }}
+                    >
+                      <ListItemButton
+                        selected={selectedRoom === room.id}
+                        onClick={() => handleRoomClick(room.id)}
+                        sx={{
+                          borderRadius: 2,
+                          py: 2,
+                          '&.Mui-selected': {
+                            backgroundColor: '#e3f2fd',
+                            color: '#1976d2',
+                            '&:hover': {
+                              backgroundColor: '#bbdefb',
+                            }
+                          },
+                          '&:hover': {
+                            backgroundColor: selectedRoom === room.id ? '#bbdefb' : '#f5f5f5',
+                          }
+                        }}
+                      >
+                        <ListItemAvatar>
+                          <Avatar sx={{ 
+                            bgcolor: selectedRoom === room.id ? '#1976d2' : '#e0e0e0',
+                            color: selectedRoom === room.id ? 'white' : '#666',
+                            width: 40,
+                            height: 40
+                          }}>
+                            {room.members.length > 2 ? (
+                              <GroupIcon />
+                            ) : (
+                              <PersonIcon />
+                            )}
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={room.name}
+                          secondary={room.members.length > 1 ? 
+                            `${room.members.length} medlemmer` : 
+                            `${room.members.length} medlem`
+                          }
+                          primaryTypographyProps={{
+                            fontWeight: selectedRoom === room.id ? 'bold' : 'normal',
+                            fontSize: '0.95rem'
+                          }}
+                          secondaryTypographyProps={{
+                            fontSize: '0.8rem',
+                            color: selectedRoom === room.id ? '#1976d2' : '#666'
+                          }}
+                        />
+                        <Box sx={{ color: '#ccc' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                          </svg>
+                        </Box>
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Box>
+          </Box>
+
+          {/* Right Chat Area */}
+          <Box sx={{ 
+            flex: 1,
+            background: 'white',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {selectedRoom && currentUser ? (
+              <Box sx={{ height: '100%' }}>
+                <Chat roomId={selectedRoom} currentUserId={currentUser.id} />
+              </Box>
+            ) : (
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                height: '100%',
+                p: 4,
+                background: '#fafafa'
+              }}>
                 <Box sx={{ 
                   display: 'flex', 
-                  flexDirection: 'column',
                   alignItems: 'center', 
-                  justifyContent: 'center', 
-                  height: '100%',
-                  p: 4
+                  gap: 1, 
+                  mb: 4,
+                  color: '#666'
                 }}>
-                  <ChatIcon sx={{ fontSize: 64, color: '#667eea', mb: 2, opacity: 0.6 }} />
-                  <Typography variant="h5" color="text.secondary" sx={{ mb: 1 }}>
+                  <GroupIcon sx={{ fontSize: 24 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    Ingen chatter valgt
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 2 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11H16V16H8V11H9.2V10C9.2,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.4,8.7 10.4,10V11H13.6V10C13.6,8.7 12.8,8.2 12,8.2Z"/>
+                    </svg>
+                    <Typography variant="body2" sx={{ color: '#4caf50' }}>
+                      Kryptert
+                    </Typography>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ textAlign: 'center' }}>
+                  <ChatIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
                     Velg et chatterom
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                     Velg et chatterom fra listen for å starte chatting
                   </Typography>
                   
                   {!isConnected && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'warning.main' }}>
-                      <WifiOffIcon />
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, color: '#ff9800' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M1,9H3L5,15L9,3H11L7.5,13.5L6,9H8L9,6L10,9H12L9,18H7L5,12L4,18H2L1,9Z"/>
+                      </svg>
                       <Typography variant="body2">
                         Kobler til chat-server...
                       </Typography>
@@ -341,9 +430,9 @@ const MessagesPage: NextPage = () => {
                     </Typography>
                   )}
                 </Box>
-              )}
-            </CardContent>
-          </Card>
+              </Box>
+            )}
+          </Box>
         </Box>
 
         {/* New Chat Modal */}

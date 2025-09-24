@@ -3,7 +3,11 @@
 // 1) NEXT_PUBLIC_API_BASE env
 // 2) window.location.hostname (same host, port 3001)
 // 3) fallback list
-export const API_BASE_URLS = ['http://10.229.18.144:3001', 'http://10.129.48.163:3001'];
+export const API_BASE_URLS = [
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+  'http://10.229.17.40:3001',
+];
 
 function resolveApiBase(): string {
   // Env override
