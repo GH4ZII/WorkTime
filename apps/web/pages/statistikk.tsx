@@ -188,6 +188,9 @@ const StatisticsPage: NextPage = () => {
           backdropFilter: 'blur(10px)',
           cursor: onClick ? 'pointer' : 'default',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
           '&:hover': {
             boxShadow: '0 12px 35px rgba(102, 126, 234, 0.2)',
             borderColor: 'rgba(102, 126, 234, 0.3)',
@@ -195,7 +198,7 @@ const StatisticsPage: NextPage = () => {
         }}
         onClick={onClick}
       >
-        <CardContent sx={{ p: 3 }}>
+        <CardContent sx={{ p: 3, minHeight: 160, display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
             <Typography variant="h6" color="text.secondary">
               {title}
@@ -210,7 +213,7 @@ const StatisticsPage: NextPage = () => {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {subtitle}
           </Typography>
-          {change !== undefined && (
+          {change !== undefined ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Chip
                 label={`${change > 0 ? '+' : ''}${change.toFixed(1)}%`}
@@ -222,6 +225,8 @@ const StatisticsPage: NextPage = () => {
                 fra forrige måned
               </Typography>
             </Box>
+          ) : (
+            <Box sx={{ height: 25 }} />
           )}
         </CardContent>
       </Card>
@@ -235,140 +240,121 @@ const StatisticsPage: NextPage = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <Box
-        sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
-          color: 'white',
-          textAlign: 'center',
-          py: 6,
-          px: 3
-        }}
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
-            Statistikk & Analyse
-          </Typography>
-          <Typography variant="h6" sx={{ opacity: 0.9 }}>
-            Oversikt over arbeidstid, produktivitet og ytelse
-          </Typography>
-        </motion.div>
+      <Box sx={{ p: 4, pb: 2 }}>
+        <Typography variant="h3" component="h1" gutterBottom>
+          Statistikk & Analyse
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#6b7280' }}>
+          Oversikt over arbeidstid, produktivitet og ytelse
+        </Typography>
       </Box>
 
-      <Box sx={{ p: 3 }}>
-        {/* Controls */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Periode</InputLabel>
-              <Select
-                value={timeScale}
-                label="Periode"
-                onChange={(e) => setTimeScale(e.target.value)}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': { borderColor: '#667eea' },
-                    '&.Mui-focused fieldset': { borderColor: '#667eea' },
-                  },
-                }}
-              >
-                <MenuItem value="week">Uke</MenuItem>
-                <MenuItem value="month">Måned</MenuItem>
-                <MenuItem value="year">År</MenuItem>
-              </Select>
-            </FormControl>
+      <Box sx={{ p: 3, pt: 0 }}>
+        {/* Filterbar + knapper */}
+        <Paper elevation={0} sx={{ p: 2, borderRadius: 2, mb: 3, border: '1px dashed #e5e7eb', background: '#fff' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel>Periode</InputLabel>
+                <Select
+                  value={timeScale}
+                  label="Periode"
+                  onChange={(e) => setTimeScale(e.target.value)}
+                >
+                  <MenuItem value="week">Uke</MenuItem>
+                  <MenuItem value="month">Måned</MenuItem>
+                  <MenuItem value="year">År</MenuItem>
+                </Select>
+              </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 170 }}>
-              <InputLabel>Datasett</InputLabel>
-              <Select
-                value={selectedPeriod}
-                label="Datasett"
-                onChange={(e) => setSelectedPeriod(e.target.value)}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover fieldset': { borderColor: '#667eea' },
-                    '&.Mui-focused fieldset': { borderColor: '#667eea' },
-                  },
-                }}
-              >
-                <MenuItem value="current">Nåværende</MenuItem>
-                <MenuItem value="previous">Forrige</MenuItem>
-              </Select>
-            </FormControl>
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <InputLabel>Datasett</InputLabel>
+                <Select
+                  value={selectedPeriod}
+                  label="Datasett"
+                  onChange={(e) => setSelectedPeriod(e.target.value)}
+                >
+                  <MenuItem value="current">Nåværende</MenuItem>
+                  <MenuItem value="previous">Forrige</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 1.5 }}>
+              <Paper component="button" elevation={0} onClick={() => window.print?.()}
+                sx={{ px: 2, py: 1, borderRadius: 1, border: '1px solid #e5e7eb', bgcolor: '#fff', cursor: 'pointer' }}>
+                Eksporter
+              </Paper>
+              <Paper component="button" elevation={0} onClick={handleRefresh}
+                sx={{ px: 2, py: 1, borderRadius: 1, bgcolor: '#3b82f6', color: '#fff', cursor: 'pointer' }}>
+                Oppdater
+              </Paper>
+            </Box>
           </Box>
+        </Paper>
 
-          <Box sx={{ display: 'flex', gap: 2 }} />
-        </Box>
-
-        {/* Tabs */}
-        <Paper sx={{ mb: 4, borderRadius: 3 }}>
+        {/* Seksjonstabs */}
+        <Paper sx={{ mb: 3, borderRadius: 2 }}>
           <Tabs
             value={selectedTab}
             onChange={(e, newValue) => setSelectedTab(newValue)}
             sx={{
               '& .MuiTab-root': {
                 color: 'text.secondary',
-                '&.Mui-selected': {
-                  color: '#667eea',
-                },
+                '&.Mui-selected': { color: '#667eea' },
               },
-              '& .MuiTabs-indicator': {
-                backgroundColor: '#667eea',
-              },
+              '& .MuiTabs-indicator': { backgroundColor: '#667eea' },
             }}
           >
             <Tab label="Oversikt" icon={<AssessmentIcon />} />
           </Tabs>
         </Paper>
 
-        {/* Tab Content */}
+        {/* Innhold */}
         {selectedTab === 0 && (
           <Box>
-            {/* Key Metrics */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-              <Grid item xs={12} sm={6} md={3}>
-                <StatCard
-                  title="Total arbeidstid"
-                  value={`${currentData.totalHours}h`}
-                  subtitle="Denne måneden"
-                  icon={<WorkIcon />}
-                  color="#667eea"
-                  change={calculateChange(currentData.totalHours, previousData.totalHours)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <StatCard
-                  title="Overtid"
-                  value={`${currentData.overtimeHours}h`}
-                  subtitle="Ekstra timer"
-                  icon={<AccessTimeIcon />}
-                  color="#4c5fd6"
-                  change={calculateChange(currentData.overtimeHours, previousData.overtimeHours)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <StatCard
-                  title="Totalt fravær"
-                  value={`${currentData.sickDays + currentData.vacationDays} dager`}
-                  subtitle="Syk + Ferie"
-                  icon={<BarChartIcon />}
-                  color="#4caf50"
-                />
-              </Grid>
-            </Grid>
+            <Paper elevation={0} sx={{ p: 2, borderRadius: 2, mb: 3, border: '1px solid #e5e7eb' }}>
+              <Typography variant="subtitle2" sx={{ mb: 2, color: '#6b7280' }}>
+                Oversikt
+              </Typography>
+              <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' } }}>
+                <Box>
+                  <StatCard
+                    title="Total arbeidstid"
+                    value={`${currentData.totalHours}h`}
+                    subtitle="Denne måneden"
+                    icon={<WorkIcon />}
+                    color="#667eea"
+                    change={calculateChange(currentData.totalHours, previousData.totalHours)}
+                  />
+                </Box>
+                <Box>
+                  <StatCard
+                    title="Overtid"
+                    value={`${currentData.overtimeHours}h`}
+                    subtitle="Ekstra timer"
+                    icon={<AccessTimeIcon />}
+                    color="#4c5fd6"
+                    change={calculateChange(currentData.overtimeHours, previousData.overtimeHours)}
+                  />
+                </Box>
+                <Box>
+                  <StatCard
+                    title="Totalt fravær"
+                    value={`${currentData.sickDays + currentData.vacationDays} dager`}
+                    subtitle="Syk + Ferie"
+                    icon={<BarChartIcon />}
+                    color="#4caf50"
+                  />
+                </Box>
+              </Box>
+            </Paper>
 
-            {/* Per ansatt: arbeidstimer og fravær */}
-            <Card elevation={3} sx={{ borderRadius: 3, border: '1px solid rgba(102,126,234,0.1)', mb: 3 }}>
-                    <CardContent sx={{ p: 3 }}>
-                      <Typography variant="h6" gutterBottom sx={{ color: '#667eea', fontWeight: 'bold' }}>
+            <Card elevation={0} sx={{ borderRadius: 2, border: '1px solid #e5e7eb', mb: 3 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom sx={{ color: '#667eea', fontWeight: 'bold' }}>
                   Timer og fravær per ansatt
-                      </Typography>
+                </Typography>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
@@ -399,8 +385,12 @@ const StatisticsPage: NextPage = () => {
                     })}
                   </TableBody>
                 </Table>
-                    </CardContent>
-                  </Card>
+              </CardContent>
+            </Card>
+
+            <Paper elevation={0} sx={{ p: 4, borderRadius: 2, border: '2px dashed #e5e7eb', color: '#9ca3af', textAlign: 'center' }}>
+              Plassholder for grafer og detaljerte data
+            </Paper>
           </Box>
         )}
       </Box>
