@@ -109,6 +109,14 @@ let ChatService = class ChatService {
             },
         });
     }
+    async delete(roomId) {
+        await this.prisma.$transaction([
+            this.prisma.message.deleteMany({ where: { roomId } }),
+            this.prisma.chatMember.deleteMany({ where: { roomId } }),
+            this.prisma.chatRoom.delete({ where: { id: roomId } }),
+        ]);
+        return { success: true };
+    }
 };
 exports.ChatService = ChatService;
 exports.ChatService = ChatService = __decorate([

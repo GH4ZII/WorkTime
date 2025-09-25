@@ -48,6 +48,9 @@ let ChatController = class ChatController {
     addMessage(id, createMessageDto) {
         return this.chatService.addMessage(id, createMessageDto);
     }
+    delete(id) {
+        return this.chatService.delete(id);
+    }
 };
 exports.ChatController = ChatController;
 __decorate([
@@ -109,6 +112,13 @@ __decorate([
     __metadata("design:paramtypes", [String, create_message_dto_1.CreateMessageDto]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "addMessage", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ChatController.prototype, "delete", null);
 exports.ChatController = ChatController = __decorate([
     (0, common_1.Controller)('chatrooms'),
     __metadata("design:paramtypes", [chat_service_1.ChatService])

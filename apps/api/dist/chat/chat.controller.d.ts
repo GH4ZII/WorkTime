@@ -15,4 +15,7 @@ export declare class ChatController {
     removeMembers(id: string, updateMembersDto: UpdateMembersDto): Promise<ChatRoom>;
     getMessages(id: string): Promise<Message[]>;
     addMessage(id: string, createMessageDto: CreateMessageDto): Promise<Message>;
+    delete(id: string): Promise<{
+        readonly success: true;
+    }>;
 }

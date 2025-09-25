@@ -1,12 +1,17 @@
 ﻿import { Injectable } from "@nestjs/common";
 import { UsersService } from "src/users/users.service";
 import { JwtService } from "@nestjs/jwt";
+import { MailService } from "../mail/mail.service";
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
-    constructor(private usersService: UsersService, private jwtService: JwtService) {}
+    constructor(
+        private usersService: UsersService, 
+        private jwtService: JwtService,
+        private mailService: MailService
+    ) {}
 
     async validateUser(email: string, password: string): Promise<any> {
         const user = await this.usersService.findOneByEmail(email);
@@ -61,7 +66,7 @@ export class AuthService {
         return this.jwtService.verify(token);
     }
 
-    async requestPasswordReset(email: string): Promise<{ message: string; token?: string }> {
+    async requestPasswordReset(email: string): Promise<{ message: string }> {
         const user = await this.usersService.findOneByEmail(email);
         if (!user) {
             // For sikkerhet: ikke avslør om e-posten eksisterer
@@ -72,16 +77,23 @@ export class AuthService {
         const resetToken = crypto.randomBytes(32).toString('hex');
         const resetTokenExpires = new Date(Date.now() + 3600000); // 1 time fra nå
 
-        // Lagre token i databasen (du må implementere denne metoden i UsersService)
+        // Lagre token i databasen
         await this.usersService.savePasswordResetToken(user.id, resetToken, resetTokenExpires);
 
-        // I produksjon: Send e-post med reset link
-        // For nå returnerer vi token for testing
-        console.log(`Password reset token for ${email}: ${resetToken}`);
+        // Generer reset URL
+        const resetUrl = `${process.env.FRONTEND_BASE_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+
+        try {
+            // Send e-post med reset link
+            await this.mailService.sendPasswordResetEmail(user.email, user.name, resetUrl);
+            console.log(`Password reset email sent to ${email}`);
+        } catch (error) {
+            console.error('Failed to send password reset email:', error);
+            // Fortsett likevel - ikke avslør feil til brukeren
+        }
         
         return { 
-            message: 'Hvis e-posten eksisterer, vil du motta en lenke for å tilbakestille passordet.',
-            token: resetToken // Kun for testing - fjern i produksjon
+            message: 'Hvis e-posten eksisterer, vil du motta en lenke for å tilbakestille passordet.'
         };
     }
 

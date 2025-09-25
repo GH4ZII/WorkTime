@@ -13,6 +13,7 @@ import { ChatModule } from "./chat/chat.module";
 import { AiModule } from "./ai/ai.module";
 import { PushTokensModule } from "./push-tokens/push-tokens.module";
 import { PushNotificationsModule } from "./push-notifications/push-notifications.module";
+import { MailModule } from "./mail/mail.module";
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { PushNotificationsModule } from "./push-notifications/push-notifications
     AiModule,
     PushTokensModule,
     PushNotificationsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

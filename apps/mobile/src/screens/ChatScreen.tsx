@@ -70,6 +70,8 @@ const ChatScreen: React.FC = () => {
   const [usePolling, setUsePolling] = useState(false);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   const [processedMessageIds, setProcessedMessageIds] = useState<Set<string>>(new Set());
+  const processedMessageIdsRef = useRef<Set<string>>(new Set());
+  const selectedRoomIdRef = useRef<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
   
   const messagesEndRef = useRef<FlatList>(null);
@@ -88,6 +90,11 @@ const ChatScreen: React.FC = () => {
       loadMessages(selectedRoom.id);
     }
   }, [isConnected, selectedRoom]);
+
+  // Hold latest selectedRoom id in a ref so socket handlers see current value
+  useEffect(() => {
+    selectedRoomIdRef.current = selectedRoom ? selectedRoom.id : null;
+  }, [selectedRoom]);
 
   // Polling fallback hvis WebSocket ikke fungerer
   useEffect(() => {
@@ -134,42 +141,47 @@ const ChatScreen: React.FC = () => {
       setUsePolling(true);
     });
 
-    // Håndter nye meldinger fra andre brukere
-    newSocket.on('newMessage', (message: Message) => {
-      
-      // Sjekk om meldingen allerede er behandlet
-      if (processedMessageIds.has(message.id)) {
+    // Håndter nye meldinger fra andre brukere (bruk refs for å unngå stale closures)
+    const onNewMessage = (message: Message) => {
+      // Avvis hvis allerede behandlet
+      if (processedMessageIdsRef.current.has(message.id)) {
         return;
       }
-      
-      // Sjekk om meldingen tilhører det aktuelle chatrommet
-      if (selectedRoom && 
-          message.roomId === selectedRoom.id && 
-          message.senderId !== currentUser?.id) {
-        
-        
-        // Legg til meldingen i state
-        setMessages(prev => [...prev, message]);
-        
-        // Marker meldingen som behandlet
-        setProcessedMessageIds(prev => new Set([...prev, message.id]));
-      } else {
+
+      const activeRoomId = selectedRoomIdRef.current;
+
+      if (activeRoomId && message.roomId === activeRoomId && message.senderId !== currentUser?.id) {
+        setMessages(prev => {
+          // Ekstra sikring mot duplikater dersom samme id finnes
+          if (prev.some(m => m.id === message.id)) {
+            return prev;
+          }
+          return [...prev, message];
+        });
+
+        // Marker meldingen som behandlet i både ref og state
+        processedMessageIdsRef.current = new Set([...processedMessageIdsRef.current, message.id]);
+        setProcessedMessageIds(new Set(processedMessageIdsRef.current));
       }
-    });
+    };
+    newSocket.on('newMessage', onNewMessage);
 
     // Håndter bekreftelse på egen melding
-    newSocket.on('messageSent', (message: Message) => {
+    const onMessageSent = (message: Message) => {
       // Oppdater meldingen med riktig ID fra server
       setMessages(prev => prev.map(msg => 
         msg.id === message.id ? message : msg
       ));
-    });
+    };
+    newSocket.on('messageSent', onMessageSent);
 
     socketRef.current = newSocket;
     setSocket(newSocket);
 
     return () => {
       if (newSocket) {
+        newSocket.off('newMessage', onNewMessage);
+        newSocket.off('messageSent', onMessageSent);
         newSocket.removeAllListeners();
         newSocket.close();
       }
@@ -215,6 +227,10 @@ const ChatScreen: React.FC = () => {
       setIsLoadingMessages(true);
       const response = await axios.get(`${API_ENDPOINTS.CHAT}/${roomId}/messages`);
       setMessages(response.data);
+      // Oppdater processed-id settet slik at innkommende socket-event ikke dobler
+      const ids = new Set<string>(response.data.map((m: Message) => m.id));
+      processedMessageIdsRef.current = ids;
+      setProcessedMessageIds(ids);
     } catch (error) {
       console.error('Failed to load messages:', error);
       setError('Kunne ikke laste meldinger');
@@ -245,6 +261,7 @@ const ChatScreen: React.FC = () => {
           name: currentUser?.name || '',
         },
         sentAt: new Date().toISOString(),
+        roomId: selectedRoom.id,
       };
 
 
@@ -260,10 +277,10 @@ const ChatScreen: React.FC = () => {
       }
 
       // Legg til meldingen lokalt umiddelbart
-      setMessages(prev => {
-        const newMessages = [...prev, newMessageObj];
-        return newMessages;
-      });
+      setMessages(prev => [...prev, newMessageObj]);
+      // Marker midlertidig id som behandlet for å forhindre duplikater
+      processedMessageIdsRef.current = new Set([...processedMessageIdsRef.current, newMessageObj.id]);
+      setProcessedMessageIds(new Set(processedMessageIdsRef.current));
       
       // Rydd opp input-feltet
       setMessage('');
@@ -394,12 +411,32 @@ const ChatScreen: React.FC = () => {
         <View style={styles.sidebar}>
           <View style={styles.sidebarHeader}>
             <Text style={styles.sidebarTitle}>Chatrom</Text>
-            <TouchableOpacity
-              style={styles.newChatButton}
-              onPress={() => setShowNewChatModal(true)}
-            >
-              <Ionicons name="add" size={20} color="white" />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TouchableOpacity
+                style={styles.newChatButton}
+                onPress={() => setShowNewChatModal(true)}
+              >
+                <Ionicons name="add" size={20} color="white" />
+              </TouchableOpacity>
+              {selectedRoom && (
+                <TouchableOpacity
+                  style={[styles.newChatButton, { backgroundColor: '#e53935' }]}
+                  onPress={async () => {
+                    try {
+                      await axios.delete(`${API_ENDPOINTS.CHAT}/${selectedRoom.id}`);
+                      setChatRooms(prev => prev.filter(r => r.id !== selectedRoom.id));
+                      setSelectedRoom(null);
+                      setMessages([]);
+                    } catch (error) {
+                      console.error('Failed to delete chat room:', error);
+                      Alert.alert('Feil', 'Kunne ikke slette chat');
+                    }
+                  }}
+                >
+                  <Ionicons name="trash" size={20} color="white" />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
           
           <FlatList

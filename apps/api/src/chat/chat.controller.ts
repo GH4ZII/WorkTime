@@ -68,4 +68,10 @@ export class ChatController {
     ): Promise<Message> {
         return this.chatService.addMessage(id, createMessageDto);
     }
+
+    // Slett hele chatterommet
+    @Delete(':id')
+    delete(@Param('id') id: string) {
+        return this.chatService.delete(id);
+    }
 }

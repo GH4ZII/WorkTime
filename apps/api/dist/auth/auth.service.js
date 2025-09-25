@@ -13,14 +13,17 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const users_service_1 = require("../users/users.service");
 const jwt_1 = require("@nestjs/jwt");
+const mail_service_1 = require("../mail/mail.service");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 let AuthService = class AuthService {
     usersService;
     jwtService;
-    constructor(usersService, jwtService) {
+    mailService;
+    constructor(usersService, jwtService, mailService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
+        this.mailService = mailService;
     }
     async validateUser(email, password) {
         const user = await this.usersService.findOneByEmail(email);
@@ -72,10 +75,16 @@ let AuthService = class AuthService {
         const resetToken = crypto.randomBytes(32).toString('hex');
         const resetTokenExpires = new Date(Date.now() + 3600000);
         await this.usersService.savePasswordResetToken(user.id, resetToken, resetTokenExpires);
-        console.log(`Password reset token for ${email}: ${resetToken}`);
+        const resetUrl = `${process.env.FRONTEND_BASE_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+        try {
+            await this.mailService.sendPasswordResetEmail(user.email, user.name, resetUrl);
+            console.log(`Password reset email sent to ${email}`);
+        }
+        catch (error) {
+            console.error('Failed to send password reset email:', error);
+        }
         return {
-            message: 'Hvis e-posten eksisterer, vil du motta en lenke for å tilbakestille passordet.',
-            token: resetToken
+            message: 'Hvis e-posten eksisterer, vil du motta en lenke for å tilbakestille passordet.'
         };
     }
     async resetPassword(token, newPassword) {
@@ -95,6 +104,8 @@ let AuthService = class AuthService {
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [users_service_1.UsersService, jwt_1.JwtService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        jwt_1.JwtService,
+        mail_service_1.MailService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

@@ -121,4 +121,7 @@ export declare class ChatService {
         senderId: string;
         content: string;
     }>;
+    delete(roomId: string): Promise<{
+        readonly success: true;
+    }>;
 }

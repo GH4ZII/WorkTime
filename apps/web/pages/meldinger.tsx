@@ -230,22 +230,43 @@ const MessagesPage: NextPage = () => {
               }}
             />
             
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setShowNewChatModal(true)}
-              sx={{
-                backgroundColor: '#1976d2',
-                borderRadius: 3,
-                px: 3,
-                py: 1,
-                '&:hover': {
-                  backgroundColor: '#1565c0',
-                },
-              }}
-            >
-              Ny chat
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setShowNewChatModal(true)}
+                sx={{
+                  backgroundColor: '#1976d2',
+                  borderRadius: 3,
+                  px: 3,
+                  py: 1,
+                  '&:hover': {
+                    backgroundColor: '#1565c0',
+                  },
+                }}
+              >
+                Ny chat
+              </Button>
+              {selectedRoom && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={async () => {
+                    try {
+                      await axios.delete(apiUrl(`/chatrooms/${selectedRoom}`), { withCredentials: true });
+                      setChatRooms(prev => prev.filter(r => r.id !== selectedRoom));
+                      setSelectedRoom(null);
+                    } catch (e) {
+                      console.error('Failed to delete chat room', e);
+                      setError('Kunne ikke slette chatrom');
+                    }
+                  }}
+                  sx={{ borderRadius: 3, px: 3, py: 1 }}
+                >
+                  Slett chat
+                </Button>
+              )}
+            </Box>
           </Box>
         </Box>
 

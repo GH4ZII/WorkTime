@@ -12,6 +12,7 @@ interface Message {
     name: string;
   };
   sentAt: string;
+  roomId: string;
 }
 
 interface ChatProps {
@@ -29,6 +30,8 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) =
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { socket, isConnected, joinRoom, leaveRoom, sendMessage } = useChat();
+  const processedMessageIdsRef = useRef<Set<string>>(new Set());
+  const [processedMessageIds, setProcessedMessageIds] = useState<Set<string>>(new Set());
 
   console.log('Chat: roomId =', roomId);
   console.log('Chat: currentUserId =', currentUserId);
@@ -56,9 +59,19 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) =
 
   useEffect(() => {
     if (socket) {
-      socket.on('newMessage', (message: Message) => {
-        setMessages(prev => [...prev, message]);
-      });
+      const onNewMessage = (message: Message) => {
+        // Kun meldinger for aktivt rom
+        if (message.roomId !== roomId) return;
+        // Unngå duplikater
+        if (processedMessageIdsRef.current.has(message.id)) return;
+        setMessages(prev => {
+          if (prev.some(m => m.id === message.id)) return prev;
+          return [...prev, message];
+        });
+        processedMessageIdsRef.current = new Set([...processedMessageIdsRef.current, message.id]);
+        setProcessedMessageIds(new Set(processedMessageIdsRef.current));
+      };
+      socket.on('newMessage', onNewMessage);
 
       socket.on('userTyping', ({ userId, isTyping: typing }) => {
         if (typing) {
@@ -69,7 +82,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) =
       });
 
       return () => {
-        socket.off('newMessage');
+        socket.off('newMessage', onNewMessage);
         socket.off('userTyping');
       };
     }
@@ -87,6 +100,9 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) =
       
       console.log('Chat: Messages loaded:', response.data);
       setMessages(response.data);
+      const ids = new Set<string>(response.data.map((m: Message) => m.id));
+      processedMessageIdsRef.current = ids;
+      setProcessedMessageIds(ids);
     } catch (error) {
       console.error('Chat: Failed to load messages:', error);
       setError('Kunne ikke laste meldinger');
@@ -94,6 +110,13 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) =
       setIsLoading(false);
     }
   };
+
+  // Scroll always to bottom when messages change or after loading
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+    }
+  }, [messages, isLoading]);
 
   const handleSendMessage = () => {
     console.log('handleSendMessage called:', { newMessage, isConnected, roomId, currentUserId });
@@ -118,22 +141,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) =
     try {
       console.log('Sending message:', { roomId, message: newMessage, senderId: currentUserId });
       
-      // Opprett en ny melding lokalt umiddelbart
-      const newMessageObj: Message = {
-        id: Date.now().toString(), // Midlertidig ID
-        content: newMessage.trim(),
-        senderId: currentUserId,
-        sender: {
-          id: currentUserId,
-          name: currentUserName || 'Du', // Bruk faktisk brukernavn
-        },
-        sentAt: new Date().toISOString(),
-      };
-      
-      // Legg til meldingen lokalt umiddelbart
-      setMessages(prev => [...prev, newMessageObj]);
-      
-      // Send meldingen via WebSocket
+      // Send meldingen via WebSocket (vent på server-event for visning for å unngå duplikat)
       sendMessage(roomId, newMessage.trim(), currentUserId);
       
       // Rydd opp
@@ -175,19 +183,6 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) =
 
   return (
     <div style={styles.chatContainer}>
-      {/* Legg til en toggle-knapp for auto-scroll */}
-      <div style={styles.autoScrollToggle}>
-        <button
-          onClick={() => {}} // Removed toggleAutoScroll as auto-scroll is off
-          style={{
-            ...styles.toggleButton,
-            backgroundColor: '#bdc3c7' // Changed color to gray
-          }}
-        >
-          Auto-scroll: Av
-        </button>
-      </div>
-
       <div style={styles.messagesContainer}>
         {isLoading && (
           <div style={styles.loadingMessage}>
@@ -233,7 +228,7 @@ const Chat: React.FC<ChatProps> = ({ roomId, currentUserId, currentUserName }) =
             {typingUsers.join(', ')} skriver...
           </div>
         )}
-        {/* <div ref={messagesEndRef} /> */}
+        <div ref={messagesEndRef} />
       </div>
       
       <div style={styles.inputContainer}>
@@ -262,7 +257,7 @@ const styles: Record<string, React.CSSProperties> = {
   chatContainer: {
     display: 'flex',
     flexDirection: 'column',
-    height: '100%', // Endret fra '600px' til '100%' for å fylle tilgjengelig plass
+    height: '70vh', // Gjør at chatten har egen scroll og siden ikke vokser
     border: '1px solid #e0e0e0',
     borderRadius: '8px',
   },
@@ -361,26 +356,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#666',
     fontStyle: 'italic',
   },
-  autoScrollToggle: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 10,
-    padding: '8px 16px',
-    backgroundColor: '#f8f9fa',
-    borderBottom: '1px solid #e1e8ed',
-    textAlign: 'center',
-  },
-  
-  toggleButton: {
-    padding: '6px 12px',
-    borderRadius: '16px',
-    border: 'none',
-    color: 'white',
-    fontSize: '12px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  },
+  // Fjernet auto-scroll knapp og tilhørende stiler
 };
 
 export default Chat; 

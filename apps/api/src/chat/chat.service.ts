@@ -137,4 +137,18 @@ export class ChatService {
             },
         });
     }
+
+    /**
+     * Deletes a chat room and all related members and messages.
+     */
+    async delete(roomId: string) {
+        // Slett relaterte meldinger og medlemmer eksplisitt før vi sletter rommet
+        await this.prisma.$transaction([
+            this.prisma.message.deleteMany({ where: { roomId } }),
+            this.prisma.chatMember.deleteMany({ where: { roomId } }),
+            this.prisma.chatRoom.delete({ where: { id: roomId } }),
+        ]);
+
+        return { success: true } as const;
+    }
 }
