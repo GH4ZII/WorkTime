@@ -28,6 +28,7 @@ interface DataTableProps {
   title?: string;
   defaultRowsPerPage?: number;
   rowsPerPageOptions?: number[];
+  emptyMessage?: React.ReactNode;
 }
 
 export const DataTable: React.FC<DataTableProps> = ({
@@ -35,7 +36,8 @@ export const DataTable: React.FC<DataTableProps> = ({
   data,
   title,
   defaultRowsPerPage = 10,
-  rowsPerPageOptions = [5, 10, 25]
+  rowsPerPageOptions = [5, 10, 25],
+  emptyMessage
 }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(defaultRowsPerPage);
@@ -117,45 +119,54 @@ export const DataTable: React.FC<DataTableProps> = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row, index) => (
-              <TableRow
-                key={index}
-                sx={{
-                  '&:last-child td, &:last-child th': { border: 0 },
-                  bgcolor: index % 2 === 0 ? '#ffffff' : '#fbfbfd',
-                  '&:hover': { bgcolor: '#f3f4f6' }
-                }}
-              >
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    align={column.align || 'left'}
-                    sx={{ borderBottom: '1px solid #f0f0f2', color: '#111827' }}
-                  >
-                    {column.render ? column.render(row[column.id]) : row[column.id]}
-                  </TableCell>
-                ))}
+            {paginatedData.length > 0 ? (
+              paginatedData.map((row, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    bgcolor: index % 2 === 0 ? '#ffffff' : '#fbfbfd',
+                    '&:hover': { bgcolor: '#f3f4f6' }
+                  }}
+                >
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align || 'left'}
+                      sx={{ borderBottom: '1px solid #f0f0f2', color: '#111827' }}
+                    >
+                      {column.render ? column.render(row[column.id]) : row[column.id]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} align="center" sx={{ py: 6, color: '#6b7280' }}>
+                  {emptyMessage || 'Ingen data å vise'}
+                </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
-      
-      <TablePagination
-        rowsPerPageOptions={rowsPerPageOptions}
-        component="div"
-        count={data.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        sx={{
-          borderTop: '1px solid #eee',
-          backgroundColor: 'transparent',
-          '.MuiTablePagination-toolbar': { color: '#6b7280' },
-          '.MuiTablePagination-displayedRows, .MuiTablePagination-selectLabel': { color: '#6b7280' }
-        }}
-      />
+      {data.length > 0 && (
+        <TablePagination
+          rowsPerPageOptions={rowsPerPageOptions}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{
+            borderTop: '1px solid #eee',
+            backgroundColor: 'transparent',
+            '.MuiTablePagination-toolbar': { color: '#6b7280' },
+            '.MuiTablePagination-displayedRows, .MuiTablePagination-selectLabel': { color: '#6b7280' }
+          }}
+        />
+      )}
     </Paper>
   );
 };

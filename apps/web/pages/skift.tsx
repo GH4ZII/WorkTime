@@ -164,7 +164,7 @@ const SkiftPage: NextPage = () => {
     const handleAiGenerateSchedule = async () => {
         setIsGeneratingSchedule(true);
         try {
-            const response = await axios.post('apiUrl('/ai/generate-monthly-schedule')', {
+            const response = await axios.post(apiUrl('/ai/generate-monthly-schedule'), {
                 month: selectedMonth.toISOString(),
             });
             
@@ -190,7 +190,7 @@ const SkiftPage: NextPage = () => {
         if (!aiGeneratedSchedule) return;
         
         try {
-            const response = await axios.post('apiUrl('/ai/apply-schedule')', {
+            const response = await axios.post(apiUrl('/ai/apply-schedule'), {
                 shifts: aiGeneratedSchedule.shifts,
                 month: selectedMonth.toISOString().slice(0, 7),
                 approved: true
@@ -218,7 +218,7 @@ const SkiftPage: NextPage = () => {
     const handleAiGenerateWeeklySchedule = async () => {
         setIsGeneratingWeeklySchedule(true);
         try {
-            const response = await axios.post('apiUrl('/ai/generate-weekly-schedule')', {
+            const response = await axios.post(apiUrl('/ai/generate-weekly-schedule'), {
                 weekStart: selectedWeekStart.toISOString(),
             });
             
@@ -295,7 +295,7 @@ const SkiftPage: NextPage = () => {
 
     const fetchAbsences = async () => {
         try {
-            const res = await axios.get<any[]>('apiUrl('/time-off-requests')', { withCredentials: true })
+            const res = await axios.get<any[]>(apiUrl('/time-off-requests'), { withCredentials: true })
             setAbsences(res.data)
         } catch (err: any) {
             console.error('Feil ved henting av fravær:', err)
@@ -306,7 +306,7 @@ const SkiftPage: NextPage = () => {
     const fetchAvailableShifts = async () => {
         try {
             // Hent ledige skift fra samme endpoint som vanlige skift
-            const res = await axios.get<any[]>('apiUrl('/shifts')', { withCredentials: true })
+            const res = await axios.get<any[]>(apiUrl('/shifts'), { withCredentials: true })
             const available = res.data.filter((shift: any) => shift.isAvailableShift === true)
             setAvailableShifts(available)
         } catch (err: any) {
@@ -332,7 +332,7 @@ const SkiftPage: NextPage = () => {
     const fetchEmployees = async () => {
         try {
             setLoading(true)
-            const res = await axios.get<Employee[]>('apiUrl('/users')', { withCredentials: true })
+            const res = await axios.get<Employee[]>(apiUrl('/users'), { withCredentials: true })
             setEmployees(res.data)
         } catch (err: any) {
             setError(err.message)
@@ -343,7 +343,7 @@ const SkiftPage: NextPage = () => {
 
     const fetchShifts = async () => {
         try {
-            const res = await axios.get<Shift[]>('apiUrl('/shifts')', { withCredentials: true })
+            const res = await axios.get<Shift[]>(apiUrl('/shifts'), { withCredentials: true })
             setShifts(res.data)
         } catch (err: any) {
             setError(err.message)
@@ -377,7 +377,7 @@ const SkiftPage: NextPage = () => {
         }
         
         try {
-            await axios.post('apiUrl('/shifts')', payload, { withCredentials: true })
+            await axios.post(apiUrl('/shifts'), payload, { withCredentials: true })
             setForm({ userId: '', date: '', startTime: '', endTime: '', location: '', notes: '', createdBy: 'admin' })
             setShowForm(false)
             setSuccess('Skift opprettet!')
@@ -408,7 +408,7 @@ const SkiftPage: NextPage = () => {
         }
         
         try {
-            await axios.put(`apiUrl('/shifts')/${editingShift.id}`, payload, { withCredentials: true })
+            await axios.put(`${apiUrl('/shifts')}/${editingShift.id}`, payload, { withCredentials: true })
             setShowEditForm(false)
             setEditingShift(null)
             setSuccess('Skift oppdatert!')
@@ -424,7 +424,7 @@ const SkiftPage: NextPage = () => {
         if (!confirm('Er du sikker på at du vil slette dette skiftet?')) return
         
         try {
-            await axios.delete(`apiUrl('/shifts')/${shiftId}`, { withCredentials: true })
+            await axios.delete(`${apiUrl('/shifts')}/${shiftId}`, { withCredentials: true })
             setSuccess('Skift slettet!')
             fetchShifts()
             setTimeout(() => setSuccess(null), 3000)
@@ -1081,7 +1081,7 @@ const getDuration = (startTime: string, endTime: string) => {
         try {
             // Opprett fraværsforespørsel kun hvis det er en spesifikk ansatt
             if (absenceForm.userId) {
-                const absenceResponse = await axios.post('apiUrl('/time-off-requests')', {
+            const absenceResponse = await axios.post(apiUrl('/time-off-requests'), {
                     userId: absenceForm.userId,
                     fromDate: `${absenceForm.fromDate}T00:00:00.000Z`,
                     toDate: `${absenceForm.toDate}T23:59:59.999Z`,
@@ -1091,13 +1091,13 @@ const getDuration = (startTime: string, endTime: string) => {
 
                 // Godkjenn fraværsforespørselen automatisk (admin gjør det)
                 if (absenceResponse.data.id) {
-                    await axios.post(`apiUrl('/time-off-requests')/${absenceResponse.data.id}/approve`, {}, { withCredentials: true })
+                    await axios.post(`${apiUrl('/time-off-requests')}/${absenceResponse.data.id}/approve`, {}, { withCredentials: true })
                 }
             }
 
             // Slett skiftet hvis det finnes og ikke er AI-generert eller ledig skift
             if (absenceForm.shiftId && !absenceForm.shiftId.startsWith('ai-') && !absenceForm.shiftId.startsWith('available-')) {
-                await axios.delete(`apiUrl('/shifts')/${absenceForm.shiftId}`, { withCredentials: true })
+                await axios.delete(`${apiUrl('/shifts')}/${absenceForm.shiftId}`, { withCredentials: true })
             }
 
             // Oppdater AI-skiftplan hvis det var et AI-skift
@@ -1196,7 +1196,7 @@ const getDuration = (startTime: string, endTime: string) => {
         
         try {
             // Opprett ledig skift (uten tilordnet ansatt)
-            await axios.post('apiUrl('/shifts')', {
+            await axios.post(apiUrl('/shifts'), {
                 startTime: `${availableShiftForm.date}T${availableShiftForm.startTime}:00.000Z`,
                 endTime: `${availableShiftForm.date}T${availableShiftForm.endTime}:00.000Z`,
                 location: availableShiftForm.location,
@@ -1245,7 +1245,7 @@ const getDuration = (startTime: string, endTime: string) => {
         if (approved && aiGeneratedSchedule) {
             try {
                 // Konverter AI-skiftplan til faktiske skift i databasen
-                await axios.post('apiUrl('/ai/apply-schedule')', {
+                await axios.post(apiUrl('/ai/apply-schedule'), {
                     scheduleId: aiGeneratedSchedule.id,
                     approved: true
                 });

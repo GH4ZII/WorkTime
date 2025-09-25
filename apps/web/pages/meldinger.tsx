@@ -194,8 +194,8 @@ const MessagesPage: NextPage = () => {
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, maxWidth: '1200px', mx: 'auto' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <ChatIcon sx={{ color: '#1976d2', fontSize: 28 }} />
-              <Typography variant="h5" fontWeight="bold" sx={{ color: '#1976d2' }}>
+              <ChatIcon sx={{ color: '#000', fontSize: 28 }} />
+              <Typography variant="h5" fontWeight="bold" sx={{ color: '#000' }}>
                 Chatter
               </Typography>
             </Box>
@@ -207,6 +207,13 @@ const MessagesPage: NextPage = () => {
               sx={{
                 flex: 1,
                 maxWidth: 400,
+                '& .MuiInputBase-input': {
+                  color: '#000',
+                  '::placeholder': {
+                    color: '#000',
+                    opacity: 1
+                  }
+                },
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 3,
                   backgroundColor: '#f5f5f5',
@@ -256,8 +263,8 @@ const MessagesPage: NextPage = () => {
             <Box sx={{ p: 3, borderBottom: '1px solid #e0e0e0' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ChatIcon sx={{ color: '#1976d2', fontSize: 20 }} />
-                  <Typography variant="h6" fontWeight="bold" sx={{ color: '#1976d2' }}>
+                  <ChatIcon sx={{ color: '#000', fontSize: 20 }} />
+                  <Typography variant="h6" fontWeight="bold" sx={{ color: '#000' }}>
                     Chatterom
                   </Typography>
                 </Box>
@@ -310,7 +317,7 @@ const MessagesPage: NextPage = () => {
                           py: 2,
                           '&.Mui-selected': {
                             backgroundColor: '#e3f2fd',
-                            color: '#1976d2',
+                            color: '#000',
                             '&:hover': {
                               backgroundColor: '#bbdefb',
                             }
@@ -342,11 +349,12 @@ const MessagesPage: NextPage = () => {
                           }
                           primaryTypographyProps={{
                             fontWeight: selectedRoom === room.id ? 'bold' : 'normal',
-                            fontSize: '0.95rem'
+                            fontSize: '0.95rem',
+                            sx: { color: '#000' }
                           }}
                           secondaryTypographyProps={{
                             fontSize: '0.8rem',
-                            color: selectedRoom === room.id ? '#1976d2' : '#666'
+                            color: '#000'
                           }}
                         />
                         <Box sx={{ color: '#ccc' }}>

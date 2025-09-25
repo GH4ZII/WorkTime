@@ -113,13 +113,12 @@ const HistoryPage: NextPage = () => {
           </FormControl>
         </Box>
 
-        {selectedEmployee && (
-          <DataTable
-            columns={columns}
-            data={workLogs}
-            defaultRowsPerPage={10}
-          />
-        )}
+        <DataTable
+          columns={columns}
+          data={workLogs}
+          defaultRowsPerPage={10}
+          emptyMessage={selectedEmployee ? 'Ingen historikk funnet for valgt ansatt' : 'Velg en ansatt for å se historikken'}
+        />
       </Box>
     </Layout>
   );
