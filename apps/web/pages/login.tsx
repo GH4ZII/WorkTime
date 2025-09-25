@@ -25,6 +25,7 @@ import {
     Login as LoginIcon
 } from '@mui/icons-material';
 import ForgotPassword from '../components/ForgotPassword';
+import Image from 'next/image'
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -110,7 +111,10 @@ const Login: React.FC = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                background: '#667eea',
+                background: '#764ba2',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
@@ -119,6 +123,10 @@ const Login: React.FC = () => {
                 overflow: 'hidden',
             }}
         >
+            {/* Top-left transparent logo overlay */}
+            <Box sx={{ position: 'absolute', top: -50, left: -50, zIndex: 2 }}>
+                    <Image src="/images/Design_uten_navn-removebg-preview.png" alt="WorkTime logo" width={380} height={220} priority />
+            </Box>
             {/* Wave Background Elements */}
             <Box
                 sx={{
@@ -127,7 +135,7 @@ const Login: React.FC = () => {
                     left: '-50%',
                     width: '200%',
                     height: '200%',
-                    background: 'radial-gradient(circle at 30% 20%, rgba(118, 75, 162, 0.3) 0%, transparent 50%)',
+                    background: 'radial-gradient(circle at 30% 20%, rgba(118, 75, 162, 0.4) 0%, transparent 50%)',
                     animation: 'float 20s ease-in-out infinite',
                 }}
             />
@@ -139,7 +147,7 @@ const Login: React.FC = () => {
                     right: '-40%',
                     width: '180%',
                     height: '180%',
-                    background: 'radial-gradient(circle at 70% 80%, rgba(102, 126, 234, 0.4) 0%, transparent 50%)',
+                    background: 'radial-gradient(circle at 70% 80%, rgba(118, 75, 162, 0.3) 0%, transparent 50%)',
                     animation: 'float 25s ease-in-out infinite reverse',
                 }}
             />
@@ -151,7 +159,7 @@ const Login: React.FC = () => {
                     left: '20%',
                     width: '140%',
                     height: '140%',
-                    background: 'radial-gradient(circle at 40% 60%, rgba(88, 101, 242, 0.3) 0%, transparent 50%)',
+                    background: 'radial-gradient(circle at 40% 60%, rgba(118, 75, 162, 0.2) 0%, transparent 50%)',
                     animation: 'float 30s ease-in-out infinite',
                 }}
             />
@@ -197,7 +205,7 @@ const Login: React.FC = () => {
                 >
                     <Box
                         sx={{
-                            background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
+                            background: 'linear-gradient(135deg, #764ba2 0%, #6a4190 100%)',
                             padding: 4,
                             textAlign: 'center',
                             color: 'white',
@@ -253,7 +261,7 @@ const Login: React.FC = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <EmailIcon sx={{ color: '#667eea' }} />
+                                            <EmailIcon sx={{ color: '#764ba2' }} />
                                         </InputAdornment>
                                     ),
                                 }}
@@ -261,16 +269,16 @@ const Login: React.FC = () => {
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: 3,
                                         '&:hover fieldset': {
-                                            borderColor: '#667eea',
+                                            borderColor: '#764ba2',
                                             borderWidth: '2px',
                                         },
                                         '&.Mui-focused fieldset': {
-                                            borderColor: '#667eea',
+                                            borderColor: '#764ba2',
                                             borderWidth: '2px',
                                         },
                                     },
                                     '& .MuiInputLabel-root.Mui-focused': {
-                                        color: '#667eea',
+                                        color: '#764ba2',
                                     },
                                 }}
                             />
@@ -289,7 +297,7 @@ const Login: React.FC = () => {
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <LockIcon sx={{ color: '#667eea' }} />
+                                            <LockIcon sx={{ color: '#764ba2' }} />
                                         </InputAdornment>
                                     ),
                                     endAdornment: (
@@ -298,7 +306,7 @@ const Login: React.FC = () => {
                                                 aria-label="toggle password visibility"
                                                 onClick={handleTogglePasswordVisibility}
                                                 edge="end"
-                                                sx={{ color: '#667eea' }}
+                                                sx={{ color: '#764ba2' }}
                                             >
                                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
@@ -309,16 +317,16 @@ const Login: React.FC = () => {
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: 3,
                                         '&:hover fieldset': {
-                                            borderColor: '#667eea',
+                                            borderColor: '#764ba2',
                                             borderWidth: '2px',
                                         },
                                         '&.Mui-focused fieldset': {
-                                            borderColor: '#667eea',
+                                            borderColor: '#764ba2',
                                             borderWidth: '2px',
                                         },
                                     },
                                     '& .MuiInputLabel-root.Mui-focused': {
-                                        color: '#667eea',
+                                        color: '#764ba2',
                                     },
                                 }}
                             />
@@ -350,14 +358,14 @@ const Login: React.FC = () => {
                                     fontSize: '1.1rem',
                                     fontWeight: 'bold',
                                     background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
-                                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                                    boxShadow: '0 8px 25px rgba(118, 75, 162, 0.3)',
                                     '&:hover': {
-                                        background: 'linear-gradient(135deg, #5a6fd8 0%, #4c5fd6 100%)',
+                                        background: 'linear-gradient(135deg, #6a4190 0%, #5d377a 100%)',
                                         transform: 'translateY(-2px)',
-                                        boxShadow: '0 12px 35px rgba(102, 126, 234, 0.4)',
+                                        boxShadow: '0 12px 35px rgba(118, 75, 162, 0.4)',
                                     },
                                     '&:disabled': {
-                                        background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
+                                        background: 'linear-gradient(135deg, #764ba2 0%, #6a4190 100%)',
                                         opacity: 0.7,
                                     },
                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -377,12 +385,12 @@ const Login: React.FC = () => {
                                     variant="body2"
                                     onClick={handleForgotPasswordClick}
                                     sx={{
-                                        color: '#667eea',
+                                        color: '#764ba2',
                                         textDecoration: 'none',
                                         fontWeight: 'bold',
                                         '&:hover': {
                                             textDecoration: 'underline',
-                                            color: '#5a6fd8',
+                                            color: '#6a4190',
                                         },
                                     }}
                                 >
