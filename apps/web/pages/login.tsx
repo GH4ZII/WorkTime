@@ -357,7 +357,7 @@ const Login: React.FC = () => {
                                     borderRadius: 3,
                                     fontSize: '1.1rem',
                                     fontWeight: 'bold',
-                                    background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
+                                    background: 'linear-gradient(135deg, #764ba2 0%, #6a4190 100%)',
                                     boxShadow: '0 8px 25px rgba(118, 75, 162, 0.3)',
                                     '&:hover': {
                                         background: 'linear-gradient(135deg, #6a4190 0%, #5d377a 100%)',

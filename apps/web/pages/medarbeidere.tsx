@@ -614,9 +614,9 @@ const CoWorkerPage: NextPage = () => {
                                 px: 3,
                                 borderRadius: 999,
                                 fontWeight: 'bold',
-                                backgroundColor: '#2563eb',
+                                backgroundColor: '#764ba2',
                                 boxShadow: 'none',
-                                '&:hover': { backgroundColor: '#1d4ed8' }
+                                '&:hover': { backgroundColor: '#6a4190' }
                             }}
                         >
                             Legg til ny ansatt
@@ -643,14 +643,15 @@ const CoWorkerPage: NextPage = () => {
                                             sx={{
                                                 height: '100%',
                                                 borderRadius: 3,
-                                                backgroundColor: 'grey.50',
+                                                backgroundColor: 'linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%)',
                                                 border: '1px solid',
-                                                borderColor: 'grey.200',
-                                                boxShadow: 'none',
+                                                borderColor: 'rgba(118, 75, 162, 0.2)',
+                                                boxShadow: '0 2px 8px rgba(118, 75, 162, 0.1)',
                                                 transition: 'all 0.2s ease',
                                                 '&:hover': {
                                                     transform: 'translateY(-2px)',
-                                                    boxShadow: '0 8px 18px rgba(16,24,40,0.12)'
+                                                    boxShadow: '0 8px 25px rgba(118, 75, 162, 0.15)',
+                                                    borderColor: 'rgba(118, 75, 162, 0.3)'
                                                 }
                                             }}
                                         >
@@ -658,13 +659,14 @@ const CoWorkerPage: NextPage = () => {
                                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                                                     <Avatar 
                                                         sx={{ 
-                                                            bgcolor: '#fff',
-                                                            color: 'text.primary',
-                                                            border: '1px solid',
-                                                            borderColor: 'divider',
+                                                            bgcolor: 'linear-gradient(135deg, #764ba2 0%, #6a4190 100%)',
+                                                            color: '#fff',
+                                                            border: '2px solid',
+                                                            borderColor: 'rgba(118, 75, 162, 0.3)',
                                                             mr: 2,
                                                             width: 44,
-                                                            height: 44
+                                                            height: 44,
+                                                            fontWeight: 'bold'
                                                         }}
                                                     >
                                                         {employee.name.charAt(0)}
@@ -677,7 +679,13 @@ const CoWorkerPage: NextPage = () => {
                                                             label={getRoleDisplayName(employee.role)}
                                                             color="default"
                                                             size="small"
-                                                            sx={{ borderRadius: 999, height: 22, bgcolor: 'grey.100' }}
+                                                            sx={{ 
+                                                                borderRadius: 999, 
+                                                                height: 22, 
+                                                                bgcolor: employee.role === 'ADMIN' ? 'rgba(118, 75, 162, 0.15)' : 'rgba(118, 75, 162, 0.1)',
+                                                                color: '#764ba2',
+                                                                fontWeight: 'medium'
+                                                            }}
                                                         />
                                                     </Box>
                                                     <Box sx={{ display: 'flex', gap: 1.5, ml: 4 }}>
@@ -716,21 +724,21 @@ const CoWorkerPage: NextPage = () => {
 
                                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <EmailIcon fontSize="small" sx={{ color: 'grey.500' }} />
+                                                        <EmailIcon fontSize="small" sx={{ color: '#764ba2' }} />
                                                         <Typography variant="body2" color="text.secondary">
                                                             {employee.email}
                                                         </Typography>
                                                     </Box>
                                                     
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <PhoneIcon fontSize="small" sx={{ color: 'grey.500' }} />
+                                                        <PhoneIcon fontSize="small" sx={{ color: '#764ba2' }} />
                                                         <Typography variant="body2" color="text.secondary">
                                                             {employee.phone || 'Ikke satt'}
                                                         </Typography>
                                                     </Box>
                                                     
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <CalendarIcon fontSize="small" sx={{ color: 'grey.500' }} />
+                                                        <CalendarIcon fontSize="small" sx={{ color: '#764ba2' }} />
                                                         <Typography variant="body2" color="text.secondary">
                                                             {formatDate((employee as any).hireDate)}
                                                         </Typography>

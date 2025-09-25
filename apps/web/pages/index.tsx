@@ -165,8 +165,8 @@ const SectionCard: React.FC<SectionCardProps> = ({ title, icon, action, children
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: (theme) => theme.palette.primary.main + '1A',
-                            color: 'primary.main'
+                            bgcolor: '#764ba21A',
+                            color: '#764ba2'
                         }}
                     >
                         {icon}

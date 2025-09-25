@@ -171,7 +171,7 @@ const MessagesPage: NextPage = () => {
     return (
       <Layout>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <CircularProgress size={60} sx={{ color: '#667eea' }} />
+          <CircularProgress size={60} sx={{ color: '#764ba2' }} />
         </Box>
       </Layout>
     );
@@ -224,7 +224,7 @@ const MessagesPage: NextPage = () => {
                     borderColor: '#e0e0e0',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#1976d2',
+                    borderColor: '#764ba2',
                   },
                 },
               }}
@@ -236,12 +236,12 @@ const MessagesPage: NextPage = () => {
                 startIcon={<AddIcon />}
                 onClick={() => setShowNewChatModal(true)}
                 sx={{
-                  backgroundColor: '#1976d2',
+                  backgroundColor: '#764ba2',
                   borderRadius: 3,
                   px: 3,
                   py: 1,
                   '&:hover': {
-                    backgroundColor: '#1565c0',
+                    backgroundColor: '#6a4190',
                   },
                 }}
               >
@@ -295,10 +295,10 @@ const MessagesPage: NextPage = () => {
                   startIcon={<AddIcon />}
                   onClick={() => setShowNewChatModal(true)}
                   sx={{
-                    backgroundColor: '#1976d2',
+                    backgroundColor: '#764ba2',
                     borderRadius: 2,
                     '&:hover': {
-                      backgroundColor: '#1565c0',
+                      backgroundColor: '#6a4190',
                     },
                   }}
                 >
@@ -337,20 +337,20 @@ const MessagesPage: NextPage = () => {
                           borderRadius: 2,
                           py: 2,
                           '&.Mui-selected': {
-                            backgroundColor: '#e3f2fd',
+                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
                             color: '#000',
                             '&:hover': {
-                              backgroundColor: '#bbdefb',
+                              backgroundColor: 'rgba(118, 75, 162, 0.2)',
                             }
                           },
                           '&:hover': {
-                            backgroundColor: selectedRoom === room.id ? '#bbdefb' : '#f5f5f5',
+                            backgroundColor: selectedRoom === room.id ? 'rgba(118, 75, 162, 0.2)' : '#f5f5f5',
                           }
                         }}
                       >
                         <ListItemAvatar>
                           <Avatar sx={{ 
-                            bgcolor: selectedRoom === room.id ? '#1976d2' : '#e0e0e0',
+                            bgcolor: selectedRoom === room.id ? '#764ba2' : '#e0e0e0',
                             color: selectedRoom === room.id ? 'white' : '#666',
                             width: 40,
                             height: 40
@@ -473,12 +473,12 @@ const MessagesPage: NextPage = () => {
           PaperProps={{
             sx: {
               borderRadius: 3,
-              border: '1px solid rgba(102, 126, 234, 0.1)'
+              border: '1px solid rgba(118, 75, 162, 0.1)'
             }
           }}
         >
           <DialogTitle sx={{ 
-            background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
+            background: 'linear-gradient(135deg, #764ba2 0%, #6a4190 100%)',
             color: 'white'
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -502,21 +502,21 @@ const MessagesPage: NextPage = () => {
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
                     '&:hover fieldset': {
-                      borderColor: '#667eea',
+                      borderColor: '#764ba2',
                       borderWidth: '2px',
                     },
                     '&.Mui-focused fieldset': {
-                      borderColor: '#667eea',
+                      borderColor: '#764ba2',
                       borderWidth: '2px',
                     },
                   },
                   '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#667eea',
+                    color: '#764ba2',
                   },
                 }}
               />
 
-              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2, color: '#667eea' }}>
+              <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2, color: '#764ba2' }}>
                 Velg brukere:
               </Typography>
               
@@ -524,7 +524,7 @@ const MessagesPage: NextPage = () => {
                 maxHeight: 300, 
                 overflow: 'auto', 
                 border: 1, 
-                borderColor: 'rgba(102, 126, 234, 0.2)', 
+                borderColor: 'rgba(118, 75, 162, 0.2)', 
                 borderRadius: 2 
               }}>
                 <List>
@@ -534,7 +534,7 @@ const MessagesPage: NextPage = () => {
                       <ListItem key={user.id} disablePadding>
                         <ListItemButton onClick={() => handleUserToggle(user.id)}>
                           <ListItemAvatar>
-                            <Avatar sx={{ bgcolor: '#667eea', color: 'white' }}>
+                            <Avatar sx={{ bgcolor: '#764ba2', color: 'white' }}>
                               {user.name.charAt(0)}
                             </Avatar>
                           </ListItemAvatar>
@@ -546,18 +546,18 @@ const MessagesPage: NextPage = () => {
                             label={user.role === 'ADMIN' ? 'Administrator' : 'Ansatt'}
                             size="small"
                             sx={{
-                              bgcolor: user.role === 'ADMIN' ? '#667eea' : 'rgba(102, 126, 234, 0.1)',
-                              color: user.role === 'ADMIN' ? 'white' : '#667eea',
-                              border: user.role === 'ADMIN' ? 'none' : '1px solid #667eea',
+                              bgcolor: user.role === 'ADMIN' ? '#764ba2' : 'rgba(118, 75, 162, 0.1)',
+                              color: user.role === 'ADMIN' ? 'white' : '#764ba2',
+                              border: user.role === 'ADMIN' ? 'none' : '1px solid #764ba2',
                             }}
                           />
                           <Checkbox
                             checked={selectedUsers.includes(user.id)}
                             onChange={() => handleUserToggle(user.id)}
                             sx={{ 
-                              color: '#667eea',
+                              color: '#764ba2',
                               '&.Mui-checked': {
-                                color: '#667eea',
+                                color: '#764ba2',
                               },
                             }}
                           />
@@ -574,11 +574,11 @@ const MessagesPage: NextPage = () => {
               startIcon={<CancelIcon />}
               variant="outlined"
               sx={{
-                borderColor: '#667eea',
-                color: '#667eea',
+                borderColor: '#764ba2',
+                color: '#764ba2',
                 '&:hover': {
-                  borderColor: '#5a6fd8',
-                  backgroundColor: 'rgba(102, 126, 234, 0.04)',
+                  borderColor: '#6a4190',
+                  backgroundColor: 'rgba(118, 75, 162, 0.04)',
                 },
                 borderRadius: 2,
               }}
@@ -590,11 +590,11 @@ const MessagesPage: NextPage = () => {
               startIcon={<CheckIcon />}
               variant="contained"
               sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #5a6fd8 100%)',
+                background: 'linear-gradient(135deg, #764ba2 0%, #6a4190 100%)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #5a6fd8 0%, #4c5fd6 100%)',
+                  background: 'linear-gradient(135deg, #6a4190 0%, #5d377a 100%)',
                   transform: 'translateY(-1px)',
-                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                  boxShadow: '0 8px 25px rgba(118, 75, 162, 0.3)',
                 },
                 borderRadius: 2,
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',

@@ -160,9 +160,22 @@ const SkiftPage: NextPage = () => {
         return monday;
     });
 
+    // Legg til state for genereringstid
+    const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
+    const [elapsedTime, setElapsedTime] = useState(0);
+
     // ← Ny: Hent AI-genererte skift
     const handleAiGenerateSchedule = async () => {
         setIsGeneratingSchedule(true);
+        setGenerationStartTime(Date.now());
+        setElapsedTime(0);
+        
+        // Start timer for å vise elapsed time
+        const startTime = Date.now();
+        const timer = setInterval(() => {
+            setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+        }, 1000);
+        
         try {
             const response = await axios.post(apiUrl('/ai/generate-monthly-schedule'), {
                 month: selectedMonth.toISOString(),
@@ -182,6 +195,9 @@ const SkiftPage: NextPage = () => {
             alert('Feil ved AI-generering. Sjekk konsollen for detaljer.');
         } finally {
             setIsGeneratingSchedule(false);
+            setGenerationStartTime(null);
+            setElapsedTime(0);
+            clearInterval(timer);
         }
     };
 
@@ -1325,8 +1341,8 @@ const getDuration = (startTime: string, endTime: string) => {
                                         variant="contained"
                                         onClick={startAvailableShiftForm}
                                         sx={{
-                                            backgroundColor: '#2563eb',
-                                            '&:hover': { backgroundColor: '#1d4ed8' },
+                                            backgroundColor: '#764ba2',
+                                            '&:hover': { backgroundColor: '#6a4190' },
                                             px: 3,
                                             py: 1,
                                             borderRadius: 2,
@@ -1419,7 +1435,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                     backgroundColor: '#ffffff',
                                                                     borderRadius: 2,
                                                                     p: 1.5, // Redusert fra p: 2 til p: 1.5
-                                                                    border: shift.createdBy === 'AI' ? '2px solid #667eea' : '2px solid #e2e8f0',
+                                                                    border: shift.createdBy === 'AI' ? '2px solid #764ba2' : '2px solid #e2e8f0',
                                                                     position: 'relative',
                                                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                                                     '&:hover': {
@@ -1433,7 +1449,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                                 position: 'absolute',
                                                                                 top: -8,
                                                                                 right: -8,
-                                                                                backgroundColor: '#667eea',
+                                                                                backgroundColor: '#764ba2',
                                                                                 color: 'white',
                                                                                 borderRadius: '50%',
                                                                                 width: 20,
@@ -1446,7 +1462,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                                 cursor: 'pointer',
                                                                                 transition: 'all 0.2s ease-in-out',
                                                                                 '&:hover': {
-                                                                                    backgroundColor: '#5a6fd8',
+                                                                                    backgroundColor: '#6a4190',
                                                                                     transform: 'scale(1.1)'
                                                                                 }
                                                                             }}
@@ -1479,7 +1495,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                             variant="caption" 
                                                                             sx={{ 
                                                                                 display: 'block',
-                                                                                color: '#667eea',
+                                                                                color: '#764ba2',
                                                                                 fontWeight: 'bold',
                                                                                 mt: 0.5
                                                                             }}
@@ -1497,8 +1513,8 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                             size="small"
                                                                             onClick={() => startEdit(shift)}
                                                                             sx={{ 
-                                                                                color: '#667eea',
-                                                                                '&:hover': { backgroundColor: 'rgba(102, 126, 234, 0.1)' }
+                                                                                color: '#764ba2',
+                                                                                '&:hover': { backgroundColor: 'rgba(118, 75, 162, 0.1)' }
                                                                             }}
                                                                             title="Rediger skift (dobbeltklikk for fravær)"
                                                                             onDoubleClick={() => startAbsenceForm(shift)}
@@ -1634,7 +1650,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                     backgroundColor: '#ffffff',
                                                                     borderRadius: 2,
                                                                     p: 1.5, // Redusert fra p: 2 til p: 1.5
-                                                                    border: '2px dashed #667eea',
+                                                                    border: '2px dashed #764ba2',
                                                                     position: 'relative'
                                                                 }}>
                                                                     <Box sx={{
@@ -1673,7 +1689,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                             justifyContent: 'center',
                                                                             cursor: 'pointer',
                                                                             borderRadius: 2,
-                                                                            border: '2px dashed #667eea',
+                                                                            border: '2px dashed #764ba2',
                                                                             transition: 'all 0.2s ease',
                                                                             backgroundColor: 'rgba(102, 126, 234, 0.05)',
                                                                             '&:hover': {
@@ -1688,14 +1704,14 @@ const getDuration = (startTime: string, endTime: string) => {
                                                                                 width: 32,
                                                                                 height: 32,
                                                                                 borderRadius: '50%',
-                                                                                backgroundColor: '#667eea',
+                                                                                backgroundColor: '#764ba2',
                                                                                 color: 'white',
                                                                                 display: 'flex',
                                                                                 alignItems: 'center',
                                                                                 justifyContent: 'center',
                                                                                 transition: 'all 0.2s ease',
                                                                                 '&:hover': {
-                                                                                    backgroundColor: '#5a6fd8',
+                                                                                    backgroundColor: '#6a4190',
                                                                                     transform: 'scale(1.1)'
                                                                                 }
                                                                             }}
@@ -1834,9 +1850,9 @@ const getDuration = (startTime: string, endTime: string) => {
                                     variant="contained"
                                     startIcon={<SaveIcon />}
                                     sx={{
-                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        background: 'linear-gradient(135deg, #764ba2 0%, #6a4190 100%)',
                                         '&:hover': {
-                                            background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
+                                            background: 'linear-gradient(135deg, #6a4190 0%, #5d377a 100%)',
                                         }
                                     }}
                                 >
@@ -1993,9 +2009,9 @@ const getDuration = (startTime: string, endTime: string) => {
                                     variant="contained"
                                     startIcon={<SaveIcon />}
                                     sx={{
-                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        background: 'linear-gradient(135deg, #764ba2 0%, #6a4190 100%)',
                                         '&:hover': {
-                                            background: 'linear-gradient(135deg, #5a6fd8 0%, #667eea 100%)',
+                                            background: 'linear-gradient(135deg, #6a4190 0%, #5d377a 100%)',
                                         }
                                     }}
                                 >
@@ -2254,9 +2270,9 @@ const getDuration = (startTime: string, endTime: string) => {
                                     color="success"
                                     startIcon={<AddIcon />}
                                     sx={{
-                                        backgroundColor: '#667eea',
+                                        backgroundColor: '#764ba2',
                                         '&:hover': {
-                                            backgroundColor: '#1565c0',
+                                            backgroundColor: '#6a4190',
                                         }
                                     }}
                                 >
@@ -2289,7 +2305,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                     p: 3,
                                     bgcolor: 'white',
                                     borderRadius: 2,
-                                    border: '1px solid rgba(102, 126, 234, 0.1)',
+                                    border: '1px solid rgba(118, 75, 162, 0.1)',
                                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
                                 }}>
                                     <Box sx={{ 
@@ -2311,13 +2327,13 @@ const getDuration = (startTime: string, endTime: string) => {
                                             minWidth: 180,
                                             '& .MuiOutlinedInput-root': {
                                                 '& fieldset': {
-                                                    borderColor: 'rgba(102, 126, 234, 0.3)',
+                                                    borderColor: 'rgba(118, 75, 162, 0.3)',
                                                 },
                                                 '&:hover fieldset': {
-                                                    borderColor: 'rgba(102, 126, 234, 0.5)',
+                                                    borderColor: 'rgba(118, 75, 162, 0.5)',
                                                 },
                                                 '&.Mui-focused fieldset': {
-                                                    borderColor: '#667eea',
+                                                    borderColor: '#764ba2',
                                                 },
                                             }
                                         }}
@@ -2328,22 +2344,40 @@ const getDuration = (startTime: string, endTime: string) => {
                                         onClick={handleAiGenerateSchedule}
                                         disabled={isGeneratingSchedule}
                                         sx={{
-                                            backgroundColor: '#2563eb',
-                                            '&:hover': { backgroundColor: '#1d4ed8' },
-                                            '&:disabled': { backgroundColor: '#b0b7c4' },
+                                            backgroundColor: isGeneratingSchedule ? '#6a4190' : '#764ba2',
+                                            '&:hover': { 
+                                                backgroundColor: isGeneratingSchedule ? '#6a4190' : '#6a4190' 
+                                            },
+                                            '&:disabled': { 
+                                                backgroundColor: '#6a4190',
+                                                color: 'white',
+                                                opacity: 0.8
+                                            },
                                             px: 4,
                                             py: 1.5,
                                             borderRadius: 2,
                                             fontWeight: 700,
                                             fontSize: '1rem',
                                             boxShadow: 'none',
-                                            ml: 'auto'
+                                            ml: 'auto',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1
                                         }}
                                     >
                                         {isGeneratingSchedule ? (
                                             <>
-                                                <CircularProgress size={20} sx={{ ml: 70, color: 'white' }} />
-                                                Genererer...
+                                                <CircularProgress size={16} sx={{ color: 'white' }} />
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                    <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
+                                                        Genererer... ({elapsedTime}s)
+                                                    </Typography>
+                                                    {elapsedTime > 30 && (
+                                                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.7rem' }}>
+                                                            Dette kan ta opptil 4-5 minutter...
+                                                        </Typography>
+                                                    )}
+                                                </Box>
                                             </>
                                         ) : (
                                             '+ Generer månedlig plan'
@@ -2360,7 +2394,7 @@ const getDuration = (startTime: string, endTime: string) => {
                                     p: 3,
                                     bgcolor: 'white',
                                     borderRadius: 2,
-                                    border: '1px solid rgba(102, 126, 234, 0.1)',
+                                    border: '1px solid rgba(118, 75, 162, 0.1)',
                                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
                                 }}>
                                     <Box sx={{ 
@@ -2382,13 +2416,13 @@ const getDuration = (startTime: string, endTime: string) => {
                                             minWidth: 180,
                                             '& .MuiOutlinedInput-root': {
                                                 '& fieldset': {
-                                                    borderColor: 'rgba(102, 126, 234, 0.3)',
+                                                    borderColor: 'rgba(118, 75, 162, 0.3)',
                                                 },
                                                 '&:hover fieldset': {
-                                                    borderColor: 'rgba(102, 126, 234, 0.5)',
+                                                    borderColor: 'rgba(118, 75, 162, 0.5)',
                                                 },
                                                 '&.Mui-focused fieldset': {
-                                                    borderColor: '#667eea',
+                                                    borderColor: '#764ba2',
                                                 },
                                             }
                                         }}
@@ -2403,21 +2437,30 @@ const getDuration = (startTime: string, endTime: string) => {
                                         onClick={handleAiGenerateWeeklySchedule}
                                         disabled={isGeneratingWeeklySchedule}
                                         sx={{
-                                            backgroundColor: '#2563eb',
-                                            '&:hover': { backgroundColor: '#1d4ed8' },
-                                            '&:disabled': { backgroundColor: '#b0b7c4' },
+                                            backgroundColor: isGeneratingWeeklySchedule ? '#6a4190' : '#764ba2',
+                                            '&:hover': { 
+                                                backgroundColor: isGeneratingWeeklySchedule ? '#6a4190' : '#6a4190' 
+                                            },
+                                            '&:disabled': { 
+                                                backgroundColor: '#6a4190',
+                                                color: 'white',
+                                                opacity: 0.8
+                                            },
                                             px: 4,
                                             py: 1.5,
                                             borderRadius: 2,
                                             fontWeight: 700,
                                             fontSize: '1rem',
                                             boxShadow: 'none',
-                                            ml: 'auto'
+                                            ml: 'auto',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1
                                         }}
                                     >
                                         {isGeneratingWeeklySchedule ? (
                                             <>
-                                                <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} />
+                                                <CircularProgress size={16} sx={{ color: 'white' }} />
                                                 Genererer...
                                             </>
                                         ) : (
@@ -2434,10 +2477,10 @@ const getDuration = (startTime: string, endTime: string) => {
                             p: 3, 
                             bgcolor: 'background.paper', 
                             borderRadius: 2,
-                            border: '2px solid #667eea',
+                            border: '2px solid #764ba2',
                             boxShadow: 3
                         }}>
-                            <Typography variant="h5" sx={{ mb: 2, color: '#667eea' }}>
+                            <Typography variant="h5" sx={{ mb: 2, color: '#764ba2' }}>
                                 AI-generert Skiftplan for {aiGeneratedSchedule.month}
                             </Typography>
                             

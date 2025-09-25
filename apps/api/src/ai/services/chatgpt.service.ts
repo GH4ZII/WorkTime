@@ -33,7 +33,6 @@ export class ChatGPTService {
   private readonly defaultOptions: ChatGPTOptions = {
     model: 'gpt-5-mini',
     maxTokens: 32000,
-    temperature: 0.7,
     retryAttempts: 3,
   };
 
@@ -57,8 +56,9 @@ export class ChatGPTService {
       this.openai = new OpenAI({
         apiKey: apiKey,
         maxRetries: this.defaultOptions.retryAttempts,
+        timeout: 300000, // 5 minutter timeout
       });
-      this.logger.log('OpenAI klient initialisert');
+      this.logger.log(`🔧 [OPENAI] OpenAI klient initialisert med ${this.defaultOptions.retryAttempts} retries og 5min timeout`);
     } catch (error) {
       this.logger.error('Feil ved initialisering av OpenAI klient:', error);
     }
@@ -96,25 +96,50 @@ export class ChatGPTService {
   }
 
   private async callOpenAI(prompt: string, options: ChatGPTOptions): Promise<ChatGPTResponse> {
+    const openaiCallStartTime = Date.now();
+    
     try {
-      this.logger.log('Starter OpenAI API-kall...');
+      this.logger.log(`🚀 [OPENAI] Starting OpenAI API call at ${new Date().toISOString()}`);
       
       const model = options.model || this.defaultOptions.model || 'gpt-5-mini';
       const maxTokens = options.maxTokens || this.defaultOptions.maxTokens || 4000;
       
-      this.logger.log(`Bruker modell: ${model}, maxTokens: ${maxTokens}`);
+      this.logger.log(`📝 [OPENAI] Using model: ${model}, maxTokens: ${maxTokens}`);
+      this.logger.log(`📝 [OPENAI] Prompt size: ${prompt.length} characters`);
+      this.logger.log(`📝 [OPENAI] Prompt preview: ${prompt.substring(0, 100)}...`);
       
-      // ← Legg til mer detaljert logging
-      this.logger.log('Prompt preview:', prompt.substring(0, 100) + '...');
+      this.logger.log(`⏱️ [OPENAI] About to make API call...`);
+      const apiCallStartTime = Date.now();
       
-      const completion = await this.openai.chat.completions.create({
+      // Legg til timeout og mer detaljert logging
+      const completionPromise = this.openai.chat.completions.create({
         model: model,
         messages: [{ role: 'user', content: prompt }],
         max_completion_tokens: maxTokens,
+        temperature: options.temperature || this.defaultOptions.temperature,
       });
       
+      // Log progress hver 30 sekund
+      const progressInterval = setInterval(() => {
+        const elapsed = Date.now() - apiCallStartTime;
+        this.logger.log(`⏳ [OPENAI] Still waiting... ${elapsed}ms elapsed (${(elapsed/1000).toFixed(1)}s)`);
+      }, 30000);
+      
+      let completion;
+      try {
+        completion = await completionPromise;
+        clearInterval(progressInterval);
+        const apiCallEndTime = Date.now();
+        
+        this.logger.log(`⏱️ [OPENAI] API call completed in ${apiCallEndTime - apiCallStartTime}ms`);
+      } catch (error) {
+        clearInterval(progressInterval);
+        throw error;
+      }
+      
       // ← Log hele OpenAI-responsen
-      this.logger.log('OpenAI raw response:', JSON.stringify(completion, null, 2));
+      this.logger.log(`📄 [OPENAI] Raw response length: ${completion.choices[0].message.content?.length || 0} characters`);
+      this.logger.log(`📊 [OPENAI] Token usage: ${completion.usage?.prompt_tokens || 0} prompt + ${completion.usage?.completion_tokens || 0} completion = ${completion.usage?.total_tokens || 0} total`);
       
       const response = {
         content: completion.choices[0].message.content || '',
@@ -126,7 +151,9 @@ export class ChatGPTService {
         model: completion.model,
       };
       
-      this.logger.log('Processed response:', JSON.stringify(response, null, 2));
+      const totalOpenaiTime = Date.now() - openaiCallStartTime;
+      this.logger.log(`✅ [OPENAI] Total OpenAI processing time: ${totalOpenaiTime}ms`);
+      this.logger.log(`📄 [OPENAI] Response content preview: ${response.content.substring(0, 200)}...`);
       
       return response;
       

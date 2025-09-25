@@ -72,20 +72,20 @@ export declare class AiController {
         success: boolean;
         message: string;
         error?: undefined;
-        rawContent?: undefined;
         shifts?: undefined;
         summary?: undefined;
         month?: undefined;
         employeeCount?: undefined;
+        performanceMetrics?: undefined;
     } | {
         success: boolean;
         message: string;
         error: any;
-        rawContent: string;
         shifts?: undefined;
         summary?: undefined;
         month?: undefined;
         employeeCount?: undefined;
+        performanceMetrics?: undefined;
     } | {
         success: boolean;
         message: string;
@@ -93,17 +93,18 @@ export declare class AiController {
         summary: any;
         month: string;
         employeeCount: number;
+        performanceMetrics: {
+            totalTime: number;
+            employeeFetchTime: number;
+            timeOffFetchTime: number;
+            dataProcessingTime: number;
+            promptBuildTime: number;
+            openaiApiTime: number;
+            parsingTime: number;
+            promptSize: number;
+            shiftsGenerated: any;
+        };
         error?: undefined;
-        rawContent?: undefined;
-    } | {
-        success: boolean;
-        message: string;
-        error: any;
-        rawContent?: undefined;
-        shifts?: undefined;
-        summary?: undefined;
-        month?: undefined;
-        employeeCount?: undefined;
     }>;
     applySchedule(body: {
         shifts: any[];
@@ -131,4 +132,6 @@ export declare class AiController {
     private convertTimeOffType;
     private convertRequestStatus;
     private mapShiftType;
+    private splitMonthIntoWeeks;
+    private combineWeeklySchedules;
 }
