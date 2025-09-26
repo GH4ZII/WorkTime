@@ -183,7 +183,7 @@ const StatisticsPage: NextPage = () => {
         elevation={3}
         sx={{
           borderRadius: 3,
-          border: '1px solid rgba(102, 126, 234, 0.1)',
+          border: '1px solid rgba(118, 75, 162, 0.1)',
           background: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(10px)',
           cursor: onClick ? 'pointer' : 'default',
@@ -192,8 +192,8 @@ const StatisticsPage: NextPage = () => {
           display: 'flex',
           flexDirection: 'column',
           '&:hover': {
-            boxShadow: '0 12px 35px rgba(102, 126, 234, 0.2)',
-            borderColor: 'rgba(102, 126, 234, 0.3)',
+            boxShadow: '0 12px 35px rgba(118, 75, 162, 0.2)',
+            borderColor: 'rgba(118, 75, 162, 0.3)',
           }
         }}
         onClick={onClick}
@@ -286,7 +286,7 @@ const StatisticsPage: NextPage = () => {
                 Eksporter
               </Paper>
               <Paper component="button" elevation={0} onClick={handleRefresh}
-                sx={{ px: 2, py: 1, borderRadius: 1, bgcolor: '#3b82f6', color: '#fff', cursor: 'pointer' }}>
+                sx={{ px: 2, py: 1, borderRadius: 1, bgcolor: '#764ba2', color: '#fff', cursor: 'pointer' }}>
                 Oppdater
               </Paper>
             </Box>
@@ -301,9 +301,9 @@ const StatisticsPage: NextPage = () => {
             sx={{
               '& .MuiTab-root': {
                 color: 'text.secondary',
-                '&.Mui-selected': { color: '#667eea' },
+                '&.Mui-selected': { color: '#764ba2' },
               },
-              '& .MuiTabs-indicator': { backgroundColor: '#667eea' },
+              '& .MuiTabs-indicator': { backgroundColor: '#764ba2' },
             }}
           >
             <Tab label="Oversikt" icon={<AssessmentIcon />} />
@@ -324,7 +324,7 @@ const StatisticsPage: NextPage = () => {
                     value={`${currentData.totalHours}h`}
                     subtitle="Denne måneden"
                     icon={<WorkIcon />}
-                    color="#667eea"
+                    color="#764ba2"
                     change={calculateChange(currentData.totalHours, previousData.totalHours)}
                   />
                 </Box>
@@ -344,7 +344,7 @@ const StatisticsPage: NextPage = () => {
                     value={`${currentData.sickDays + currentData.vacationDays} dager`}
                     subtitle="Syk + Ferie"
                     icon={<BarChartIcon />}
-                    color="#4caf50"
+                    color="#667eea"
                   />
                 </Box>
               </Box>
@@ -352,7 +352,7 @@ const StatisticsPage: NextPage = () => {
 
             <Card elevation={0} sx={{ borderRadius: 2, border: '1px solid #e5e7eb', mb: 3 }}>
               <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: '#667eea', fontWeight: 'bold' }}>
+                <Typography variant="h6" gutterBottom sx={{ color: '#764ba2', fontWeight: 'bold' }}>
                   Timer og fravær per ansatt
                 </Typography>
                 <Table size="small">
