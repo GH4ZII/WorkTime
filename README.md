@@ -87,7 +87,6 @@ cd apps/api && npm run dev
 * **WebSocket (Socket.IO)**: Sanntids chat
 * **Direktemeldinger & grupper**: En-til-en og gruppechat
 * **Typing indicators** og vedvarende historikk
-* Merk: Realtime oppdateringer for skift/forespørsler er ikke i bruk – kun chat er sanntid
 
 ###  Statistikk & Rapporter
 * **Timeregistrering**: Logg arbeidstimer med start/stopp
@@ -111,17 +110,6 @@ cd apps/api && npm run dev
 * **Authentication**: JWT + Passport.js
 * **Real-time (chat)**: Socket.IO for WebSocket-kommunikasjon (kun chat)
 * **AI Integration**: OpenAI GPT API for skiftplanlegging
-
----
-
-##  Dokumentasjon
-
-* **[Arkitektur](docs/architecture.md)** - Systemarkitektur og design
-* **[AI Workflow](docs/ai-workflow-explained.md)** - AI-drevet skiftplanlegging
-* **[Chat System](docs/chat-system.md)** - Live chat implementasjon
-* **[Web App](docs/web-app-documentation.md)** - Adminpanel dokumentasjon
-* **[Database](docs/database.md)** - Database-skjema og relasjoner
-* **[Auth Flow](docs/AuthFlow.md)** - Autentiseringsflyt
 
 ---
 
@@ -163,9 +151,3 @@ npx prisma generate
 - Web bruker en dynamisk base-URL (se `apps/web/utils/api.ts`). I produksjon/annet nett kan du sette `NEXT_PUBLIC_API_BASE`.
 
 ---
-
-##  Glemt passord (dev-prosess)
-
-- Endepunkter: `POST /auth/forgot-password` og `POST /auth/reset-password`.
-- I utvikling logger API en reset-token i konsollen og kan returnere token i responsen.
-- Mobilappen har en «Glemt passord?»-dialog: be om kode → lim inn token → sett nytt passord.
